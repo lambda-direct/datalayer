@@ -1,26 +1,11 @@
-// {
-//   "compilerOptions": {
-//     "target": "es5",
-//     "module": "commonjs",
-//     "lib": ["es2017", "es7", "es6", "dom"],
-//     "declaration": true,
-//     "outDir": "dist",
-//     "strict": true,
-//     "esModuleInterop": true
-//   },
-//   "exclude": [
-//     "node_modules",
-//     "dist"
-//   ]
-// }
 {
   "compilerOptions": {
     "target": "es2018",                                
     "module": "commonjs",                           
     // "lib": ["es2018","es2017", "es7", "es6"],
-    "baseUrl": "src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["./src/*"]
     },
     "outDir": "dist",                                
     "declaration": true,                       
@@ -38,6 +23,6 @@
     // "sourceMap": true,
     "noFallthroughCasesInSwitch": true, 
   },
-  // "include": ["src/**/*"],
+  "include": ["./src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

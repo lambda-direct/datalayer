@@ -6,6 +6,6 @@ export class UsersTable extends AbstractTable {
     country = this.varchar("country", 256);
 
     tableName(): string {
-        return "users";
+        return "userss";
     }
 }
