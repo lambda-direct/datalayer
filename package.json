@@ -1,0 +1,25 @@
+{
+  "name": "@lambda-team/datalayer",
+  "version": "1.0.3",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lambda-direct/datalayer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lambda-direct/datalayer/issues"
+  },
+  "homepage": "https://github.com/lambda-direct/datalayer#readme",
+  "devDependencies": {
+    "typescript": "^4.2.4"
+  }
+}
