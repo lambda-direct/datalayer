@@ -1,5 +1,5 @@
 {
-  "name": "@lambda-team/lt-datalayer",
+  "name": "@lambda-team/ltdl",
   "version": "1.0.13",
   "description": "",
   "main": "dist/index.js",
