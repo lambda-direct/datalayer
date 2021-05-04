@@ -22,4 +22,8 @@ export class Column<T extends ColumnType> {
         return this.parent.tableName().replace(".", "_") + "_" + this.columnName;
     }
 
+    getParent(): AbstractTable {
+        return this.parent;
+    }
+
 }

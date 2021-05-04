@@ -103,3 +103,5 @@ web_modules/
 .pnp.*
 
 dist
+.DS_Store
+publi.sh

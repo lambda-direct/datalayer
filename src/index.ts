@@ -6,3 +6,4 @@ export { ColumnType } from './columns/types/columnType'
 export { PgVarChar } from './columns/types/pgVarChar'
 export { SelectAggregator } from './builders/select/aggregator'
 export { Select } from './builders/select/select'
+export { Where } from './builders/where';
