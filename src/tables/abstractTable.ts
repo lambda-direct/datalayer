@@ -1,5 +1,5 @@
-import { Select } from "@/builders/select/select";
-import { Column } from "@/columns/column";
+import { Select } from "../builders/select/select";
+import { Column } from "../columns/column";
 import { Pool } from "pg";
 
 export abstract class AbstractTable {

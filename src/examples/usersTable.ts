@@ -1,4 +1,4 @@
-import { AbstractTable } from "@/tables/abstractTable";
+import { AbstractTable } from "../tables/abstractTable";
 
 export class UsersTable extends AbstractTable {
     name = this.varchar("name", 256);

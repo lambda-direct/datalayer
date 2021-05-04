@@ -1,5 +1,5 @@
-import { Column } from "@/columns/column";
-import { AbstractTable } from "@/tables/abstractTable";
+import { Column } from "../../columns/column";
+import { AbstractTable } from "../../tables/abstractTable";
 
 export class SelectAggregator {
     private _from: Array<string> = [];

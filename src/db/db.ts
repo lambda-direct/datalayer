@@ -1,4 +1,4 @@
-import { AbstractTable } from '@/tables/abstractTable';
+import { AbstractTable } from '../tables/abstractTable';
 import { Pool } from 'pg';
 
 export class Db {
