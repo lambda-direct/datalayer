@@ -1,6 +1,6 @@
 import { Select } from "../builders/select/select";
-import { Column } from "../columns/column";
 import { Pool } from "pg";
+import { Column } from "../columns/column";
 
 export abstract class AbstractTable {
     private _pool: Pool;

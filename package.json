@@ -1,12 +1,16 @@
 {
-  "name": "@lambda-team/datalayer",
+  "name": "lt-datalayer",
   "version": "1.0.7",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "NODE_ENV=production webpack"
+    "build": "NODE_ENV=production webpack",
+    "ts": "tsc"
   },
   "repository": {
     "type": "git",
