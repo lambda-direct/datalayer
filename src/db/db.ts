@@ -2,7 +2,7 @@ import { AbstractTable } from '../tables/abstractTable';
 import { Pool } from 'pg';
 
 export class Db {
-    private _pool: Pool;
+    _pool: Pool;
 
     constructor(pool: Pool){
         this._pool = pool;

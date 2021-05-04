@@ -48,6 +48,7 @@ export class DbConnector {
         
         try {
             const pool = new Pool(config);
+            
             return new Db(pool);
         } catch(e) {
             // Proper error handling
