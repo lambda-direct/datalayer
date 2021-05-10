@@ -1,63 +1,67 @@
-import { Column } from '../../columns/column';
-import { ColumnType } from '../../columns/types/columnType'
 import { AbstractTable } from '../../tables/abstractTable';
 import { UpdateExpr } from '../updates';
 import { Expr } from '../where';
+import { UpdateAggregator } from './aggregator';
 
 
-export class Update<T extends ColumnType> {
-    private _filters: Expr;
-    private _table: AbstractTable;
-    private _updates: UpdateExpr;
-
-    private constructor(table: AbstractTable) { 
-        this._table = table;
-    }
-
+export class Update {
     static in(table: AbstractTable){
-        return new Update(table);
+        const aggregator = new UpdateAggregator(table)
+        aggregator.appendFrom(table).appendFields();
+        return new UpdateIn(aggregator);
+    }
+}
+
+class UpdateIn {
+    private _aggregator: UpdateAggregator;
+
+    constructor(aggregator: UpdateAggregator){
+        this._aggregator = aggregator;
     }
 
-    filteredBy(filters: Expr): Update<T> {
-        this._filters = filters;
+    set(updates: UpdateExpr) {
+        return new WhereSet(this._aggregator).apply(updates);
+    }
+
+    build() {
+        return this._aggregator.buildQuery();
+    }
+}
+
+class WhereSet {
+    private _aggregator: UpdateAggregator;
+
+    constructor(aggregator: UpdateAggregator){
+        this._aggregator = aggregator;
+    }
+
+    apply(updates: UpdateExpr): WhereSet {
+        this._aggregator.set(updates);
         return this;
     }
 
-    set(updates: UpdateExpr): Update<T> {
-        this._updates = updates;
+    filteredBy(filters: Expr) {
+        return new WhereSelect(this._aggregator).apply(filters);
+    }
+
+    build() {
+        return this._aggregator.buildQuery();
+    }
+}
+
+class WhereSelect {
+    private _aggregator: UpdateAggregator;
+
+    constructor(aggregator: UpdateAggregator){
+        this._aggregator = aggregator;
+    }
+
+    apply(filters: Expr): WhereSelect {
+        this._aggregator.where(filters);
         return this;
     }
 
-    build(): string {
-        const res = [];
-
-        res.push("UPDATE ");
-        res.push(this._table.tableName());
-
-        res.push(`\nSET ${this._updates.toQuery()}`);
-        res.push("\nWHERE ");
-        res.push(this._filters.toQuery());
-        res.push('\nRETURNING\n');
-        for (let field of Object.values(this._table)) {
-            if (field instanceof Column){
-                // TODO Look at where.ts and get VAR class toQuery method. Seems like it's making same steps
-                res.push(" ");
-                res.push(this._table.tableName());
-                res.push(".");
-                res.push("\"");
-                res.push(field.columnName);
-                res.push("\"");
-                res.push(" AS ");
-                res.push("\"");
-                res.push(this._table.tableName().replace(".", "_"));
-                res.push("_");
-                res.push(field.columnName);
-                res.push("\"");
-                res.push(",");
-            }
-        }
-        res.pop();
-
-        return res.join('').trimEnd();
+    build() {
+        return this._aggregator.buildQuery();
     }
 }

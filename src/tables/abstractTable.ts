@@ -84,7 +84,7 @@ class UpdateTRB<T> extends TableRequestBuilder<T> {
     }
 
     async execute(): Promise<T[]> {
-        const query: string = Update.in(this._table).filteredBy(this._filter).set(this._update).build();
+        const query: string = Update.in(this._table).set(this._update).filteredBy(this._filter).build();
         console.log(query);
 
         const result = await this._pool.query(query);

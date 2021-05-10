@@ -1,5 +1,6 @@
 import { Column } from "../columns/column";
 import { ColumnType } from "../columns/types/columnType";
+import { ecranate } from "../utils/ecranate";
 
 export class Where {
     static eq<T extends ColumnType>(left: Column<T>, value: any): Expr{
@@ -35,7 +36,7 @@ class Var<T extends ColumnType> extends Expr {
     }
 
     toQuery(): string {
-        return `${this.column.getParent().tableName()}.\"${this.column.columnName}\"`;
+        return `${this.column.getParent().tableName()}.${ecranate(this.column.columnName)}`;
     }
 }
 

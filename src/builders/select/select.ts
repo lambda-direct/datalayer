@@ -5,8 +5,8 @@ import { SelectAggregator } from "./aggregator";
 export class Select {
     // TODO Add from with tableName as param
     static from(table: AbstractTable) {
-        const aggregator = new SelectAggregator()
-        aggregator.appendFrom(table).appendFields(table);
+        const aggregator = new SelectAggregator(table)
+        aggregator.appendFrom(table).appendFields();
         return new SelectFrom(aggregator);
     }
 }
