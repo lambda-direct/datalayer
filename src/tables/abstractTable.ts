@@ -3,6 +3,8 @@ import { Pool } from "pg";
 import { Column } from "../columns/column";
 import { PgVarChar } from "../columns/types/pgVarChar";
 import { Expr } from "../builders/where";
+import { UpdateExpr, Updates } from "../builders/updates";
+import { Update } from '../builders/select/update';
 
 abstract class TableRequestBuilder<T> {
     protected _table: AbstractTable<T>;
@@ -13,8 +15,15 @@ abstract class TableRequestBuilder<T> {
         this._pool = pool;
     }
 
-    abstract all(): Promise<Array<T>>;
-    abstract first(): Promise<T>;
+    abstract execute(): Promise<Array<T>>;
+    async all(): Promise<T[]> {
+        return await this.execute();
+    }
+    async first(): Promise<T> {
+        const executionRes = await this.execute();
+        // TODO add checks for undefined or null
+        return executionRes[0];
+    }
 }
 
 class SelectTRB<T> extends TableRequestBuilder<T> {
@@ -33,7 +42,7 @@ class SelectTRB<T> extends TableRequestBuilder<T> {
         return this;
     }
 
-    private async execute(): Promise<Array<T>> {
+    async execute(): Promise<T[]> {
         const queryBuilder = Select.from(this._table);
         if (this._filter){
             queryBuilder.filteredBy(this._filter);
@@ -54,14 +63,39 @@ class SelectTRB<T> extends TableRequestBuilder<T> {
 
         return response;
     }
+}
 
-    async all(): Promise<T[]> {
-        return await this.execute();
+class UpdateTRB<T> extends TableRequestBuilder<T> {
+    private _filter: Expr;
+    private _update: UpdateExpr;
+
+    constructor(table: AbstractTable<T>, pool: Pool) {
+        super(table, pool);
     }
-    async first(): Promise<T> {
-        const executionRes = await this.execute();
-        // TODO add checks for undefined or null
-        return executionRes[0];
+
+    where(expr: Expr): UpdateTRB<T> {
+        this._filter = expr;
+        return this;
+    }
+
+    set(expr: UpdateExpr): UpdateTRB<T> {
+        this._update = expr;
+        return this;
+    }
+
+    async execute(): Promise<T[]> {
+        const query: string = Update.in(this._table).filteredBy(this._filter).set(this._update).build();
+        console.log(query);
+
+        const result = await this._pool.query(query);
+
+        const response: Array<T> = []
+        for (const row of result.rows) {
+            const mappedRow = this._table.map(new RowMapper(row));
+            response.push(mappedRow);
+        }
+
+        return response;
     }
 }
 
@@ -77,7 +111,11 @@ export abstract class AbstractTable<K = any> {
     }
 
     select(): SelectTRB<K> {
-        return new SelectTRB(this, this._pool)
+        return new SelectTRB(this, this._pool);
+    }
+
+    update(): UpdateTRB<K>{
+        return new UpdateTRB(this, this._pool);
     }
 
     abstract tableName(): string;
