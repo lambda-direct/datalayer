@@ -2,7 +2,7 @@ import { Column } from "../columns/column";
 import { ColumnType } from "../columns/types/columnType";
 
 export class Where {
-    static eq<T extends ColumnType>(left: Column<T>, value: any) {
+    static eq<T extends ColumnType>(left: Column<T>, value: any): Expr{
         return new EqWhere(new Var<T>(left), new Const(value));
     }
 }
@@ -12,8 +12,8 @@ export abstract class Expr {
 }
 
 class EqWhere extends Expr {
-    left: Expr;
-    right: Expr;
+    private left: Expr;
+    private right: Expr;
 
     constructor(left: Expr, right: Expr){
         super();
@@ -27,7 +27,7 @@ class EqWhere extends Expr {
 }
 
 class Var<T extends ColumnType> extends Expr {
-    column: Column<T>
+    private column: Column<T>
 
     constructor(column: Column<T>){
         super();
@@ -40,7 +40,7 @@ class Var<T extends ColumnType> extends Expr {
 }
 
 class Const extends Expr {
-    value: any;
+    private value: any;
 
     constructor(value: any){
         super();
