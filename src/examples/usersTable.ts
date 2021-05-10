@@ -1,15 +1,15 @@
 import { AbstractTable, RowMapper } from "../tables/abstractTable";
 
 export class UsersTable extends AbstractTable<UsersModel> {
-    name = this.varchar("name", 256);
-    city = this.varchar("city", 256);
-    country = this.varchar("country", 256);
+    name = this.varchar({name: "name", size: 256});
+    city = this.varchar({name: "city", size: 256});
+    country = this.varchar({name: "country", size: 256});
 
     tableName(): string {
         return "userss";
     }
 
-    protected map(response: RowMapper): UsersModel {
+    map(response: RowMapper): UsersModel {
         return {
             name: response.getVarchar(this.name),
             city: response.getVarchar(this.city),

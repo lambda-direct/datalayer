@@ -2,51 +2,87 @@ import { Select } from "../builders/select/select";
 import { Pool } from "pg";
 import { Column } from "../columns/column";
 import { PgVarChar } from "../columns/types/pgVarChar";
-import { Expr, Where } from "../builders/where";
+import { Expr } from "../builders/where";
 
-export abstract class AbstractTable<K = any> {
-    private _pool: Pool;
+abstract class TableRequestBuilder<T> {
+    protected _table: AbstractTable<T>;
+    protected _pool: Pool;
 
-    // TODO maybe we should have a params as objects, to have named params. Should be more readable in child classes
-    protected varchar(name: string, size: number): Column<PgVarChar> {
-        return Column.varchar(this, name, size);
+    constructor(table: AbstractTable<T>, pool: Pool) {
+        this._table = table;
+        this._pool = pool;
     }
 
-    // Should provide Pool or specific class for it?
-    withConnection(connection: Pool) {
-        this._pool = connection;
+    abstract all(): Promise<Array<T>>;
+    abstract first(): Promise<T>;
+}
+
+class SelectTRB<T> extends TableRequestBuilder<T> {
+    private _filter: Expr;
+
+    constructor(table: AbstractTable<T>, pool: Pool) {
+        super(table, pool);
     }
 
-    // ToDo better params handling
-    // 1. As object with optional values?
-    // 2. As params?
-    // 3. In best case -> table.select(Array<Column>).where(Where.class).join(JoinProperties).orderBy(Column).
-    //         each builder method will return IteratorWrapper, that you could iterate through or execute new builder method
-    //    OR
-    // 4. table.select({where:""})
-    async select(filters?: Expr): Promise<Array<K>> {
-        const queryBuilder = Select.from(this);
-        if (filters){
-            queryBuilder.filteredBy(filters);
+    where(expr: Expr): SelectTRB<T> {
+        this._filter = expr;
+        return this;
+    }
+
+    join(): SelectTRB<T> {
+        return this;
+    }
+
+    private async execute(): Promise<Array<T>> {
+        const queryBuilder = Select.from(this._table);
+        if (this._filter){
+            queryBuilder.filteredBy(this._filter);
         }
 
         const query = queryBuilder.build();
+        // TODO Add logger true/false for sql query logging?
         console.log(query);
 
         const result = await this._pool!.query(query);
 
-        const response: Array<K> = []
+        // TODO Make logic abstract, for all queries. Need to check all queries firstly
+        const response: Array<T> = []
         for (const row of result.rows) {
-            const mappedRow = this.map(new RowMapper(row));
+            const mappedRow = this._table.map(new RowMapper(row));
             response.push(mappedRow);
         }
 
         return response;
     }
 
+    async all(): Promise<T[]> {
+        return await this.execute();
+    }
+    async first(): Promise<T> {
+        const executionRes = await this.execute();
+        // TODO add checks for undefined or null
+        return executionRes[0];
+    }
+}
+
+export abstract class AbstractTable<K = any> {
+    private _pool: Pool;
+
+    protected varchar({name, size}: {name: string, size: number}): Column<PgVarChar> {
+        return Column.varchar(this, name, size);
+    }
+
+    withConnection(connection: Pool) {
+        this._pool = connection;
+    }
+
+    select(): SelectTRB<K> {
+        return new SelectTRB(this, this._pool)
+    }
+
     abstract tableName(): string;
 
-    protected abstract map(response: RowMapper): K; 
+    abstract map(response: RowMapper): K; 
 }
 
 export class RowMapper {
