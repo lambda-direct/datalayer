@@ -5,6 +5,7 @@ import { PgVarChar } from "../columns/types/pgVarChar";
 import { Expr } from "../builders/where";
 import { UpdateExpr, Updates } from "../builders/updates";
 import { Update } from '../builders/select/update';
+import { Insert } from "../builders/select/insert";
 
 abstract class TableRequestBuilder<T> {
     protected _table: AbstractTable<T>;
@@ -15,7 +16,7 @@ abstract class TableRequestBuilder<T> {
         this._pool = pool;
     }
 
-    abstract execute(): Promise<Array<T>>;
+    protected abstract execute(): Promise<Array<T>>;
     async all(): Promise<T[]> {
         return await this.execute();
     }
@@ -23,6 +24,36 @@ abstract class TableRequestBuilder<T> {
         const executionRes = await this.execute();
         // TODO add checks for undefined or null
         return executionRes[0];
+    }
+}
+
+class InsertTRB<T> extends TableRequestBuilder<T> {
+    private _values: T[];
+
+    constructor(values: T[], table: AbstractTable<T>, pool: Pool) {
+        super(table, pool);
+        this._values = values;
+    }
+
+    async returningAll() {
+        return this.execute();
+    }
+
+    protected async execute(): Promise<T[]> {
+        const queryBuilder = Insert.into(this._table);
+        if(!this._values) throw Error('Values should be provided firestly\nExample: table.values().execute()');
+
+        const query = queryBuilder.values(this._values).build();
+
+        const result = await this._pool!.query(query);
+
+        const response: Array<T> = []
+        for (const row of result.rows) {
+            const mappedRow = this._table.map(new RowMapper(row));
+            response.push(mappedRow);
+        }
+
+        return response;
     }
 }
 
@@ -116,6 +147,10 @@ export abstract class AbstractTable<K = any> {
 
     update(): UpdateTRB<K>{
         return new UpdateTRB(this, this._pool);
+    }
+
+    insert(values: K[]): InsertTRB<K>{
+        return new InsertTRB(values, this, this._pool)
     }
 
     abstract tableName(): string;

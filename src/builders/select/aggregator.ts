@@ -180,6 +180,10 @@ export class InsertAggregator extends Aggregator {
         this._insert.push("VALUES\n");
         this._insert.push(this._values.join(''));
         this._insert.push("\n");
+        this._insert.push("\n");
+        this._insert.push("RETURNING");
+        this._insert.push("\n");
+        this._insert.push(this._fields.join(''));
         //@TODO onConflict. Research better ways to handle several primary or unique fields
         // this._insert.push("ON CONFLICT ON CONSTRAINT \"");
         // this._insert.push(this._table.tableName());

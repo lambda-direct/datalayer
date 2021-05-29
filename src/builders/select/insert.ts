@@ -5,7 +5,7 @@ import { InsertAggregator } from "./aggregator";
 export class Insert {
     static into(table: AbstractTable) {
         const aggregator = new InsertAggregator(table)
-        aggregator.appendFrom(table);
+        aggregator.appendFrom(table).appendFields();
         return new InsertInto(aggregator);
     }
 }
