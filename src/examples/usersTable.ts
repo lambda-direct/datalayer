@@ -14,7 +14,7 @@ export class UsersTable extends AbstractTable<UsersModel> {
             name: response.getVarchar(this.name),
             city: response.getVarchar(this.city),
             country: response.getVarchar(this.country),
-        } as UsersModel
+        };
     }
 }
 

@@ -8,17 +8,17 @@ export class Join<T extends ColumnType, K> {
     joinTable: AbstractTable<K>;
     type: JoinStrategy;
 
-    constructor(joinTable: AbstractTable<K>, toColumn: Column<T>, fromColumn: Column<T>) {
+    constructor(joinTable: AbstractTable<K>, fromColumn: Column<T>, toColumn: Column<T>,) {
         this.joinTable = joinTable;
         this.toColumn = toColumn;
         this.fromColumn = fromColumn;
     }
 
-    static with<K, M extends AbstractTable<K>>(table: M): JoinWith<K> {
+    static with<K>(table: AbstractTable<K>): JoinWith<K> {
         return new JoinWith(table);
     }
 
-    joinStrategy(type: JoinStrategy):Join<T, K> {
+    joinStrategy(type: JoinStrategy): Join<T, K> {
         this.type = type;
         return this;
     }
@@ -37,7 +37,7 @@ class JoinWith<K> {
         this.joinTable = joinTable;
     }
 
-    columns<T extends ColumnType>(fromColumn:Column<T> , toColumn:Column<T> ): Join<T, K>  {
+    columns<T extends ColumnType>(fromColumn:Column<T> , toColumn:Column<T>): Join<T, K>  {
         return new Join(this.joinTable, fromColumn, toColumn);
     }
 }
