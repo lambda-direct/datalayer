@@ -6,6 +6,7 @@ import { Expr } from "../builders/where";
 import { UpdateExpr, Updates } from "../builders/updates";
 import { Update } from '../builders/select/update';
 import { Insert } from "../builders/select/insert";
+import { Delete } from "../builders/select/delete";
 
 abstract class TableRequestBuilder<T> {
     protected _table: AbstractTable<T>;
@@ -130,6 +131,38 @@ class UpdateTRB<T> extends TableRequestBuilder<T> {
     }
 }
 
+class DeleteTRB<T> extends TableRequestBuilder<T> {
+    private _filter: Expr;
+
+    where(expr: Expr): DeleteTRB<T> {
+        this._filter = expr;
+        return this;
+    }
+
+    async returningAll() {
+        return this.execute();
+    }
+
+    protected async execute(): Promise<T[]> {
+        const queryBuilder = Delete.from(this._table);
+        if (this._filter){
+            queryBuilder.filteredBy(this._filter);
+        }
+
+        const query = queryBuilder.build();
+
+        const result = await this._pool.query(query);
+
+        const response: Array<T> = []
+        for (const row of result.rows) {
+            const mappedRow = this._table.map(new RowMapper(row));
+            response.push(mappedRow);
+        }
+
+        return response;
+    }
+}
+
 export abstract class AbstractTable<K = any> {
     private _pool: Pool;
 
@@ -145,12 +178,16 @@ export abstract class AbstractTable<K = any> {
         return new SelectTRB(this, this._pool);
     }
 
-    update(): UpdateTRB<K>{
+    update(): UpdateTRB<K> {
         return new UpdateTRB(this, this._pool);
     }
 
-    insert(values: K[]): InsertTRB<K>{
-        return new InsertTRB(values, this, this._pool)
+    insert(values: K[]): InsertTRB<K> {
+        return new InsertTRB(values, this, this._pool);
+    }
+
+    delete(): DeleteTRB<K> {
+        return new DeleteTRB(this, this._pool);
     }
 
     abstract tableName(): string;
