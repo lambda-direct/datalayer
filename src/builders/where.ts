@@ -1,6 +1,6 @@
 import { Column } from "../columns/column";
 import { ColumnType } from "../columns/types/columnType";
-import { ecranate } from "../utils/ecranate";
+import { ecranate, shouldEcranate } from "../utils/ecranate";
 
 export class Where {
     static eq<T extends ColumnType>(left: Column<T>, value: any): Expr{
@@ -49,7 +49,7 @@ class Const extends Expr {
     }
 
     toQuery(): string {
-        if (typeof this.value === 'string' || this.value instanceof Date) {
+        if (shouldEcranate(this.value)) {
             return `'${this.value.toString()}'`
         } else {
             return this.value.toString();

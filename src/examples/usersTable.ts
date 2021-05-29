@@ -18,7 +18,7 @@ export class UsersTable extends AbstractTable<UsersModel> {
     }
 }
 
-interface UsersModel {
+export interface UsersModel {
     name: string;
     city: string;
     country: string;
