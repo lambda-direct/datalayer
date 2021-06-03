@@ -1,7 +1,7 @@
 import { AbstractTable } from "../tables/abstractTable";
 import { ColumnType } from "./types/columnType";
+import { PgInteger } from "./types/pgInteger";
 import { PgVarChar } from "./types/pgVarChar";
-import { PgNumber } from "../columns/types/pgNumber";
 import { PgTimestamp } from "../columns/types/pgTimestamp";
 
 export class Column<T extends ColumnType> {
@@ -24,12 +24,12 @@ export class Column<T extends ColumnType> {
         return new Column<PgVarChar>(parent, name, new PgVarChar(size));
     }
 
-    static number(parent:AbstractTable, name:string): Column<PgNumber> {
-        return new Column<PgNumber>(parent, name, new PgNumber());
-    }
-
     static timestamp(parent:AbstractTable, name:string): Column<PgTimestamp> {
         return new Column<PgTimestamp>(parent, name, new PgTimestamp());
+    }
+
+    static int(parent:AbstractTable, name:string): Column<PgInteger> {
+        return new Column<PgInteger>(parent, name, new PgInteger());
     }
 
     getAlias(): string{

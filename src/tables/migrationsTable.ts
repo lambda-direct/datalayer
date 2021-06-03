@@ -1,9 +1,10 @@
 import { AbstractTable, RowMapper } from "../tables/abstractTable";
 
 export class MigrationsTable extends AbstractTable<MigrationsModel> {
-    id = this.number({name: "id"}).autoIncrement().primaryKey();
-    version = this.number({name: "version"});
-    created_at = this.timestamp({name: "created_at"});
+    id = this.int({name: "id"}).autoIncrement().primaryKey();
+    version = this.int({name: "version"});
+    // created_at = this.timestamp({name: "created_at"});
+    created_at = this.varchar({name: "created_at", size: 250});
 
     tableName(): string {
         return "migrations";
@@ -11,9 +12,9 @@ export class MigrationsTable extends AbstractTable<MigrationsModel> {
 
     map(response: RowMapper): MigrationsModel {
         return {
-            id: response.getNumber(this.id),
-            version: response.getNumber(this.version),
-            created_at: response.getTimestamp(this.created_at),
+            id: response.getInteger(this.id),
+            version: response.getInteger(this.version),
+            created_at: response.getVarchar(this.created_at),
         };
     }
 }
@@ -21,5 +22,5 @@ export class MigrationsTable extends AbstractTable<MigrationsModel> {
 export interface MigrationsModel {
     id: number;
     version: number;
-    created_at: Date;
+    created_at: string;
 }

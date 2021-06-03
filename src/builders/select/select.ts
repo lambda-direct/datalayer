@@ -1,4 +1,6 @@
+import { ColumnType } from "../../columns/types/columnType";
 import { AbstractTable } from "../../tables/abstractTable";
+import { Join } from "../join/join";
 import { Expr } from "../where";
 import { SelectAggregator } from "./aggregator";
 
@@ -16,6 +18,31 @@ class SelectFrom {
 
     constructor(aggregator: SelectAggregator){
         this._aggregator = aggregator;
+    }
+
+    joined<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}>>) {
+        return new SelectJoined(this._aggregator).apply(joins);
+    }
+
+    filteredBy(filters: Expr) {
+        return new WhereSelect(this._aggregator).apply(filters);
+    }
+
+    build() {
+        return this._aggregator.buildQuery();
+    }
+}
+
+class SelectJoined {
+    private _aggregator: SelectAggregator;
+
+    constructor(aggregator: SelectAggregator){
+        this._aggregator = aggregator;
+    }
+
+    apply<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}>>): SelectJoined {
+        this._aggregator.join(joins);
+        return this;
     }
 
     filteredBy(filters: Expr) {

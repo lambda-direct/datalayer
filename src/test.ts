@@ -13,8 +13,8 @@ import { Where } from './builders/where'
     db.use(migrationsTable);
 
     const migrationsArray: MigrationsModel[] = [
-      {id: 2, version: 3, created_at: new Date()},
-      {id: 5, version: 4, created_at: new Date()}
+      {id: 6, version: 3, created_at: new Date().toISOString()},
+      {id: 7, version: 4, created_at: new Date().toISOString()}
     ];
     const x = migrationsTable.insert(migrationsArray).returningAll();
     x.then( y => y.forEach( f => console.log(f)))
