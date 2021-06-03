@@ -2,12 +2,17 @@ import { Pool } from "pg";
 import { Column } from "../columns/column";
 import { PgVarChar } from "../columns/types/pgVarChar";
 import { DeleteTRB, InsertTRB, SelectTRB, UpdateTRB } from "../builders/requestBuilders";
+import { PgInteger } from "../columns/types/pgInteger";
 
 export abstract class AbstractTable<K = any> {
     private _pool: Pool;
 
     protected varchar({name, size}: {name: string, size: number}): Column<PgVarChar> {
         return Column.varchar(this, name, size);
+    }
+
+    protected int({name}: {name: string}): Column<PgInteger> {
+        return Column.int(this, name);
     }
 
     withConnection(connection: Pool) {

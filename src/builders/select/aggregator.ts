@@ -1,6 +1,8 @@
 import { Column } from "../../columns/column";
+import { ColumnType } from "../../columns/types/columnType";
 import { AbstractTable } from "../../tables/abstractTable";
 import { ecranate, shouldEcranate } from "../../utils/ecranate";
+import { Join } from "../join/join";
 import { UpdateExpr } from "../updates";
 import { Expr } from "../where";
 
@@ -12,19 +14,25 @@ class Aggregator {
         this._table = table;
     }
 
-    appendFields() {
-        for (let field of Object.values(this._table)) {
+    protected generateSelectArray(table: AbstractTable) {
+        const selectFields = [];
+        for (let field of Object.values(table)) {
             if (field instanceof Column){
-                this._fields.push(" ");
-                this._fields.push(this._table.tableName());
-                this._fields.push(".");
-                this._fields.push(ecranate(field.columnName));
-                this._fields.push(" AS ");
-                this._fields.push(ecranate(`${this._table.tableName().replace(".", "_")}_${field.columnName}`))
-                this._fields.push(",");
+                selectFields.push(" ");
+                selectFields.push(table.tableName());
+                selectFields.push(".");
+                selectFields.push(ecranate(field.columnName));
+                selectFields.push(" AS ");
+                selectFields.push(ecranate(`${table.tableName().replace(".", "_")}_${field.columnName}`))
+                selectFields.push(",");
             }
-        }
-        this._fields.pop()
+        };
+        selectFields.pop();
+        return selectFields;
+    }
+
+    appendFields() {
+        this._fields = this.generateSelectArray(this._table)
     }
 }
 
@@ -32,6 +40,7 @@ export class SelectAggregator extends Aggregator {
     private _from: Array<string> = [];
     private _filters: Array<string> = [];
     private _select: Array<string> = ["SELECT"];
+    private _join: Array<string> = [];
 
     constructor(table: AbstractTable){
         super(table);
@@ -49,10 +58,39 @@ export class SelectAggregator extends Aggregator {
         return this
     }
 
+    // Add select generator for second table also
+    join<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}>>): SelectAggregator {
+        for (const join of joins) {
+            const tableFrom = join.fromColumn.getParent();
+            const tableTo = join.toColumn.getParent();
+            const type = join.type;
+
+            const selectString = this.generateSelectArray(tableTo).join('');
+            this._fields.push(', ');
+            this._fields.push(selectString);
+            this._join.push('\n');
+            this._join.push(type);
+            this._join.push(" ");
+            this._join.push(tableTo.tableName());
+            this._join.push('\n');
+            this._join.push('ON ');
+            this._join.push(tableFrom.tableName());
+            this._join.push('.');
+            this._join.push(join.fromColumn.columnName);
+            this._join.push(' = ');
+            this._join.push(tableTo.tableName());
+            this._join.push('.');
+            this._join.push(join.toColumn.columnName);
+        }   
+        return this;
+    }
+
     buildQuery() {
         this._select.push(this._fields.join(''));
         this._select.push("\n");
         this._select.push(this._from.join(''));
+        this._select.push("\n");
+        this._select.push(this._join.join(''));
         this._select.push("\n");
         this._select.push(this._filters.join(''));
 

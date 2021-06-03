@@ -1,6 +1,7 @@
 import { AbstractTable, RowMapper } from "../tables/abstractTable";
 
 export class UsersTable extends AbstractTable<UsersModel> {
+    id = this.int({name: "id"})
     name = this.varchar({name: "name", size: 256});
     city = this.varchar({name: "city", size: 256});
     country = this.varchar({name: "country", size: 256});
