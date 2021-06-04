@@ -11,8 +11,8 @@ export class Column<T extends ColumnType> {
     columnName: string;
     isNullableFlag: boolean = false;
     autoIncrementFlag: boolean = false;
-    primaryKeyName: string = "";
-    uniqueKeyName: string = "";
+    primaryKeyName: string | undefined = undefined;
+    uniqueKeyName: string | undefined = undefined;
     defaultValue: any = null;
     referenced: Column<T>;
 

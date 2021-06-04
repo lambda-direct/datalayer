@@ -16,14 +16,6 @@ export class CitiesTable extends AbstractTable<CitiesModel> {
             page: response.getVarchar(this.page),
         };
     }
-
-    getPrimaryKeys(): Column<any>[] {
-        return this.primaryKeys;
-    }
-
-    getUniqueKeys(): Column<any>[] {
-        return this.uniqueKeys;
-    }
 }
 
 export interface CitiesModel {

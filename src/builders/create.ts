@@ -42,33 +42,46 @@ export class Create {
             }
         };
 
-        if (this.tableClass.getPrimaryKeys().length !== 0) {
-            this.columns.push(",");
-            this.primaryKey.push("\nCONSTRAINT " + this.tableClass.tableName() + "_" + this.tableClass.getPrimaryKeys()[0].getColumnName());
+        const primaryKeys: Column<any>[] = []
+        const uniqueKeys: Column<any>[] = []
+        for (let field of Object.values(this.tableClass)) {
+            if (field instanceof Column){
+                if (field.primaryKeyName){
+                    primaryKeys.push(field)
+                }
+                if (field.uniqueKeyName){
+                    uniqueKeys.push(field)
+                }
+            }
+        }
+
+        if (primaryKeys.length !== 0) {
+            // this.columns.push(",");
+            this.primaryKey.push("\nCONSTRAINT " + this.tableClass.tableName() + "_" + primaryKeys[0].getColumnName());
             this.primaryKey.push(" PRIMARY KEY(");
 
-            for (let i = 0; i < this.tableClass.getPrimaryKeys().length; i++) {
-                const column: Column<any> = this.tableClass.getPrimaryKeys()[i];
+            for (let i = 0; i < primaryKeys.length; i++) {
+                const column: Column<any> = primaryKeys[i];
                 this.primaryKey.push(column.getColumnName());
 
-                if (i != this.tableClass.getPrimaryKeys().length - 1) {
+                if (i != primaryKeys.length - 1) {
                     this.primaryKey.push(",");
                 }
             }
             this.primaryKey.push(")");
         }
 
-        if (this.tableClass.getUniqueKeys().length !== 0) {
-            const columnName: string = this.tableClass.getUniqueKeys()[0].getColumnName();
+        if (uniqueKeys.length !== 0) {
+            const columnName: string = uniqueKeys[0].getColumnName();
             this.uniqueKey.push(",");
             this.uniqueKey.push("\nCONSTRAINT " + this.tableClass.tableName() + "_" + columnName);
             this.uniqueKey.push(" UNIQUE(");
 
-            for (let i = 0; i < this.tableClass.getUniqueKeys().length; i++) {
-                const column: Column<any> = this.tableClass.getUniqueKeys()[i];
+            for (let i = 0; i < uniqueKeys.length; i++) {
+                const column: Column<any> = uniqueKeys[i];
                 this.uniqueKey.push(column.getColumnName());
 
-                if (i != this.tableClass.getUniqueKeys().length - 1) {
+                if (i != uniqueKeys.length - 1) {
                     this.uniqueKey.push(",");
                 }
             }

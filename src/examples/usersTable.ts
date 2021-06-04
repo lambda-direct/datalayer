@@ -18,17 +18,6 @@ export class UsersTable extends AbstractTable<UsersModel> {
             country: response.getVarchar(this.country),
         };
     }
-
-    getPrimaryKeys(): Column<any>[] {
-        if (this.primaryKeys.length === 0) {
-            this.primaryKeys.push(this.id);
-        }
-        return this.primaryKeys;
-    }
-
-    getUniqueKeys(): Column<any>[] {
-        return this.uniqueKeys;
-    }
 }
 
 export interface UsersModel {
