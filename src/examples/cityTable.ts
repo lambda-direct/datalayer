@@ -1,3 +1,4 @@
+import { Column } from "..";
 import { AbstractTable, RowMapper } from "../tables/abstractTable";
 
 export class CitiesTable extends AbstractTable<CitiesModel> {
@@ -14,6 +15,14 @@ export class CitiesTable extends AbstractTable<CitiesModel> {
             name: response.getVarchar(this.name),
             page: response.getVarchar(this.page),
         };
+    }
+
+    getPrimaryKeys(): Column<any>[] {
+        return this.primaryKeys;
+    }
+
+    getUniqueKeys(): Column<any>[] {
+        return this.uniqueKeys;
     }
 }
 

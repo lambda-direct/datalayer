@@ -6,6 +6,8 @@ import { DeleteTRB, InsertTRB, SelectTRB, UpdateTRB } from "../builders/requestB
 import { PgInteger } from "../columns/types/pgInteger";
 
 export abstract class AbstractTable<K = any> {
+    protected primaryKeys: Column<any>[] = [];
+    protected uniqueKeys: Column<any>[] = [];
     private _pool: Pool;
 
     protected varchar({name, size}: {name: string, size: number}): Column<PgVarChar> {
@@ -41,6 +43,10 @@ export abstract class AbstractTable<K = any> {
     }
 
     abstract tableName(): string;
+
+    abstract getPrimaryKeys(): Column<any>[];
+
+    abstract getUniqueKeys(): Column<any>[];
 
     abstract map(response: RowMapper): K; 
 }
