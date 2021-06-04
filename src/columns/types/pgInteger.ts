@@ -7,4 +7,8 @@ export class PgInteger extends ColumnType {
         super();
         this.dbName = `INT`;
     }
+
+    getDbName(): string {
+        return this.dbName;
+    }
 }

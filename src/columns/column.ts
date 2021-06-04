@@ -13,6 +13,8 @@ export class Column<T extends ColumnType> {
     autoIncrementFlag: boolean = false;
     primaryKeyName: string = "";
     uniqueKeyName: string = "";
+    defaultValue: any = null;
+    referenced: Column<T>;
 
     private constructor(parent: AbstractTable, columnName: string, columnType: T){
         this.columnType = columnType;
@@ -32,12 +34,17 @@ export class Column<T extends ColumnType> {
         return new Column<PgInteger>(parent, name, new PgInteger());
     }
 
-    getAlias(): string{
+    getAlias(): string {
         return this.parent.tableName().replace(".", "_") + "_" + this.columnName;
     }
 
     getParent(): AbstractTable {
         return this.parent;
+    }
+
+    references(column: Column<T>): Column<T> {
+        this.referenced = column;
+        return this;
     }
 
     isNullable() {
@@ -58,5 +65,29 @@ export class Column<T extends ColumnType> {
     unique() {
         this.uniqueKeyName = this.columnName;
         return this;
+    }
+
+    isAutoIncrement(): boolean {
+        return this.autoIncrementFlag;
+    }
+
+    getIsNullable(): boolean {
+        return this.isNullableFlag;
+    }
+
+    getColumnName(): string {
+        return this.columnName;
+    }
+
+    getReferenced(): Column<T> {
+        return this.referenced;
+    }
+
+    getColumnType(): T {
+        return this.columnType;
+    }
+
+    getDefaultValue(): any {
+        return this.defaultValue;
     }
 }

@@ -3,21 +3,28 @@ import { DbConnector } from "./db/dbConnector";
 import { UsersTable } from "./examples/usersTable";
 import { MigrationsModel, MigrationsTable } from "./tables/migrationsTable";
 import { Where } from './builders/where'
+import { Create } from "./builders/create";
+import { Pool } from "pg";
+import { QueryResponseMapper } from "./builders/requestBuilders";
 
 (async () => {
     // const usersTable = new UsersTable();
     const migrationsTable = new MigrationsTable();
     
-
     const db: Db = new DbConnector().host("localhost").user("postgres").password("Jawa-350").port(5432).db("datalayer").connect();
     db.use(migrationsTable);
 
     const migrationsArray: MigrationsModel[] = [
-      {id: 6, version: 3, created_at: new Date().toISOString()},
-      {id: 7, version: 4, created_at: new Date().toISOString()}
+      {id: 0, version: 1, created_at: new Date()},
+      {id: 0, version: 2, created_at: new Date()}
     ];
-    const x = migrationsTable.insert(migrationsArray).returningAll();
-    x.then( y => y.forEach( f => console.log(f)))
+    
+    const res = migrationsTable.insert(migrationsArray).returningAll();
+    res.then(migrations => migrations.forEach(migration => console.log(migration)));
+
+    // console.log(Create.from(usersTable).build());
+    // console.log(Create.from(migrationsTable).build());
+    // await db._pool.query(Create.from(migrationsTable).build())
 
     // const start = Date.now()
     // console.log(await db._pool.query("SELECT * FROM test_config"));

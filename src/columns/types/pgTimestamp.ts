@@ -7,4 +7,8 @@ export class PgTimestamp extends ColumnType {
         super();
         this.dbName = "timestamp without time zone"
     }
+
+    getDbName(): string {
+        return this.dbName;
+    }
 }

@@ -9,4 +9,8 @@ export class PgVarChar extends ColumnType {
         this.size = size;
         this.dbName = `character varying(${this.size})`
     }
+
+    getDbName(): string {
+        return this.dbName;
+    }
 }
