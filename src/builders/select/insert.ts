@@ -34,8 +34,12 @@ class ValuesInsert {
     }
 
     apply<T>(values: Array<T>): ValuesInsert {
+        // deleting id (id is SERIAL)
+        values.map((value: Object) => Reflect.deleteProperty(value, 'id'));
+
         this._aggregator.appendColumns(values);
         this._aggregator.appendValues(values);
+
         return this;
     }
 

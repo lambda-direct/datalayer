@@ -183,9 +183,13 @@ export class InsertAggregator extends Aggregator {
 
             this._values.push("(");
             for(let j = 0; j < insertValues.length; j++) {
-                const insertValue = insertValues[j];      
+                const insertValue = insertValues[j];    
+
                 if (shouldEcranate(insertValue)) {
-                    const ecranatedValue =  insertValue instanceof String ? insertValue.replace("'", "''") :  insertValue;
+                    let ecranatedValue = insertValue;
+                    if (insertValue instanceof String) ecranatedValue = insertValue.replace("'", "''");
+                    if (insertValue instanceof Date) ecranatedValue = insertValue.toISOString();
+                    // const ecranatedValue = insertValue instanceof String ? insertValue.replace("'", "''") : insertValue;
 
                     this._values.push("'");
                     this._values.push(ecranatedValue);
