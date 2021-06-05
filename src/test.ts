@@ -1,10 +1,7 @@
-import { Db } from "./db/db";
+import { Create } from "./builders/lowLvlBuilders";
+import { Db } from "./db";
 import { DbConnector } from "./db/dbConnector";
-import { UsersTable } from "./examples/usersTable";
-import { MigrationsModel, MigrationsTable } from "./tables/migrationsTable";
-import { Where } from './builders/where'
-import { Join } from "./builders/join/join";
-import { Create } from "./builders/create";
+import { MigrationsTable } from "./tables/migrationsTable";
 
 (async () => {
     // const usersTable = new UsersTable();
@@ -21,7 +18,7 @@ import { Create } from "./builders/create";
     // x.then( y => y.forEach( f => console.log(f)))
 
     // console.log(Create.from(usersTable).build());
-    console.log(Create.from(migrationsTable).build());
+    console.log(Create.table(migrationsTable).build());
     // await db._pool.query(Create.from(migrationsTable).build())
 
     // const start = Date.now()

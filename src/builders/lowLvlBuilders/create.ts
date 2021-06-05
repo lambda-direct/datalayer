@@ -1,5 +1,5 @@
-import { Column } from "../columns/column";
-import { AbstractTable } from "../tables/abstractTable";
+import { Column } from "../../columns/column";
+import { AbstractTable } from "../../tables/abstractTable";
 
 export class Create {
     private table: Array<string> = [];
@@ -12,7 +12,7 @@ export class Create {
         this.tableClass = tableClass;
     }
 
-    static from(tableClass: AbstractTable<any>): Create {
+    static table(tableClass: AbstractTable<any>): Create {
         return new Create(tableClass);
     }
 

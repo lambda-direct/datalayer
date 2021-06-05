@@ -1,6 +1,6 @@
 import { AbstractTable } from "../../tables/abstractTable";
-import { UpdateExpr, Updates } from "../updates";
-import { InsertAggregator } from "./aggregator";
+import { UpdateExpr } from "../requestBuilders/updates";
+import { InsertAggregator } from "../aggregators";
 
 export class Insert {
     static into(table: AbstractTable) {
@@ -34,9 +34,6 @@ class ValuesInsert {
     }
 
     apply<T>(values: Array<T>): ValuesInsert {
-        // deleting id (id is SERIAL)
-        values.map((value: Object) => Reflect.deleteProperty(value, 'id'));
-
         this._aggregator.appendColumns(values);
         this._aggregator.appendValues(values);
 

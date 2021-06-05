@@ -1,6 +1,6 @@
 import { AbstractTable } from "../../tables/abstractTable";
-import { Expr } from "../where";
-import { DeleteAggregator } from "./aggregator";
+import { Expr } from "../requestBuilders/where";
+import { DeleteAggregator } from "../aggregators";
 
 export class Delete {
     static from(table: AbstractTable) {

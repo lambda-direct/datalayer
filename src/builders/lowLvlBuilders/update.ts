@@ -1,7 +1,7 @@
 import { AbstractTable } from '../../tables/abstractTable';
-import { UpdateExpr } from '../updates';
-import { Expr } from '../where';
-import { UpdateAggregator } from './aggregator';
+import { UpdateExpr } from '../requestBuilders/updates';
+import { Expr } from '../requestBuilders/where';
+import { UpdateAggregator } from '../aggregators';
 
 
 export class Update {

@@ -1,4 +1,3 @@
-import { Column } from "..";
 import { AbstractTable, RowMapper } from "../tables/abstractTable";
 
 export class CitiesTable extends AbstractTable<CitiesModel> {

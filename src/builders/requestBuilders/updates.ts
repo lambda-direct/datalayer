@@ -1,5 +1,5 @@
-import { Column } from "../columns/column";
-import { ColumnType } from "../columns/types/columnType";
+import { Column } from "../../columns/column";
+import { ColumnType } from "../../columns/types/columnType";
 
 export class Updates {
     static set<T extends ColumnType>(column: Column<T>, value: any): UpdateExpr{

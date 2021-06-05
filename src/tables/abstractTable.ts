@@ -2,8 +2,8 @@ import { Pool } from "pg";
 import { Column } from "../columns/column";
 import { PgVarChar } from "../columns/types/pgVarChar";
 import { PgTimestamp } from "../columns/types/pgTimestamp";
-import { DeleteTRB, InsertTRB, SelectTRB, UpdateTRB } from "../builders/requestBuilders";
 import { PgInteger } from "../columns/types/pgInteger";
+import { DeleteTRB, InsertTRB, SelectTRB, UpdateTRB } from "../builders/highLvlBuilders";
 
 export abstract class AbstractTable<K = any> {
     private _pool: Pool;

@@ -1,8 +1,8 @@
 import { ColumnType } from "../../columns/types/columnType";
 import { AbstractTable } from "../../tables/abstractTable";
-import { Join } from "../join/join";
-import { Expr } from "../where";
-import { SelectAggregator } from "./aggregator";
+import { Join } from "../joinBuilders/join";
+import { Expr } from "../requestBuilders/where";
+import { SelectAggregator } from "../aggregators/";
 
 export class Select {
     // TODO Add from with tableName as param

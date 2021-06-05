@@ -4,6 +4,9 @@ export { DbConnector } from './db/dbConnector'
 export { Column } from './columns/column'
 export { ColumnType } from './columns/types/columnType'
 export { PgVarChar } from './columns/types/pgVarChar'
-export { SelectAggregator } from './builders/select/aggregator'
-export { Select } from './builders/select/select'
-export { Where } from './builders/where';
+export { SelectAggregator } from './builders/aggregators'
+export { InsertAggregator } from './builders/aggregators'
+export { DeleteAggregator } from './builders/aggregators'
+export { UpdateAggregator } from './builders/aggregators'
+export { Select } from './builders/lowLvlBuilders'
+export { Where } from './builders/requestBuilders/where';

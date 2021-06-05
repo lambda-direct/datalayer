@@ -1,6 +1,6 @@
-import { Column } from "../columns/column";
-import { ColumnType } from "../columns/types/columnType";
-import { ecranate, shouldEcranate } from "../utils/ecranate";
+import { Column } from "../../columns/column";
+import { ColumnType } from "../../columns/types/columnType";
+import { ecranate, shouldEcranate } from "../../utils/ecranate";
 
 export class Where {
     static eq<T extends ColumnType>(left: Column<T>, value: any): Expr{
