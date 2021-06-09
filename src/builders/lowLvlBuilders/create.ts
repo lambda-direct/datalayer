@@ -28,7 +28,6 @@ export class Create {
             const column = columns[i];
 
             if (column instanceof Column) {
-                console.log(column.getColumnName())
                 this.columnsBuilder.push(column.getColumnName());
                 this.columnsBuilder.push(" ");
                 this.columnsBuilder.push(column.isAutoIncrement() ? "SERIAL" : column.getColumnType().getDbName());
