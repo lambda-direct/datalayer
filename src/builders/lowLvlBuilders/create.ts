@@ -33,7 +33,7 @@ export class Create {
                 this.columnsBuilder.push(column.isAutoIncrement() ? "SERIAL" : column.getColumnType().getDbName());
                 this.columnsBuilder.push(" ");
                 this.columnsBuilder.push(column.getDefaultValue() != null ? "DEFAULT " + column.getDefaultValue() : "");
-                this.columnsBuilder.push(column.getIsNullable() ? "" : "NOT NULL");
+                this.columnsBuilder.push(column.getIsNullable() ? "" : " NOT NULL");
 
                 const referenced: Column<any> = column.getReferenced();
                 this.columnsBuilder.push(referenced != null ? " REFERENCES " + referenced.getParent().tableName() + " (" + referenced.getColumnName() + ")" : "");

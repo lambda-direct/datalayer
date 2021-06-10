@@ -11,8 +11,8 @@ export class MigrationsTable extends AbstractTable<MigrationsModel> {
 
     map(response: RowMapper): MigrationsModel {
         return {
-            id: response.getInteger(this.id),
-            version: response.getInteger(this.version),
+            id: response.getInt(this.id),
+            version: response.getInt(this.version),
             created_at: response.getTimestamp(this.created_at),
         };
     }

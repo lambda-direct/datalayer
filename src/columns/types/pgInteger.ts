@@ -5,7 +5,7 @@ export class PgInteger extends ColumnType {
 
     constructor() {
         super();
-        this.dbName = `INT`;
+        this.dbName = "INT";
     }
 
     getDbName(): string {

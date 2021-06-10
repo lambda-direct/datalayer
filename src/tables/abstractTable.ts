@@ -3,6 +3,10 @@ import { Column } from "../columns/column";
 import { PgVarChar } from "../columns/types/pgVarChar";
 import { PgTimestamp } from "../columns/types/pgTimestamp";
 import { PgInteger } from "../columns/types/pgInteger";
+import { PgBigDecimal } from "../columns/types/pgBigDecimal";
+import { PgTime } from "../columns/types/pgTime";
+import { PgBoolean } from "../columns/types/pgBoolean";
+import { PgText } from "../columns/types/pgText";
 import { DeleteTRB, InsertTRB, SelectTRB, UpdateTRB } from "../builders/highLvlBuilders";
 
 export abstract class AbstractTable<K = any> {
@@ -18,6 +22,22 @@ export abstract class AbstractTable<K = any> {
 
     protected int({name}: {name: string}): Column<PgInteger> {
         return Column.int(this, name);
+    }
+
+    protected decimal({name, precision, scale}: {name: string, precision: number, scale: number}): Column<PgBigDecimal> {
+        return Column.decimal(this, name, precision, scale);
+    }
+
+    protected time({name}: {name: string}): Column<PgTime> {
+        return Column.time(this, name);
+    }
+
+    protected bool({name}: {name: string}): Column<PgBoolean> {
+        return Column.bool(this, name);
+    }
+
+    protected text({name}: {name: string}): Column<PgText> {
+        return Column.text(this, name);
     }
 
     withConnection(connection: Pool) {
@@ -56,11 +76,27 @@ export class RowMapper {
         return this.row[column.getAlias()];
     }
 
-    getInteger(column: Column<PgInteger>): number {
+    getInt(column: Column<PgInteger>): number {
         return this.row[column.getAlias()];
     }
 
     getTimestamp(column: Column<PgTimestamp>): Date {
+        return this.row[column.getAlias()];
+    }
+
+    getDecimal(column: Column<PgBigDecimal>): number {
+        return this.row[column.getAlias()];
+    }
+
+    getTime(column: Column<PgTime>): Date {
+        return this.row[column.getAlias()];
+    }
+
+    getBool(column: Column<PgBoolean>): boolean {
+        return this.row[column.getAlias()];
+    }
+
+    getText(column: Column<PgText>): string {
         return this.row[column.getAlias()];
     }
 }
