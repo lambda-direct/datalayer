@@ -17,7 +17,7 @@ export class Column<T extends ColumnType> {
     autoIncrementFlag: boolean = false;
     primaryKeyName: string | undefined = undefined;
     uniqueKeyName: string | undefined = undefined;
-    defaultValueParam: any = null;
+    defaultParam: any = null;
     referenced: Column<T>;
 
     private constructor(parent: AbstractTable, columnName: string, columnType: T){
@@ -73,7 +73,7 @@ export class Column<T extends ColumnType> {
     }
 
     defaultValue(value: any) {
-        this.defaultValueParam = value;
+        this.defaultParam = value;
         return this;
     }
 
@@ -113,6 +113,6 @@ export class Column<T extends ColumnType> {
     }
 
     getDefaultValue(): any {
-        return this.defaultValueParam;
+        return this.defaultParam;
     }
 }
