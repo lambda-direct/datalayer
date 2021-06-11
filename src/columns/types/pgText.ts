@@ -1,11 +1,11 @@
 import { ColumnType } from "./columnType";
 
-export class PgTimestamp extends ColumnType {
+export class PgText extends ColumnType {
     dbName: string;
 
     constructor() {
         super();
-        this.dbName = "timestamp without time zone";
+        this.dbName = "TEXT";
     }
 
     getDbName(): string {

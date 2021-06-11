@@ -37,7 +37,7 @@ export class DbConnector {
         return this;
     }
 
-    connect(): Db {
+    async connect(): Promise<Db> {
         const config = {
             user: this._user,
             host: this._host,
@@ -48,13 +48,14 @@ export class DbConnector {
         
         try {
             const pool = new Pool(config);
-            
+
+            await pool.connect();
+            console.log("Db connected!");
+
             return new Db(pool);
-        } catch(e) {
-            // Proper error handling
-            console.log(e);
-            // Not sure if we should throw new Error??
-            throw new Error();
-        };
+        } catch (e) {
+            console.log("Connection error: " + e.message);
+            throw new Error("Connection error: " + e.message);
+        }
     }
 }

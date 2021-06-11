@@ -2,7 +2,11 @@ import { AbstractTable } from "../tables/abstractTable";
 import { ColumnType } from "./types/columnType";
 import { PgInteger } from "./types/pgInteger";
 import { PgVarChar } from "./types/pgVarChar";
-import { PgTimestamp } from "../columns/types/pgTimestamp";
+import { PgTimestamp } from "./types/pgTimestamp";
+import { PgBigDecimal } from "./types/pgBigDecimal";
+import { PgTime } from "./types/pgTime";
+import { PgBoolean } from "./types/pgBoolean";
+import { PgText } from "./types/pgText";
 
 export class Column<T extends ColumnType> {
     private parent: AbstractTable;
@@ -13,7 +17,7 @@ export class Column<T extends ColumnType> {
     autoIncrementFlag: boolean = false;
     primaryKeyName: string | undefined = undefined;
     uniqueKeyName: string | undefined = undefined;
-    defaultValue: any = null;
+    defaultParam: any = null;
     referenced: Column<T>;
 
     private constructor(parent: AbstractTable, columnName: string, columnType: T){
@@ -34,6 +38,22 @@ export class Column<T extends ColumnType> {
         return new Column<PgInteger>(parent, name, new PgInteger());
     }
 
+    static decimal(parent:AbstractTable, name:string, precision: number, scale: number): Column<PgBigDecimal> {
+        return new Column<PgBigDecimal>(parent, name, new PgBigDecimal(precision, scale));
+    }
+
+    static time(parent:AbstractTable, name:string): Column<PgTime> {
+        return new Column<PgTime>(parent, name, new PgTime());
+    }
+
+    static bool(parent:AbstractTable, name:string): Column<PgBoolean> {
+        return new Column<PgBoolean>(parent, name, new PgBoolean());
+    }
+
+    static text(parent:AbstractTable, name:string): Column<PgText> {
+        return new Column<PgText>(parent, name, new PgText());
+    }
+
     getAlias(): string {
         return this.parent.tableName().replace(".", "_") + "_" + this.columnName;
     }
@@ -49,6 +69,11 @@ export class Column<T extends ColumnType> {
 
     isNullable() {
         this.isNullableFlag = true;
+        return this;
+    }
+
+    defaultValue(value: any) {
+        this.defaultParam = value;
         return this;
     }
 
@@ -88,6 +113,6 @@ export class Column<T extends ColumnType> {
     }
 
     getDefaultValue(): any {
-        return this.defaultValue;
+        return this.defaultParam;
     }
 }

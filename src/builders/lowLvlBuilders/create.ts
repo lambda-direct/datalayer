@@ -2,8 +2,8 @@ import { Column } from "../../columns/column";
 import { AbstractTable } from "../../tables/abstractTable";
 
 export class Create {
-    private table: Array<string> = [];
-    private columns: Array<string> = [];
+    private tableBuilder: Array<string> = [];
+    private columnsBuilder: Array<string> = [];
     private primaryKey: Array<string> = [];
     private uniqueKey: Array<string> = [];
     private tableClass: AbstractTable<any>;
@@ -17,27 +17,29 @@ export class Create {
     }
 
     build(): string {
-        this.table.push("CREATE TABLE IF NOT EXISTS ")
-        this.table.push(this.tableClass.tableName())
-        this.table.push(" (");
+        this.tableBuilder.push("CREATE TABLE IF NOT EXISTS ")
+        this.tableBuilder.push(this.tableClass.tableName())
+        this.tableBuilder.push(" (");
 
-        const values = Object.values(this.tableClass);
-        for (let i = 0; i < values.length; i++) {
-            const column = values[i];
+        const tableValues = Object.values(this.tableClass);
+        const columns = tableValues.filter(value => value instanceof Column);
+        
+        for (let i = 0; i < columns.length; i++) {
+            const column = columns[i];
 
-            if (column instanceof Column){
-                this.columns.push(column.getColumnName());
-                this.columns.push(" ");
-                this.columns.push(column.isAutoIncrement() ? "SERIAL" : column.getColumnType().getDbName());
-                this.columns.push(" ");
-                this.columns.push(column.getDefaultValue() != null ? "DEFAULT " + column.getDefaultValue() : "");
-                this.columns.push(column.getIsNullable() ? "" : "NOT NULL");
+            if (column instanceof Column) {
+                this.columnsBuilder.push(column.getColumnName());
+                this.columnsBuilder.push(" ");
+                this.columnsBuilder.push(column.isAutoIncrement() ? "SERIAL" : column.getColumnType().getDbName());
+                this.columnsBuilder.push(" ");
+                this.columnsBuilder.push(column.getDefaultValue() != null ? "DEFAULT " + column.getDefaultValue() : "");
+                this.columnsBuilder.push(column.getIsNullable() ? "" : " NOT NULL");
 
                 const referenced: Column<any> = column.getReferenced();
-                this.columns.push(referenced != null ? " REFERENCES " + referenced.getParent().tableName() + " (" + referenced.getColumnName() + ")" : "");
+                this.columnsBuilder.push(referenced != null ? " REFERENCES " + referenced.getParent().tableName() + " (" + referenced.getColumnName() + ")" : "");
 
-                if (i < values.length - 1) {
-                    this.columns.push(",");
+                if (i != columns.length - 1) {
+                    this.columnsBuilder.push(",");
                 }
             }
         };
@@ -45,7 +47,7 @@ export class Create {
         const primaryKeys: Column<any>[] = []
         const uniqueKeys: Column<any>[] = []
         for (let field of Object.values(this.tableClass)) {
-            if (field instanceof Column){
+            if (field instanceof Column) {
                 if (field.primaryKeyName){
                     primaryKeys.push(field)
                 }
@@ -56,7 +58,7 @@ export class Create {
         }
 
         if (primaryKeys.length !== 0) {
-            // this.columns.push(",");
+            this.primaryKey.push(",");
             this.primaryKey.push("\nCONSTRAINT " + this.tableClass.tableName() + "_" + primaryKeys[0].getColumnName());
             this.primaryKey.push(" PRIMARY KEY(");
 
@@ -88,6 +90,6 @@ export class Create {
             this.uniqueKey.push(")");
         }
 
-        return this.table.join("") + this.columns.join("") + this.primaryKey.join("") + this.uniqueKey.join("") + ");";
+        return this.tableBuilder.join("") + this.columnsBuilder.join("") + this.primaryKey.join("") + this.uniqueKey.join("") + ");";
     }
 }
