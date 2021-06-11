@@ -5,21 +5,20 @@ import { CitiesTable } from "./examples/cityTable";
 import { TestTable } from "./examples/testTable";
 import { UsersTable } from "./examples/usersTable";
 import { Migrator, SessionWrapper } from "./migrator/migrator";
-import { MigrationsTable } from "./tables/migrationsTable";
 
 (async () => {
     const usersTable = new UsersTable();
     const citiesTable = new CitiesTable();
     const testTable = new TestTable();
-    // const migrationsTable = new MigrationsTable();
 
-    const db: Db = new DbConnector().host("localhost").user("postgres").password("Jawa-350").port(5432).db("datalayer").connect();
-    // db.use(migrationsTable);
+    const dbConnector: DbConnector = new DbConnector().host("localhost").user("postgres").password("Jawa-350").port(5432).db("datalayer");
+    const db: Db = await dbConnector.connect();
+    // db.use(testTable);
     const migrator = new Migrator(db);
 
     migrator.chain(3, (dbSession: SessionWrapper) => {
-      // dbSession.execute(Create.table(usersTable).build());
-      // dbSession.execute(Create.table(citiesTable).build());
+      dbSession.execute(Create.table(usersTable).build());
+      dbSession.execute(Create.table(citiesTable).build());
       dbSession.execute(Create.table(testTable).build());
     }).execute();
   
