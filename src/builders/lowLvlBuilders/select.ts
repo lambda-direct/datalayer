@@ -6,21 +6,21 @@ import { SelectAggregator } from "../aggregators/";
 
 export class Select {
     // TODO Add from with tableName as param
-    static from(table: AbstractTable) {
+    static from<SERVICE, DB>(table: AbstractTable<SERVICE, DB>) {
         const aggregator = new SelectAggregator(table)
         aggregator.appendFrom(table).appendFields();
         return new SelectFrom(aggregator);
     }
 }
 
-class SelectFrom {
-    private _aggregator: SelectAggregator;
+class SelectFrom<SERVICE, DB> {
+    private _aggregator: SelectAggregator<SERVICE, DB>;
 
-    constructor(aggregator: SelectAggregator){
+    constructor(aggregator: SelectAggregator<SERVICE, DB>){
         this._aggregator = aggregator;
     }
 
-    joined<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}>>) {
+    joined<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}, DB>>) {
         return new SelectJoined(this._aggregator).apply(joins);
     }
 
@@ -33,14 +33,14 @@ class SelectFrom {
     }
 }
 
-class SelectJoined {
-    private _aggregator: SelectAggregator;
+class SelectJoined<SERVICE, DB> {
+    private _aggregator: SelectAggregator<SERVICE, DB>;
 
-    constructor(aggregator: SelectAggregator){
+    constructor(aggregator: SelectAggregator<SERVICE, DB>){
         this._aggregator = aggregator;
     }
 
-    apply<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}>>): SelectJoined {
+    apply<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}, DB>>): SelectJoined<SERVICE, DB> {
         this._aggregator.join(joins);
         return this;
     }
@@ -54,14 +54,14 @@ class SelectJoined {
     }
 }
 
-class WhereSelect {
-    private _aggregator: SelectAggregator;
+class WhereSelect<SERVICE, DB> {
+    private _aggregator: SelectAggregator<SERVICE, DB>;
 
-    constructor(aggregator: SelectAggregator){
+    constructor(aggregator: SelectAggregator<SERVICE, DB>){
         this._aggregator = aggregator;
     }
 
-    apply(filters: Expr): WhereSelect {
+    apply(filters: Expr): WhereSelect<SERVICE, DB> {
         this._aggregator.filters(filters);
         return this;
     }

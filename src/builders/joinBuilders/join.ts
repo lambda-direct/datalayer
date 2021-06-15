@@ -2,42 +2,42 @@ import { Column } from "../../columns/column";
 import { ColumnType } from "../../columns/types/columnType";
 import { AbstractTable } from "../../tables/abstractTable";
 
-export class Join<T extends ColumnType, K> {
+export class Join<T extends ColumnType, K, DB> {
     fromColumn: Column<T>;
     toColumn: Column<T>;
-    joinTable: AbstractTable<K>;
+    joinTable: AbstractTable<K, DB>;
     type: JoinStrategy;
 
-    constructor(joinTable: AbstractTable<K>, fromColumn: Column<T>, toColumn: Column<T>,) {
+    constructor(joinTable: AbstractTable<K, DB>, fromColumn: Column<T>, toColumn: Column<T>,) {
         this.joinTable = joinTable;
         this.toColumn = toColumn;
         this.fromColumn = fromColumn;
     }
 
-    static with<K>(table: AbstractTable<K>): JoinWith<K> {
+    static with<T extends ColumnType,K, DB>(table: AbstractTable<K, DB>): JoinWith<T, K> {
         return new JoinWith(table);
     }
 
-    joinStrategy(type: JoinStrategy): Join<T, K> {
+    joinStrategy(type: JoinStrategy): Join<T, K, DB> {
         this.type = type;
         return this;
     }
 
-    columns(fromColumn:Column<T> , toColumn:Column<T> ): Join<T, K>  {
+    columns(fromColumn:Column<T> , toColumn:Column<T> ): Join<T, K, DB>  {
         this.toColumn = toColumn;
         this.fromColumn = fromColumn;
         return this;
     }
 }
 
-class JoinWith<K> {
-    joinTable: AbstractTable<K>;
+export class JoinWith<T extends ColumnType, K> {
+    joinTable: AbstractTable<K, {}>;
 
-    constructor(joinTable: AbstractTable<K>) {
+    constructor(joinTable: AbstractTable<K, {}>) {
         this.joinTable = joinTable;
     }
 
-    columns<T extends ColumnType>(fromColumn:Column<T> , toColumn:Column<T>): Join<T, K>  {
+    columns(fromColumn:Column<T> , toColumn:Column<T>): Join<T, K, {}>  {
         return new Join(this.joinTable, fromColumn, toColumn);
     }
 }

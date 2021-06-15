@@ -8,7 +8,7 @@ export class Db {
         this._pool = pool;
     }
 
-    use<T extends AbstractTable>(table: T){
+    use<T extends AbstractTable<{}, {}>>(table: T){
         table.withConnection(this._pool);
     }
 }

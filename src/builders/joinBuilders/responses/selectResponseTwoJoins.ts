@@ -1,4 +1,4 @@
-export class SelectResponseTwoJoins<T1, T2, T3> {
+export class SelectResponseTwoJoins<T1, T2, T3, DB> {
     private _t1: T1[];
     private _t2: T2[];
     private _t3: T3[];

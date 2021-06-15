@@ -2,18 +2,18 @@ import { AbstractTable } from "../../tables/abstractTable";
 import { Expr } from "../requestBuilders/where";
 import { DeleteAggregator } from "../aggregators";
 
-export class Delete {
-    static from(table: AbstractTable) {
+export class Delete<SERVICE, DB> {
+    static from<SERVICE, DB>(table: AbstractTable<SERVICE, DB>): DeleteFrom<SERVICE, DB> {
         const aggregator = new DeleteAggregator(table)
         aggregator.appendFrom(table).appendFields();
         return new DeleteFrom(aggregator);
     }
 }
 
-class DeleteFrom {
-    private _aggregator: DeleteAggregator;
+class DeleteFrom<SERVICE, DB> {
+    private _aggregator: DeleteAggregator<SERVICE, DB>;
 
-    constructor(aggregator: DeleteAggregator){
+    constructor(aggregator: DeleteAggregator<SERVICE, DB>){
         this._aggregator = aggregator;
     }
 
@@ -26,14 +26,14 @@ class DeleteFrom {
     }
 }
 
-class DeleteFilter {
-    private _aggregator: DeleteAggregator;
+class DeleteFilter<SERVICE, DB> {
+    private _aggregator: DeleteAggregator<SERVICE, DB>;
 
-    constructor(aggregator: DeleteAggregator){
+    constructor(aggregator: DeleteAggregator<SERVICE, DB>){
         this._aggregator = aggregator;
     }
 
-    apply(filters: Expr): DeleteFilter {
+    apply(filters: Expr): DeleteFilter<SERVICE, DB> {
         this._aggregator.filters(filters);
         return this;
     }

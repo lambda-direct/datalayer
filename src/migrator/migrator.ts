@@ -4,14 +4,14 @@ import { MigrationsModel, MigrationsTable } from "../tables/migrationsTable";
 
 export class Migrator {
     private _db: Db;
-    private migrationsPerVersion: Map<number, () => boolean> = new Map<number, () => boolean>();
+    private migrationsPerVersion: Map<number, () => Promise<boolean>> = new Map<number, () => Promise<boolean>>();
   
     constructor(db: Db){
         this._db = db;
     }
 
     chain<M>(version: number, migration: (sessionWrapper: SessionWrapper) => M): Migrator {
-        this.migrationsPerVersion.set(version, () => {
+        this.migrationsPerVersion.set(version, async () => {
             migration(new SessionWrapper(this._db));
             return true;
         });
@@ -26,10 +26,10 @@ export class Migrator {
 
         const migrations: Array<MigrationsModel> = await migrationsTable.select().all();
         const latestMigration: MigrationsModel | null = this.getLastOrNull(migrations);
-        let queriesToExecute: Map<number, () => boolean> = this.migrationsPerVersion;
+        let queriesToExecute: Map<number, () => Promise<boolean>> = this.migrationsPerVersion;
   
         if (latestMigration != null) {
-            let queriesToExecuteTest: Map<number, () => boolean> = new Map<number, () => boolean>();
+            let queriesToExecuteTest: Map<number, () => Promise<boolean>> = new Map<number, () => Promise<boolean>>();
 
             for (let [key, value] of this.migrationsPerVersion) {
                 if (key > latestMigration.version) {
@@ -40,8 +40,8 @@ export class Migrator {
         }
 
         for (let [key, value] of queriesToExecute) {
-           value();
-           migrationsTable.insert([{version: key, created_at: new Date()}]).returningAll();
+           await value();
+           migrationsTable.insert([{version: key, createdAt: new Date()}]).returningAll();
         }
     }
 
@@ -61,11 +61,11 @@ export class SessionWrapper {
         this._db = db;
     }
 
-    execute(query: string): void {
-        this._db._pool.query(query);
+    async execute(query: string): Promise<void> {
+        await this._db._pool.query(query);
     }
 
-    update(query: string): void {
-        this._db._pool.query(query);
+    async update(query: string): Promise<void> {
+        await this._db._pool.query(query);
     }
 }

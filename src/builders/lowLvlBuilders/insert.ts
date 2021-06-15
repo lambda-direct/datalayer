@@ -3,17 +3,17 @@ import { UpdateExpr } from "../requestBuilders/updates";
 import { InsertAggregator } from "../aggregators";
 
 export class Insert {
-    static into(table: AbstractTable) {
+    static into<SERVICE, DB>(table: AbstractTable<SERVICE, DB>) {
         const aggregator = new InsertAggregator(table)
         aggregator.appendFrom(table).appendFields();
         return new InsertInto(aggregator);
     }
 }
 
-class InsertInto {
-    private _aggregator: InsertAggregator;
+class InsertInto<SERVICE, DB> {
+    private _aggregator: InsertAggregator<SERVICE, DB>;
 
-    constructor(aggregator: InsertAggregator){
+    constructor(aggregator: InsertAggregator<SERVICE, DB>){
         this._aggregator = aggregator;
     }
 
@@ -26,14 +26,14 @@ class InsertInto {
     }
 }
 
-class ValuesInsert {
-    private _aggregator: InsertAggregator;
+class ValuesInsert<SERVICE, DB> {
+    private _aggregator: InsertAggregator<SERVICE, DB>;
 
-    constructor(aggregator: InsertAggregator){
+    constructor(aggregator: InsertAggregator<SERVICE, DB>){
         this._aggregator = aggregator;
     }
 
-    apply<T>(values: Array<T>): ValuesInsert {
+    apply<T>(values: Array<T>): ValuesInsert<SERVICE, DB> {
         this._aggregator.appendColumns(values);
         this._aggregator.appendValues(values);
 
@@ -49,14 +49,14 @@ class ValuesInsert {
     }
 }
 
-class OnConflictInsert {
-    private _aggregator: InsertAggregator;
+class OnConflictInsert<SERVICE, DB> {
+    private _aggregator: InsertAggregator<SERVICE, DB>;
 
-    constructor(aggregator: InsertAggregator){
+    constructor(aggregator: InsertAggregator<SERVICE, DB>){
         this._aggregator = aggregator;
     }
 
-    apply(updates: UpdateExpr): OnConflictInsert {
+    apply(updates: UpdateExpr): OnConflictInsert<SERVICE, DB> {
         this._aggregator.appendOnConflict(updates);
         return this;
     }

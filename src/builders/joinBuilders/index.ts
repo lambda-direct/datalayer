@@ -1,4 +1,3 @@
-export { Join, JoinStrategy } from './join'
 export { SelectTRBWithTwoJoins } from './builders/selectWithTwoJoins'
 export { SelectTRBWithJoin } from './builders/selectWithJoin'
 export { SelectResponseJoin } from './responses/SelectResponseWithJoin'

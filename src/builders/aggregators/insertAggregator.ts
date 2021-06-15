@@ -3,18 +3,18 @@ import { shouldEcranate } from "../../utils/ecranate";
 import { UpdateExpr } from "../requestBuilders/updates";
 import { Aggregator } from "./abstractAggregator";
 
-export class InsertAggregator extends Aggregator {
+export class InsertAggregator<SERVICE, MODEL> extends Aggregator<SERVICE, MODEL> {
     private _onConflict: Array<string> = [];
     private _columns: Array<string> = [];
     private _values: Array<string> = [];
     private _from: Array<string> = [];
     private _insert: Array<string> = ["INSERT INTO"];
 
-    constructor(table: AbstractTable){
+    constructor(table: AbstractTable<SERVICE, MODEL>){
         super(table);
     }
 
-    appendFrom(table: AbstractTable): InsertAggregator {
+    appendFrom(table: AbstractTable<SERVICE, MODEL>): InsertAggregator<SERVICE, MODEL> {
         this._from.push(" ");
         this._from.push(table.tableName());
         this._table = table;

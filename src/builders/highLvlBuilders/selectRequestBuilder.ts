@@ -2,25 +2,26 @@ import { Pool } from "pg";
 import { ColumnType } from "../../columns/types/columnType";
 import { QueryResponseMapper } from "../../mappers/responseMapper";
 import { AbstractTable } from "../../tables/abstractTable";
-import { Join, SelectTRBWithJoin } from "../joinBuilders";
+import { SelectTRBWithJoin } from "../joinBuilders";
+import { Join } from "../joinBuilders/join";
 import { Select } from "../lowLvlBuilders/select";
 import { Expr } from "../requestBuilders/where";
 import { TableRequestBuilder } from "./abstractRequestBuilder";
 
-export class SelectTRB<MODEL> extends TableRequestBuilder<MODEL> {
+export class SelectTRB<MODEL, DB> extends TableRequestBuilder<MODEL, DB> {
     protected _filter: Expr;
 
-    constructor(table: AbstractTable<MODEL>, pool: Pool) {
+    constructor(table: AbstractTable<MODEL, DB>, pool: Pool) {
         super(table, pool);
     }
 
-    where(expr: Expr): SelectTRB<MODEL> {
+    where(expr: Expr): SelectTRB<MODEL, DB> {
         this._filter = expr;
         return this;
     }
 
-    join<COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1>): SelectTRBWithJoin<COLUMN, T1, MODEL>{  
-        if(join.toColumn.getParent() === this._table) {
+    join<COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1, {}>): SelectTRBWithJoin<COLUMN, T1, MODEL, {}>{  
+        if (join.toColumn.getParent() === this._table) {
             throw Error('We are not supporting self joining in this version');
         }
         return new SelectTRBWithJoin(this._table, this._pool, this._filter, join);
@@ -34,7 +35,7 @@ export class SelectTRB<MODEL> extends TableRequestBuilder<MODEL> {
 
         const query = queryBuilder.build();
         // TODO Add logger true/false for sql query logging?
-        console.log(query);
+        console.log('SELECT: ', query)
 
         const result = await this._pool!.query(query);
         return QueryResponseMapper.map(this._table, result);

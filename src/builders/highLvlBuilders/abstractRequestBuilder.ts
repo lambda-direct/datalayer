@@ -1,11 +1,11 @@
 import { Pool } from "pg";
 import { AbstractTable } from "../../tables/abstractTable";
 
-export abstract class TableRequestBuilder<T> {
-    protected _table: AbstractTable<T>;
+export abstract class TableRequestBuilder<T, DB> {
+    protected _table: AbstractTable<T, DB>;
     protected _pool: Pool;
 
-    constructor(table: AbstractTable<T>, pool: Pool) {
+    constructor(table: AbstractTable<T, DB>, pool: Pool) {
         this._table = table;
         this._pool = pool;
     }

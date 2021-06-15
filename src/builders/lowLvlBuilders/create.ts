@@ -1,18 +1,18 @@
 import { Column } from "../../columns/column";
 import { AbstractTable } from "../../tables/abstractTable";
 
-export class Create {
+export class Create<SERVICE, DB> {
     private tableBuilder: Array<string> = [];
     private columnsBuilder: Array<string> = [];
     private primaryKey: Array<string> = [];
     private uniqueKey: Array<string> = [];
-    private tableClass: AbstractTable<any>;
+    private tableClass: AbstractTable<SERVICE, DB>;
 
-    private constructor(tableClass: AbstractTable<any>) {
+    private constructor(tableClass: AbstractTable<SERVICE, DB>) {
         this.tableClass = tableClass;
     }
 
-    static table(tableClass: AbstractTable<any>): Create {
+    static table<SERVICE, DB>(tableClass: AbstractTable<SERVICE, DB>): Create<SERVICE, DB> {
         return new Create(tableClass);
     }
 
