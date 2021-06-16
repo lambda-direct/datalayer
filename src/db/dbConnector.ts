@@ -1,6 +1,32 @@
 import { ClientConfig, Pool } from "pg";
 import { Db } from "./db";
 
+export class DBStringConnector { 
+    private _url: string;
+
+    constructor(url: string) {
+        this._url = url;
+    }
+
+    async connect(): Promise<Db> {
+        const config = {
+            connectionString: this._url
+        } as ClientConfig;
+        
+        try {
+            const pool = new Pool(config);
+
+            await pool.connect();
+            console.log("Db connected!");
+
+            return new Db(pool);
+        } catch (e) {
+            console.log("Connection error: " + e.message);
+            throw new Error("Connection error: " + e.message);
+        }
+    }
+}
+
 export class DbConnector {
     private _host: string;
     private _db: string;
@@ -10,6 +36,10 @@ export class DbConnector {
 
     constructor() {
 
+    }
+
+    connectionString(url: string): DBStringConnector {
+        return new DBStringConnector(url);
     }
 
     host(host: string): DbConnector {
