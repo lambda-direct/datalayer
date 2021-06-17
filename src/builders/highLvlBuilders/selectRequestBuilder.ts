@@ -35,7 +35,6 @@ export class SelectTRB<MODEL, DB> extends TableRequestBuilder<MODEL, DB> {
 
         const query = queryBuilder.build();
         // TODO Add logger true/false for sql query logging?
-        console.log('SELECT: ', query)
 
         const result = await this._pool!.query(query);
         return QueryResponseMapper.map(this._table, result);

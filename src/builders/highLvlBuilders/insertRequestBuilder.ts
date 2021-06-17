@@ -22,7 +22,6 @@ export class InsertTRB<T, DB> extends TableRequestBuilder<T, DB> {
         const valuesToInsert = this._values.map(this._table.toDbModel);
 
         const query = queryBuilder.values(valuesToInsert).build();
-        console.log('INSERT: ', query)
 
         const result = await this._pool!.query(query);
         return QueryResponseMapper.map(this._table, result);

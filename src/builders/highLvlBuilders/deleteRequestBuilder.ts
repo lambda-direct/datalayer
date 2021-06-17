@@ -22,7 +22,6 @@ export class DeleteTRB<T, DB> extends TableRequestBuilder<T, DB> {
         }
 
         const query = queryBuilder.build();
-        console.log('DELETE: ', query)
 
         const result = await this._pool.query(query);
         return QueryResponseMapper.map(this._table, result);

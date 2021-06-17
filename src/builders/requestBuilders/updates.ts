@@ -27,7 +27,8 @@ class SetObject extends UpdateExpr{
 
     toQuery(): string {
         if (typeof this._value === 'string' || this._value instanceof Date) {
-            this._value =typeof this._value === 'string' ? this._value.replace("'", "''"): this._value
+            this._value = typeof this._value === 'string' ? this._value.replace("'", "''"): this._value
+            if (this._value instanceof Date) this._value = this._value.toISOString();
             return `\"${this._column}\"='${this._value.toString()}'`
         } else {
             return `\"${this._column}\"=${this._value.toString()}`

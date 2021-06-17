@@ -1,7 +1,7 @@
 import { AbstractTable, RowMapper } from "../tables/abstractTable";
 
 export class CitiesTable extends AbstractTable<CitiesModel, DbCity> {
-    name = this.varchar({name: "name", size: 256});
+    name = this.timestamp({name: "name"});
     page = this.varchar({name: "page", size: 256});
     userId = this.int({name: "user_id"})
 
@@ -11,7 +11,7 @@ export class CitiesTable extends AbstractTable<CitiesModel, DbCity> {
 
     toServiceModel(response: RowMapper): CitiesModel {
         return {
-            name: response.getVarchar(this.name),
+            name: response.getTimestamp(this.name),
             page: response.getVarchar(this.page),
             userId: response.getInt(this.userId)
         };
@@ -27,13 +27,13 @@ export class CitiesTable extends AbstractTable<CitiesModel, DbCity> {
 }
 
 interface DbCity {
-    name: string;
+    name: Date;
     page: string;
     user_id: number
 }
 
 export interface CitiesModel {
-    name: string;
+    name: Date;
     page: string;
     userId: number
 }
