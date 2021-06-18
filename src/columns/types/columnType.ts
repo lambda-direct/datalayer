@@ -1,4 +1,5 @@
 export abstract class ColumnType {
-    abstract dbName: string;
+    protected abstract dbName: string;
     abstract getDbName(): string;
+    abstract insertStrategy(value: any): string;
 }

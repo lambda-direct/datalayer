@@ -15,4 +15,8 @@ export class PgBigDecimal extends ColumnType {
     getDbName(): string {
         return this.dbName;
     }
+
+    insertStrategy(value: any): string {
+        return `${value}`;
+    }
 }

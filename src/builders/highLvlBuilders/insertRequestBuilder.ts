@@ -1,4 +1,6 @@
 import { Pool } from "pg";
+import { Column } from "../../columns/column";
+import { ColumnType } from "../../columns/types/columnType";
 import { QueryResponseMapper } from "../../mappers/responseMapper";
 import { AbstractTable } from "../../tables/abstractTable";
 import { Insert } from "../lowLvlBuilders/insert";
@@ -22,6 +24,7 @@ export class InsertTRB<T> extends TableRequestBuilder<T> {
         
         const mappedRows: {[name: string]: any}[] = []
         const mapper = this._table.mapServiceToDb()
+
         for (const valueToInsert of this._values) {
             const mappedValue: {[name: string]: any} = {}
             for (let [key, value] of Object.entries(valueToInsert)){
@@ -30,8 +33,6 @@ export class InsertTRB<T> extends TableRequestBuilder<T> {
             }
             mappedRows.push(mappedValue);
         }
-
-        console.log(mappedRows)
 
         const query = queryBuilder.values(mappedRows).build();
         console.log(query)

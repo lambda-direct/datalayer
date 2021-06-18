@@ -1,3 +1,5 @@
+import { Column } from "../../columns/column";
+import { ColumnType } from "../../columns/types/columnType";
 import { AbstractTable } from "../../tables/abstractTable";
 import { shouldEcranate } from "../../utils/ecranate";
 import { UpdateExpr } from "../requestBuilders/updates";
@@ -40,29 +42,25 @@ export class InsertAggregator<SERVICE> extends Aggregator<SERVICE> {
 
     appendValues<T> (values: Array<T>) {
         //@TODO Check if values not empty
+        const mapper = this._table.mapServiceToDb();
+
         for(let i = 0; i < values.length; i++) {
             const value = values[i];
             const insertValues = Object.values(value);
+            const insertKeys = Object.keys(value);
 
             this._values.push("(");
-            for(let j = 0; j < insertValues.length; j++) {
-                const insertValue = insertValues[j];    
+            for (let j = 0; j < insertValues.length; j++) {
+                let insertValue = insertValues[j];
+                let insertKey = insertKeys[j];
 
-                if (shouldEcranate(insertValue)) {
-                    let ecranatedValue = insertValue;
-                    if (insertValue instanceof String) ecranatedValue = insertValue.replace("'", "''");
-                    else if (insertValue instanceof Date) ecranatedValue = insertValue.toISOString();
-                    else if (insertValue === Object(insertValue)) ecranatedValue = JSON.stringify(insertValue);
-                    // const ecranatedValue = insertValue instanceof String ? insertValue.replace("'", "''") : insertValue;
+                const columnKey = Object.keys(mapper).find(it => mapper[it as keyof SERVICE].columnName === insertKey)!
+                const column = mapper[columnKey as keyof SERVICE];
 
-                    this._values.push("'");
-                    this._values.push(ecranatedValue);
-                    this._values.push("'");
-                    if (insertValue === Object(insertValue) && !(insertValue instanceof Date )){
-                        this._values.push("::jsonb");
-                    }
+                if (insertValue) {
+                    this._values.push(column.columnType.insertStrategy(insertValue))
                 } else {
-                    this._values.push(insertValue);
+                    this._values.push('null')
                 }
 
                 if (j < insertValues.length - 1) {

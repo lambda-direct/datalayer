@@ -12,4 +12,7 @@ export class PgJsonb extends ColumnType {
         return this.dbName;
     }
 
+    insertStrategy(value: any): string {
+        return `'${JSON.stringify(value)}'::jsonb`
+    }
 }

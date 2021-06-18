@@ -24,7 +24,7 @@ export class CitiesTable extends AbstractTable<CitiesModel> {
 
 export interface CitiesModel {
     name: Date;
-    page: string;
+    page: string | undefined;
     userId: number;
     data: string[]
 }

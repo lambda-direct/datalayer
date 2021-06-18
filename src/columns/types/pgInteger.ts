@@ -11,4 +11,8 @@ export class PgInteger extends ColumnType {
     getDbName(): string {
         return this.dbName;
     }
+
+    insertStrategy(value: any): string {
+        return `${value}`;
+    }
 }

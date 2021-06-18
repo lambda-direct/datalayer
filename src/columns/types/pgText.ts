@@ -1,7 +1,7 @@
 import { ColumnType } from "./columnType";
 
 export class PgText extends ColumnType {
-    dbName: string;
+    protected dbName: string;
 
     constructor() {
         super();
@@ -10,5 +10,9 @@ export class PgText extends ColumnType {
 
     getDbName(): string {
         return this.dbName;
+    }
+
+    insertStrategy(value: any): string {
+        return `'${value.replace("'", "''")}'`
     }
 }

@@ -11,4 +11,8 @@ export class PgTimestamp extends ColumnType {
     getDbName(): string {
         return this.dbName;
     }
+
+    insertStrategy(value: any): string {
+        return `'${value.toISOString()}'`
+    }
 }

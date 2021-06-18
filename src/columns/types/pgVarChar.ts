@@ -1,8 +1,8 @@
 import { ColumnType } from "./columnType";
 
 export class PgVarChar extends ColumnType {
-    size: number;
-    dbName: string;
+    protected size: number;
+    protected dbName: string;
 
     constructor(size: number) {
         super();
@@ -12,5 +12,9 @@ export class PgVarChar extends ColumnType {
 
     getDbName(): string {
         return this.dbName;
+    }
+
+    insertStrategy(value: any): string {
+        return `'${value.replace("'", "''")}'`
     }
 }

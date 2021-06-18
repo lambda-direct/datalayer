@@ -1,6 +1,8 @@
 import { AbstractTable } from "../../tables/abstractTable";
 import { UpdateExpr } from "../requestBuilders/updates";
 import { InsertAggregator } from "../aggregators";
+import { Column } from "../../columns/column";
+import { ColumnType } from "../../columns/types/columnType";
 
 export class Insert {
     static into<SERVICE>(table: AbstractTable<SERVICE>) {
