@@ -7,8 +7,9 @@ import { PgBigDecimal } from "./types/pgBigDecimal";
 import { PgTime } from "./types/pgTime";
 import { PgBoolean } from "./types/pgBoolean";
 import { PgText } from "./types/pgText";
+import { PgJsonb } from "./types/pgJsonb";
 
-export class Column<T extends ColumnType> {
+export class Column<T extends ColumnType, SUBTYPE = {}> {
     private parent: AbstractTable<{},{}>;
 
     columnType: T;
@@ -52,6 +53,10 @@ export class Column<T extends ColumnType> {
 
     static text(parent:AbstractTable<{},{}>, name:string): Column<PgText> {
         return new Column<PgText>(parent, name, new PgText());
+    }
+
+    static jsonb<SUBTYPE = {}>(parent:AbstractTable<{},{}>, name:string): Column<PgJsonb> {
+        return new Column<PgJsonb, SUBTYPE>(parent, name, new PgJsonb());
     }
 
     getAlias(): string {

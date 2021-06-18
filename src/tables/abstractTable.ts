@@ -8,6 +8,9 @@ import { PgTime } from "../columns/types/pgTime";
 import { PgBoolean } from "../columns/types/pgBoolean";
 import { PgText } from "../columns/types/pgText";
 import { DeleteTRB, InsertTRB, SelectTRB, UpdateTRB } from "../builders/highLvlBuilders";
+import { PgJsonb } from "../columns/types/pgJsonb";
+import { ColumnType } from "../columns/types/columnType";
+
 
 export abstract class AbstractTable<SERVICE, DB> {
     private _pool: Pool;
@@ -40,6 +43,11 @@ export abstract class AbstractTable<SERVICE, DB> {
         return Column.text(this, name);
     }
 
+    protected jsonb<SUBTYPE>({name}: {name: string}): Column<PgJsonb> {
+        return Column.jsonb<SUBTYPE>(this, name);
+    }
+
+
     withConnection(connection: Pool) {
         this._pool = connection;
     }
@@ -64,6 +72,8 @@ export abstract class AbstractTable<SERVICE, DB> {
     
     abstract toServiceModel(response: RowMapper): SERVICE;
     abstract toDbModel(response: SERVICE): DB;
+    
+    // abstract toTest(): {[name in keyof SERVICE]: Column<ColumnType>};
 }
 
 export class RowMapper {
@@ -83,6 +93,10 @@ export class RowMapper {
 
     getTimestamp(column: Column<PgTimestamp>): Date {
         return this.row[column.getAlias()];
+    }
+
+    getJsonb<TYPE>(column: Column<PgJsonb, TYPE>): TYPE {
+        return this.row[column.getAlias()] as TYPE;
     }
 
     getDecimal(column: Column<PgBigDecimal>): number {

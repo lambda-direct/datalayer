@@ -51,12 +51,16 @@ export class InsertAggregator<SERVICE, MODEL> extends Aggregator<SERVICE, MODEL>
                 if (shouldEcranate(insertValue)) {
                     let ecranatedValue = insertValue;
                     if (insertValue instanceof String) ecranatedValue = insertValue.replace("'", "''");
-                    if (insertValue instanceof Date) ecranatedValue = insertValue.toISOString();
+                    else if (insertValue instanceof Date) ecranatedValue = insertValue.toISOString();
+                    else if (insertValue === Object(insertValue)) ecranatedValue = JSON.stringify(insertValue);
                     // const ecranatedValue = insertValue instanceof String ? insertValue.replace("'", "''") : insertValue;
 
                     this._values.push("'");
                     this._values.push(ecranatedValue);
                     this._values.push("'");
+                    if (insertValue === Object(insertValue) && !(insertValue instanceof Date )){
+                        this._values.push("::jsonb");
+                    }
                 } else {
                     this._values.push(insertValue);
                 }

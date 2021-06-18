@@ -3,5 +3,5 @@ export function ecranate(data: string) {
 }
 
 export function shouldEcranate(value: any): boolean {
-    return typeof value === 'string' || value instanceof Date;
+    return typeof value === 'string' || value instanceof Date || value === Object(value);
 }

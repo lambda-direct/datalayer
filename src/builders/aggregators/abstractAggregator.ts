@@ -1,4 +1,5 @@
 import { Column } from "../../columns/column";
+import { ColumnType } from "../../columns/types/columnType";
 import { AbstractTable } from "../../tables/abstractTable";
 import { ecranate } from "../../utils/ecranate";
 
@@ -12,6 +13,7 @@ export class Aggregator<SERVICE, MODEL> {
 
     protected generateSelectArray(table: AbstractTable<{},{}>) {
         const selectFields = [];
+        
         for (let field of Object.values(table)) {
             if (field instanceof Column){
                 selectFields.push(" ");
