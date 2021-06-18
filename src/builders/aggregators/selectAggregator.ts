@@ -4,30 +4,30 @@ import { Join } from "../joinBuilders/join";
 import { Expr } from "../requestBuilders/where";
 import { Aggregator } from "./abstractAggregator";
 
-export class SelectAggregator<SERVICE, MODEL> extends Aggregator<SERVICE, MODEL> {
+export class SelectAggregator<SERVICE> extends Aggregator<SERVICE> {
     private _from: Array<string> = [];
     private _filters: Array<string> = [];
     private _select: Array<string> = ["SELECT"];
     private _join: Array<string> = [];
 
-    constructor(table: AbstractTable<SERVICE, MODEL>){
+    constructor(table: AbstractTable<SERVICE>){
         super(table);
     }
 
-    filters(filters: Expr): SelectAggregator<SERVICE, MODEL> {
+    filters(filters: Expr): SelectAggregator<SERVICE> {
         this._filters.push("WHERE ");
         this._filters.push(filters.toQuery());
         return this;
     }
 
-    appendFrom(table: AbstractTable<SERVICE, MODEL>): SelectAggregator<SERVICE, MODEL> {
+    appendFrom(table: AbstractTable<SERVICE>): SelectAggregator<SERVICE> {
         this._from.push(" FROM ");
         this._from.push(table.tableName());
         return this
     }
 
     // Add select generator for second table also
-    join<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}, MODEL>>): SelectAggregator<SERVICE, MODEL> {
+    join<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}>>): SelectAggregator<SERVICE> {
         for (const join of joins) {
             const tableFrom = join.fromColumn.getParent();
             const tableTo = join.toColumn.getParent();

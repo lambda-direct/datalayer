@@ -6,13 +6,13 @@ export class Create<SERVICE, DB> {
     private columnsBuilder: Array<string> = [];
     private primaryKey: Array<string> = [];
     private uniqueKey: Array<string> = [];
-    private tableClass: AbstractTable<SERVICE, DB>;
+    private tableClass: AbstractTable<SERVICE>;
 
-    private constructor(tableClass: AbstractTable<SERVICE, DB>) {
+    private constructor(tableClass: AbstractTable<SERVICE>) {
         this.tableClass = tableClass;
     }
 
-    static table<SERVICE, DB>(tableClass: AbstractTable<SERVICE, DB>): Create<SERVICE, DB> {
+    static table<SERVICE, DB>(tableClass: AbstractTable<SERVICE>): Create<SERVICE, DB> {
         return new Create(tableClass);
     }
 

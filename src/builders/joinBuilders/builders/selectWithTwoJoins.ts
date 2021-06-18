@@ -8,17 +8,17 @@ import { Join } from "../join";
 import { SelectResponseTwoJoins } from "../responses/selectResponseTwoJoins";
 import { AbstractJoined } from "./abstractJoinBuilder";
 
-export class SelectTRBWithTwoJoins<COLUMN extends ColumnType, T1, T2, MODEL, DB> extends AbstractJoined<MODEL, DB> {
-    private _join1: Join<COLUMN, T1, DB>;
-    private _join2: Join<COLUMN, T2, DB>;
+export class SelectTRBWithTwoJoins<COLUMN extends ColumnType, T1, T2, MODEL> extends AbstractJoined<MODEL> {
+    private _join1: Join<COLUMN, T1>;
+    private _join2: Join<COLUMN, T2>;
 
-    constructor(table: AbstractTable<MODEL, DB>, pool: Pool, filter: Expr, join1: Join<COLUMN, T1, DB>, join2: Join<COLUMN, T2, DB>) {
+    constructor(table: AbstractTable<MODEL>, pool: Pool, filter: Expr, join1: Join<COLUMN, T1>, join2: Join<COLUMN, T2>) {
         super(filter, table, pool);
         this._join1 = join1;
         this._join2 = join2;
     }
 
-    async execute(): Promise<SelectResponseTwoJoins<MODEL, T1, T2, DB>> {
+    async execute(): Promise<SelectResponseTwoJoins<MODEL, T1, T2>> {
         // List<Join<T, ?>> joinPropsList = Arrays.asList(join1, join2);
 
         const queryBuilder = Select.from(this._table);
@@ -32,8 +32,8 @@ export class SelectTRBWithTwoJoins<COLUMN extends ColumnType, T1, T2, MODEL, DB>
 
         const result = await this._pool!.query(query);
     
-        const parent: AbstractTable<T1,DB>  = this._join1.joinTable;
-        const parentTwo: AbstractTable<T2,DB> = this._join2.joinTable;
+        const parent: AbstractTable<T1>  = this._join1.joinTable;
+        const parentTwo: AbstractTable<T2> = this._join2.joinTable;
 
         const response = QueryResponseMapper.map(this._table, result);
         const objects = QueryResponseMapper.map(parent, result);

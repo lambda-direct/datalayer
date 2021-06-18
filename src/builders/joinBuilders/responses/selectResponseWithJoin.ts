@@ -1,4 +1,4 @@
-export class SelectResponseJoin<MODEL, T2, DB> { 
+export class SelectResponseJoin<MODEL, T2> { 
     private _t1: MODEL[];
     private _t2: T2[];
 

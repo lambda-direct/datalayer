@@ -6,20 +6,20 @@ import { UpdateExpr } from "../requestBuilders/updates";
 import { Expr } from "../requestBuilders/where";
 import { TableRequestBuilder } from "./abstractRequestBuilder";
 
-export class UpdateTRB<T, DB> extends TableRequestBuilder<T, DB> {
+export class UpdateTRB<T> extends TableRequestBuilder<T> {
     private _filter: Expr;
     private _update: UpdateExpr;
 
-    constructor(table: AbstractTable<T, DB>, pool: Pool) {
+    constructor(table: AbstractTable<T>, pool: Pool) {
         super(table, pool);
     }
 
-    where(expr: Expr): UpdateTRB<T, DB> {
+    where(expr: Expr): UpdateTRB<T> {
         this._filter = expr;
         return this;
     }
 
-    set(expr: UpdateExpr): UpdateTRB<T, DB> {
+    set(expr: UpdateExpr): UpdateTRB<T> {
         this._update = expr;
         return this;
     }

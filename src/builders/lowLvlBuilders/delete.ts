@@ -3,7 +3,7 @@ import { Expr } from "../requestBuilders/where";
 import { DeleteAggregator } from "../aggregators";
 
 export class Delete<SERVICE, DB> {
-    static from<SERVICE, DB>(table: AbstractTable<SERVICE, DB>): DeleteFrom<SERVICE, DB> {
+    static from<SERVICE, DB>(table: AbstractTable<SERVICE>): DeleteFrom<SERVICE, DB> {
         const aggregator = new DeleteAggregator(table)
         aggregator.appendFrom(table).appendFields();
         return new DeleteFrom(aggregator);
@@ -11,9 +11,9 @@ export class Delete<SERVICE, DB> {
 }
 
 class DeleteFrom<SERVICE, DB> {
-    private _aggregator: DeleteAggregator<SERVICE, DB>;
+    private _aggregator: DeleteAggregator<SERVICE>;
 
-    constructor(aggregator: DeleteAggregator<SERVICE, DB>){
+    constructor(aggregator: DeleteAggregator<SERVICE>){
         this._aggregator = aggregator;
     }
 
@@ -27,9 +27,9 @@ class DeleteFrom<SERVICE, DB> {
 }
 
 class DeleteFilter<SERVICE, DB> {
-    private _aggregator: DeleteAggregator<SERVICE, DB>;
+    private _aggregator: DeleteAggregator<SERVICE>;
 
-    constructor(aggregator: DeleteAggregator<SERVICE, DB>){
+    constructor(aggregator: DeleteAggregator<SERVICE>){
         this._aggregator = aggregator;
     }
 

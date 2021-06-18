@@ -8,19 +8,19 @@ import { Select } from "../lowLvlBuilders/select";
 import { Expr } from "../requestBuilders/where";
 import { TableRequestBuilder } from "./abstractRequestBuilder";
 
-export class SelectTRB<MODEL, DB> extends TableRequestBuilder<MODEL, DB> {
+export class SelectTRB<MODEL> extends TableRequestBuilder<MODEL> {
     protected _filter: Expr;
 
-    constructor(table: AbstractTable<MODEL, DB>, pool: Pool) {
+    constructor(table: AbstractTable<MODEL>, pool: Pool) {
         super(table, pool);
     }
 
-    where(expr: Expr): SelectTRB<MODEL, DB> {
+    where(expr: Expr): SelectTRB<MODEL> {
         this._filter = expr;
         return this;
     }
 
-    join<COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1, {}>): SelectTRBWithJoin<COLUMN, T1, MODEL, {}>{  
+    join<COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1>): SelectTRBWithJoin<COLUMN, T1, MODEL>{  
         if (join.toColumn.getParent() === this._table) {
             throw Error('We are not supporting self joining in this version');
         }

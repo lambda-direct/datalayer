@@ -12,7 +12,7 @@ import { PgJsonb } from "../columns/types/pgJsonb";
 import { ColumnType } from "../columns/types/columnType";
 
 
-export abstract class AbstractTable<SERVICE, DB> {
+export abstract class AbstractTable<SERVICE> {
     private _pool: Pool;
 
     protected varchar({name, size}: {name: string, size: number}): Column<PgVarChar> {
@@ -52,28 +52,25 @@ export abstract class AbstractTable<SERVICE, DB> {
         this._pool = connection;
     }
 
-    select(): SelectTRB<SERVICE, DB> {
+    select(): SelectTRB<SERVICE> {
         return new SelectTRB(this, this._pool);
     }
 
-    update(): UpdateTRB<SERVICE, DB> {
+    update(): UpdateTRB<SERVICE> {
         return new UpdateTRB(this, this._pool);
     }
 
-    insert(values: SERVICE[]): InsertTRB<SERVICE, DB> {
+    insert(values: SERVICE[]): InsertTRB<SERVICE> {
         return new InsertTRB(values, this, this._pool);
     }
 
-    delete(): DeleteTRB<SERVICE, DB> {
+    delete(): DeleteTRB<SERVICE> {
         return new DeleteTRB(this, this._pool);
     }
 
     abstract tableName(): string;
     
-    abstract toServiceModel(response: RowMapper): SERVICE;
-    abstract toDbModel(response: SERVICE): DB;
-    
-    // abstract toTest(): {[name in keyof SERVICE]: Column<ColumnType>};
+    abstract mapServiceToDb(): {[name in keyof SERVICE]: Column<ColumnType>};
 }
 
 export class RowMapper {

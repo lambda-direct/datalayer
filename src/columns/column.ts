@@ -10,7 +10,7 @@ import { PgText } from "./types/pgText";
 import { PgJsonb } from "./types/pgJsonb";
 
 export class Column<T extends ColumnType, SUBTYPE = {}> {
-    private parent: AbstractTable<{},{}>;
+    private parent: AbstractTable<{}>;
 
     columnType: T;
     columnName: string;
@@ -21,41 +21,41 @@ export class Column<T extends ColumnType, SUBTYPE = {}> {
     defaultParam: any = null;
     referenced: Column<T>;
 
-    private constructor(parent: AbstractTable<{},{}>, columnName: string, columnType: T){
+    private constructor(parent: AbstractTable<{}>, columnName: string, columnType: T){
         this.columnType = columnType;
         this.columnName = columnName;
         this.parent = parent;
     }
 
-    static varchar(parent:AbstractTable<{},{}>, name:string, size: number): Column<PgVarChar> {
+    static varchar(parent:AbstractTable<{}>, name:string, size: number): Column<PgVarChar> {
         return new Column<PgVarChar>(parent, name, new PgVarChar(size));
     }
 
-    static timestamp(parent:AbstractTable<{},{}>, name:string): Column<PgTimestamp> {
+    static timestamp(parent:AbstractTable<{}>, name:string): Column<PgTimestamp> {
         return new Column<PgTimestamp>(parent, name, new PgTimestamp());
     }
 
-    static int(parent:AbstractTable<{},{}>, name:string): Column<PgInteger> {
+    static int(parent:AbstractTable<{}>, name:string): Column<PgInteger> {
         return new Column<PgInteger>(parent, name, new PgInteger());
     }
 
-    static decimal(parent:AbstractTable<{},{}>, name:string, precision: number, scale: number): Column<PgBigDecimal> {
+    static decimal(parent:AbstractTable<{}>, name:string, precision: number, scale: number): Column<PgBigDecimal> {
         return new Column<PgBigDecimal>(parent, name, new PgBigDecimal(precision, scale));
     }
 
-    static time(parent:AbstractTable<{},{}>, name:string): Column<PgTime> {
+    static time(parent:AbstractTable<{}>, name:string): Column<PgTime> {
         return new Column<PgTime>(parent, name, new PgTime());
     }
 
-    static bool(parent:AbstractTable<{},{}>, name:string): Column<PgBoolean> {
+    static bool(parent:AbstractTable<{}>, name:string): Column<PgBoolean> {
         return new Column<PgBoolean>(parent, name, new PgBoolean());
     }
 
-    static text(parent:AbstractTable<{},{}>, name:string): Column<PgText> {
+    static text(parent:AbstractTable<{}>, name:string): Column<PgText> {
         return new Column<PgText>(parent, name, new PgText());
     }
 
-    static jsonb<SUBTYPE = {}>(parent:AbstractTable<{},{}>, name:string): Column<PgJsonb> {
+    static jsonb<SUBTYPE = {}>(parent:AbstractTable<{}>, name:string): Column<PgJsonb> {
         return new Column<PgJsonb, SUBTYPE>(parent, name, new PgJsonb());
     }
 
@@ -63,7 +63,7 @@ export class Column<T extends ColumnType, SUBTYPE = {}> {
         return this.parent.tableName().replace(".", "_") + "_" + this.columnName;
     }
 
-    getParent(): AbstractTable<{},{}> {
+    getParent(): AbstractTable<{}> {
         return this.parent;
     }
 

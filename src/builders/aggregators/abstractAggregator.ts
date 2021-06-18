@@ -3,15 +3,15 @@ import { ColumnType } from "../../columns/types/columnType";
 import { AbstractTable } from "../../tables/abstractTable";
 import { ecranate } from "../../utils/ecranate";
 
-export class Aggregator<SERVICE, MODEL> {
+export class Aggregator<SERVICE> {
     protected _fields: Array<string> = [];
-    protected _table: AbstractTable<SERVICE, MODEL>;
+    protected _table: AbstractTable<SERVICE>;
 
-    constructor(table: AbstractTable<SERVICE, MODEL>){
+    constructor(table: AbstractTable<SERVICE>){
         this._table = table;
     }
 
-    protected generateSelectArray(table: AbstractTable<{},{}>) {
+    protected generateSelectArray(table: AbstractTable<{}>) {
         const selectFields = [];
         
         for (let field of Object.values(table)) {

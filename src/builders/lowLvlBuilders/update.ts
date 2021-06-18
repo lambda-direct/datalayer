@@ -5,7 +5,7 @@ import { UpdateAggregator } from '../aggregators';
 
 
 export class Update {
-    static in<SERVICE, DB>(table: AbstractTable<SERVICE, DB>){
+    static in<SERVICE>(table: AbstractTable<SERVICE>){
         const aggregator = new UpdateAggregator(table)
         aggregator.appendFrom(table).appendFields();
         return new UpdateIn(aggregator);
@@ -13,9 +13,9 @@ export class Update {
 }
 
 class UpdateIn<SERVICE, DB> {
-    private _aggregator: UpdateAggregator<SERVICE, DB>;
+    private _aggregator: UpdateAggregator<SERVICE>;
 
-    constructor(aggregator: UpdateAggregator<SERVICE, DB>){
+    constructor(aggregator: UpdateAggregator<SERVICE>){
         this._aggregator = aggregator;
     }
 
@@ -29,9 +29,9 @@ class UpdateIn<SERVICE, DB> {
 }
 
 class WhereSet<SERVICE, DB> {
-    private _aggregator: UpdateAggregator<SERVICE, DB>;
+    private _aggregator: UpdateAggregator<SERVICE>;
 
-    constructor(aggregator: UpdateAggregator<SERVICE, DB>){
+    constructor(aggregator: UpdateAggregator<SERVICE>){
         this._aggregator = aggregator;
     }
 
@@ -50,9 +50,9 @@ class WhereSet<SERVICE, DB> {
 }
 
 class WhereSelect<SERVICE, DB> {
-    private _aggregator: UpdateAggregator<SERVICE, DB>;
+    private _aggregator: UpdateAggregator<SERVICE>;
 
-    constructor(aggregator: UpdateAggregator<SERVICE, DB>){
+    constructor(aggregator: UpdateAggregator<SERVICE>){
         this._aggregator = aggregator;
     }
 

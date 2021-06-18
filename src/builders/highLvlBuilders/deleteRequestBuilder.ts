@@ -3,10 +3,10 @@ import { Delete } from "../lowLvlBuilders/delete";
 import { Expr } from "../requestBuilders/where";
 import { TableRequestBuilder } from "./abstractRequestBuilder";
 
-export class DeleteTRB<T, DB> extends TableRequestBuilder<T, DB> {
+export class DeleteTRB<T> extends TableRequestBuilder<T> {
     private _filter: Expr;
 
-    where(expr: Expr): DeleteTRB<T, DB> {
+    where(expr: Expr): DeleteTRB<T> {
         this._filter = expr;
         return this;
     }

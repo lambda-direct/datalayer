@@ -6,7 +6,7 @@ import { SelectAggregator } from "../aggregators/";
 
 export class Select {
     // TODO Add from with tableName as param
-    static from<SERVICE, DB>(table: AbstractTable<SERVICE, DB>) {
+    static from<SERVICE, DB>(table: AbstractTable<SERVICE>) {
         const aggregator = new SelectAggregator(table)
         aggregator.appendFrom(table).appendFields();
         return new SelectFrom(aggregator);
@@ -14,13 +14,13 @@ export class Select {
 }
 
 class SelectFrom<SERVICE, DB> {
-    private _aggregator: SelectAggregator<SERVICE, DB>;
+    private _aggregator: SelectAggregator<SERVICE>;
 
-    constructor(aggregator: SelectAggregator<SERVICE, DB>){
+    constructor(aggregator: SelectAggregator<SERVICE>){
         this._aggregator = aggregator;
     }
 
-    joined<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}, DB>>) {
+    joined<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}>>) {
         return new SelectJoined(this._aggregator).apply(joins);
     }
 
@@ -34,13 +34,13 @@ class SelectFrom<SERVICE, DB> {
 }
 
 class SelectJoined<SERVICE, DB> {
-    private _aggregator: SelectAggregator<SERVICE, DB>;
+    private _aggregator: SelectAggregator<SERVICE>;
 
-    constructor(aggregator: SelectAggregator<SERVICE, DB>){
+    constructor(aggregator: SelectAggregator<SERVICE>){
         this._aggregator = aggregator;
     }
 
-    apply<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}, DB>>): SelectJoined<SERVICE, DB> {
+    apply<COLUMN extends ColumnType>(joins: Array<Join<COLUMN, {}>>): SelectJoined<SERVICE, DB> {
         this._aggregator.join(joins);
         return this;
     }
@@ -55,9 +55,9 @@ class SelectJoined<SERVICE, DB> {
 }
 
 class WhereSelect<SERVICE, DB> {
-    private _aggregator: SelectAggregator<SERVICE, DB>;
+    private _aggregator: SelectAggregator<SERVICE>;
 
-    constructor(aggregator: SelectAggregator<SERVICE, DB>){
+    constructor(aggregator: SelectAggregator<SERVICE>){
         this._aggregator = aggregator;
     }
 
