@@ -2,10 +2,9 @@ import { Column } from "../../columns/column";
 import { ColumnType } from "../../columns/types/columnType";
 import { ecranate, shouldEcranate } from "../../utils/ecranate";
 
-export class Where {
-    static eq<T extends ColumnType>(left: Column<T>, value: any): Expr{
+
+export function eq<T extends ColumnType>(left: Column<T>, value: any): Expr{
         return new EqWhere(new Var<T>(left), new Const(value));
-    }
 }
 
 export abstract class Expr {

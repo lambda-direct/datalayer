@@ -9,4 +9,3 @@ export { InsertAggregator } from './builders/aggregators'
 export { DeleteAggregator } from './builders/aggregators'
 export { UpdateAggregator } from './builders/aggregators'
 export { Select } from './builders/lowLvlBuilders'
-export { Where } from './builders/requestBuilders/where';

@@ -4,7 +4,7 @@ import { AbstractTable, RowMapper } from "../tables/abstractTable";
 
 export class CitiesTable extends AbstractTable<CitiesModel> {
     readonly name = this.timestamp({name: "name"});
-    readonly page = this.varchar({name: "page", size: 256});
+    readonly page = this.varchar({name: "page", size: 256}).isNullable();
     readonly userId = this.int({name: "user_id"})
     readonly data = this.jsonb<string[]>({name:'data'})
 
@@ -24,7 +24,7 @@ export class CitiesTable extends AbstractTable<CitiesModel> {
 
 export interface CitiesModel {
     name: Date;
-    page: string | undefined;
+    page: string | null;
     userId: number;
     data: string[]
 }
