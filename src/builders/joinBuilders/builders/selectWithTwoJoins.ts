@@ -9,13 +9,13 @@ import SelectResponseTwoJoins from '../responses/selectResponseTwoJoins';
 import AbstractJoined from './abstractJoinBuilder';
 
 export default class SelectTRBWithTwoJoins<COLUMN extends
-ColumnType, T1, T2, MODEL> extends AbstractJoined<MODEL> {
+ColumnType, T1, T2, MODEL> extends AbstractJoined {
   private _join1: Join<COLUMN, T1>;
   private _join2: Join<COLUMN, T2>;
 
-  public constructor(table: AbstractTable<MODEL>, pool: Pool,
+  public constructor(tableName: string, pool: Pool,
     filter: Expr, join1: Join<COLUMN, T1>, join2: Join<COLUMN, T2>) {
-    super(filter, table, pool);
+    super(filter, tableName, pool);
     this._join1 = join1;
     this._join2 = join2;
   }
@@ -23,7 +23,7 @@ ColumnType, T1, T2, MODEL> extends AbstractJoined<MODEL> {
   public execute = async (): Promise<SelectResponseTwoJoins<MODEL, T1, T2>> => {
     // List<Join<T, ?>> joinPropsList = Arrays.asList(join1, join2);
 
-    const queryBuilder = Select.from(this._table);
+    const queryBuilder = Select.from(this._tableName);
     if (this._filter) {
       queryBuilder.filteredBy(this._filter);
     }
@@ -34,10 +34,10 @@ ColumnType, T1, T2, MODEL> extends AbstractJoined<MODEL> {
 
     const result = await this._pool!.query(query);
 
-    const parent: AbstractTable<T1> = this._join1.joinTable;
+    const parent: AbstractTable<T1> = this._join1.columns;
     const parentTwo: AbstractTable<T2> = this._join2.joinTable;
 
-    const response = QueryResponseMapper.map(this._table, result);
+    const response = QueryResponseMapper.map(this._tableName, result);
     const objects = QueryResponseMapper.map(parent, result);
     const objectsTwo = QueryResponseMapper.map(parentTwo, result);
 

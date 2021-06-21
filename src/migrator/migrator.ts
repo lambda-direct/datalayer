@@ -1,6 +1,6 @@
+import Create from '../builders/lowLvlBuilders/create';
 import { Db } from '../db';
-import { Create } from '../builders/lowLvlBuilders';
-import { MigrationsModel, MigrationsTable } from '../tables/migrationsTable';
+import MigrationsTable, { MigrationsModel } from '../tables/migrationsTable';
 import SessionWrapper from './sessionWrapper';
 
 export default class Migrator {
@@ -35,25 +35,26 @@ export default class Migrator {
       const queriesToExecuteTest:
       Map<number, () => Promise<boolean>> = new Map<number, () => Promise<boolean>>();
 
-      for (const [key, value] of this.migrationsPerVersion) {
+      this.migrationsPerVersion.forEach((key: any, value: any) => {
         if (key > latestMigration.version) {
           queriesToExecuteTest.set(key, value);
         }
-      }
+      });
+
       queriesToExecute = queriesToExecuteTest;
     }
 
-    for (const [key, value] of queriesToExecute) {
+    queriesToExecute.forEach(async (key: any, value: any) => {
       await value();
       migrationsTable.insert([{ version: key, createdAt: new Date() }]).returningAll();
-    }
+    });
   };
 
-  getLastOrNull(list: Array<MigrationsModel>): MigrationsModel | null {
+  public getLastOrNull = (list: Array<MigrationsModel>): MigrationsModel | null => {
     let latestMigration: MigrationsModel | null = null;
-    if (list.length != 0) {
+    if (list.length !== 0) {
       latestMigration = list[list.length - 1];
     }
     return latestMigration;
-  }
+  };
 }

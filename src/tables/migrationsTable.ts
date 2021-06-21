@@ -9,13 +9,11 @@ export default class MigrationsTable extends AbstractTable<MigrationsModel> {
 
   public tableName = (): string => 'migrations';
 
-  public mapServiceToDb = (): {[name in keyof MigrationsModel]: Column<ColumnType>} => {
-    return ({
-      id: this.id,
-      version: this.version,
-      createdAt: this.created_at,
-    });
-  };
+  public mapServiceToDb = (): {[name in keyof MigrationsModel]: Column<ColumnType>} => ({
+    id: this.id,
+    version: this.version,
+    createdAt: this.created_at,
+  });
 }
 
 export interface MigrationsModel {

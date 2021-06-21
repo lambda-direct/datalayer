@@ -10,21 +10,21 @@ import AbstractJoined from './abstractJoinBuilder';
 import SelectTRBWithTwoJoins from './selectWithTwoJoins';
 
 export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
-  extends AbstractJoined<MODEL> {
+  extends AbstractJoined {
   private _join: Join<COLUMN, T1>;
 
-  public constructor(table: AbstractTable<MODEL>, pool: Pool,
+  public constructor(tableName: string, pool: Pool,
     filter: Expr, join: Join<COLUMN, T1>) {
-    super(filter, table, pool);
+    super(filter, tableName, pool);
     this._join = join;
   }
 
   public join = <T2>(join: Join<COLUMN, T2>):
-  SelectTRBWithTwoJoins<COLUMN, T1, T2, MODEL> => new SelectTRBWithTwoJoins(this._table,
+  SelectTRBWithTwoJoins<COLUMN, T1, T2, MODEL> => new SelectTRBWithTwoJoins(this._tableName,
     this._pool, this._filter, this._join, join);
 
   public execute = async (): Promise<SelectResponseJoin<MODEL, T1>> => {
-    const queryBuilder = Select.from(this._table);
+    const queryBuilder = Select.from(this._tableName);
     if (this._filter) {
       queryBuilder.filteredBy(this._filter);
     }

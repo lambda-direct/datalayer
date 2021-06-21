@@ -4,9 +4,9 @@ import Expr from '../../requestBuilders/where/where';
 import WhereSelect from './whereSelect';
 
 export default class WhereSet<SERVICE, DB> {
-  private _aggregator: UpdateAggregator<SERVICE>;
+  private _aggregator: UpdateAggregator;
 
-  public constructor(aggregator: UpdateAggregator<SERVICE>) {
+  public constructor(aggregator: UpdateAggregator) {
     this._aggregator = aggregator;
   }
 

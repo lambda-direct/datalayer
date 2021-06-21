@@ -1,10 +1,6 @@
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
-// Was commented as long as table was injected in constructor
-// eslint-disable-next-line import/no-cycle
 import AbstractTable from '../../tables/abstractTable';
-// Was commented as long as table was injected in constructor
-// eslint-disable-next-line import/no-cycle
 import JoinWith from './joinWith';
 
 export default class Join<T extends ColumnType, K> {

@@ -1,22 +1,21 @@
-import AbstractTable from '../../tables/abstractTable';
 import { shouldEcranate } from '../../utils/ecranate';
 import Aggregator from './abstractAggregator';
 
-export default class InsertAggregator<SERVICE, MODEL> extends Aggregator<SERVICE> {
+export default class InsertAggregator<SERVICE, MODEL> extends Aggregator {
   private _onConflict: Array<string> = [];
   private _columns: Array<string> = [];
   private _values: Array<string> = [];
   private _from: Array<string> = [];
   private _insert: Array<string> = ['INSERT INTO'];
 
-  public constructor(table: AbstractTable<SERVICE>) {
-    super(table);
+  public constructor(tableName: string) {
+    super(tableName);
   }
 
-  public appendFrom = (table: AbstractTable<SERVICE>): InsertAggregator<SERVICE, MODEL> => {
+  public appendFrom = (tableName: string): InsertAggregator<SERVICE, MODEL> => {
     this._from.push(' ');
-    this._from.push(table.tableName());
-    this._table = table;
+    this._from.push(tableName);
+    this._tableName = tableName;
     return this;
   };
 

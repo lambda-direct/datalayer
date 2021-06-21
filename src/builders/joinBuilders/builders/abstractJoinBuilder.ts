@@ -1,14 +1,13 @@
 import { Pool } from 'pg';
-import AbstractTable from '../../../tables/abstractTable';
 import Expr from '../../requestBuilders/where/where';
 
-export default abstract class AbstractJoined<MODEL> {
-  protected _table: AbstractTable<MODEL>;
+export default abstract class AbstractJoined {
+  protected _tableName: string;
   protected _pool: Pool;
   protected _filter: Expr;
 
-  public constructor(filter: Expr, table: AbstractTable<MODEL>, pool: Pool) {
-    this._table = table;
+  public constructor(filter: Expr, tableName: string, pool: Pool) {
+    this._tableName = tableName;
     this._pool = pool;
     this._filter = filter;
   }

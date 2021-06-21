@@ -1,25 +1,24 @@
-import AbstractTable from '../../tables/abstractTable';
 import Expr from '../requestBuilders/where/where';
 import Aggregator from './abstractAggregator';
 
-export default class DeleteAggregator<SERVICE> extends Aggregator<SERVICE> {
+export default class DeleteAggregator extends Aggregator {
   private _from: Array<string> = [];
   private _filters: Array<string> = [];
   private _delete: Array<string> = ['DELETE'];
 
-  public constructor(table: AbstractTable<SERVICE>) {
-    super(table);
+  public constructor(tableName: string) {
+    super(tableName);
   }
 
-  public filters = (filters: Expr): DeleteAggregator<SERVICE> => {
+  public filters = (filters: Expr): DeleteAggregator => {
     this._filters.push('WHERE ');
     this._filters.push(filters.toQuery());
     return this;
   };
 
-  public appendFrom = (table: AbstractTable<SERVICE>): DeleteAggregator<SERVICE> => {
+  public appendFrom = (tableName: string): DeleteAggregator => {
     this._from.push(' FROM ');
-    this._from.push(table.tableName());
+    this._from.push(tableName);
     return this;
   };
 

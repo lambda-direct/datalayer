@@ -10,21 +10,16 @@ import PgJsonb from '../columns/types/pgJsonb';
 import ColumnType from '../columns/types/columnType';
 import Column from '../columns/column';
 
-// Was commented as long as table was injected in constructor
-// eslint-disable-next-line import/no-cycle
-import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
-// Was commented as long as table was injected in constructor
-// eslint-disable-next-line import/no-cycle
 import InsertTRB from '../builders/highLvlBuilders/insertRequestBuilder';
-// Was commented as long as table was injected in constructor
-// eslint-disable-next-line import/no-cycle
 import DeleteTRB from '../builders/highLvlBuilders/deleteRequestBuilder';
 import UpdateTRB from '../builders/highLvlBuilders/updateRequestBuilder';
+import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
 
 export default abstract class AbstractTable<SERVICE> {
   private _pool: Pool;
 
-  public select = (): SelectTRB<SERVICE> => new SelectTRB(this, this._pool);
+  public select = (): SelectTRB<SERVICE> => new SelectTRB(this.tableName(),
+    this._pool, this.mapServiceToDb(), this.getColumns());
 
   public varchar = ({ name, size }: {name: string, size: number}):
   Column<PgVarChar> => new Column<PgVarChar, {}>(this.tableName(), name, new PgVarChar(size));

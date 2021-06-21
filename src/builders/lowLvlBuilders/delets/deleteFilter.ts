@@ -2,9 +2,9 @@ import DeleteAggregator from '../../aggregators/deleteAggregator';
 import Expr from '../../requestBuilders/where/where';
 
 export default class DeleteFilter<SERVICE, DB> {
-  private _aggregator: DeleteAggregator<SERVICE>;
+  private _aggregator: DeleteAggregator;
 
-  public constructor(aggregator: DeleteAggregator<SERVICE>) {
+  public constructor(aggregator: DeleteAggregator) {
     this._aggregator = aggregator;
   }
 
