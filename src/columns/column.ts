@@ -27,29 +27,29 @@ export default class Column<T extends ColumnType> {
     this.parent = parent;
   }
 
-  public static varchar = (parent: AbstractTable<{}>, name:string, size: number):
+  public static varchar = (parent: AbstractTable<any>, name:string, size: number):
   Column<PgVarChar> => new Column<PgVarChar>(parent, name, new PgVarChar(size));
 
-  public static timestamp = (parent:AbstractTable<{}>, name:string):
+  public static timestamp = (parent:AbstractTable<any>, name:string):
   Column<PgTimestamp> => new Column<PgTimestamp>(parent, name, new PgTimestamp());
 
-  public static int = (parent:AbstractTable<{}>, name:string):
+  public static int = (parent:AbstractTable<any>, name:string):
   Column<PgInteger> => new Column<PgInteger>(parent, name, new PgInteger());
 
-  public static decimal = (parent:AbstractTable<{}>, name:string, precision: number,
+  public static decimal = (parent:AbstractTable<any>, name:string, precision: number,
     scale: number): Column<PgBigDecimal> => new Column<PgBigDecimal>(parent,
     name, new PgBigDecimal(precision, scale));
 
-  public static time = (parent:AbstractTable<{}>, name:string):
+  public static time = (parent:AbstractTable<any>, name:string):
   Column<PgTime> => new Column<PgTime>(parent, name, new PgTime());
 
-  public static bool = (parent:AbstractTable<{}>, name:string):
+  public static bool = (parent:AbstractTable<any>, name:string):
   Column<PgBoolean> => new Column<PgBoolean>(parent, name, new PgBoolean());
 
-  public static text = (parent:AbstractTable<{}>, name:string):
+  public static text = (parent:AbstractTable<any>, name:string):
   Column<PgText> => new Column<PgText>(parent, name, new PgText());
 
-  public static jsonb = (parent:AbstractTable<{}>, name:string):
+  public static jsonb = (parent:AbstractTable<any>, name:string):
   Column<PgJsonb> => new Column<PgJsonb>(parent, name, new PgJsonb());
 
   public getAlias = (): string => `${this.parent.tableName().replace('.', '_')}_${this.columnName}`;

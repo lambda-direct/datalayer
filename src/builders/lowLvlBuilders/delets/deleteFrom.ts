@@ -1,5 +1,5 @@
 import DeleteAggregator from '../../aggregators/deleteAggregator';
-import { Expr } from '../../requestBuilders/where/where';
+import Expr from '../../requestBuilders/where/where';
 import DeleteFilter from './deleteFilter';
 
 export default class DeleteFrom<SERVICE> {

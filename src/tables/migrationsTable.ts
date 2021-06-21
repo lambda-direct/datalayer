@@ -1,4 +1,5 @@
-import { Column, ColumnType } from '..';
+import Column from '../columns/column';
+import ColumnType from '../columns/types/columnType';
 import AbstractTable from './abstractTable';
 
 export default class MigrationsTable extends AbstractTable<MigrationsModel> {
@@ -8,15 +9,17 @@ export default class MigrationsTable extends AbstractTable<MigrationsModel> {
 
   public tableName = (): string => 'migrations';
 
-  public mapServiceToDb = (): {[name in keyof MigrationsModel]: Column<ColumnType>} => ({
-    id: this.id,
-    version: this.version,
-    createdAt: this.created_at,
-  });
+  public mapServiceToDb = (): {[name in keyof MigrationsModel]: Column<ColumnType>} => {
+    return ({
+      id: this.id,
+      version: this.version,
+      createdAt: this.created_at,
+    });
+  };
 }
 
 export interface MigrationsModel {
-  id?: number;
+  id?: number,
   version: number;
   createdAt: Date;
 }

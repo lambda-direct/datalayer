@@ -1,7 +1,7 @@
 import ColumnType from '../../../columns/types/columnType';
 import SelectAggregator from '../../aggregators/selectAggregator';
 import Join from '../../joinBuilders/join';
-import { Expr } from '../../requestBuilders/where/where';
+import Expr from '../../requestBuilders/where/where';
 import WhereSelect from './whereSelect';
 
 export default class SelectJoined<SERVICE, DB> {

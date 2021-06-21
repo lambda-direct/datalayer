@@ -3,7 +3,7 @@ import ColumnType from '../../../columns/types/columnType';
 import QueryResponseMapper from '../../../mappers/responseMapper';
 import AbstractTable from '../../../tables/abstractTable';
 import Select from '../../lowLvlBuilders/selects/select';
-import { Expr } from '../../requestBuilders/where/where';
+import Expr from '../../requestBuilders/where/where';
 import Join from '../join';
 import SelectResponseTwoJoins from '../responses/selectResponseTwoJoins';
 import AbstractJoined from './abstractJoinBuilder';

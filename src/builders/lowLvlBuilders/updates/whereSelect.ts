@@ -1,5 +1,5 @@
 import UpdateAggregator from '../../aggregators/updateAggregator';
-import { Expr } from '../../requestBuilders/where/where';
+import Expr from '../../requestBuilders/where/where';
 
 export default class WhereSelect<SERVICE, DB> {
   private _aggregator: UpdateAggregator<SERVICE>;

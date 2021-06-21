@@ -1,5 +1,5 @@
 import SelectAggregator from '../../aggregators/selectAggregator';
-import { Expr } from '../../requestBuilders/where/where';
+import Expr from '../../requestBuilders/where/where';
 
 export default class WhereSelect<SERVICE, DB> {
   private _aggregator: SelectAggregator<SERVICE>;

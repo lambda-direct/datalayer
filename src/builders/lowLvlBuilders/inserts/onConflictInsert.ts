@@ -1,5 +1,5 @@
 import InsertAggregator from '../../aggregators/insertAggregator';
-import { UpdateExpr } from '../../requestBuilders/updates/updates';
+import UpdateExpr from '../../requestBuilders/updates/updates';
 
 export default class OnConflictInsert<SERVICE, MODEL> {
   private _aggregator: InsertAggregator<SERVICE, MODEL>;
@@ -9,7 +9,7 @@ export default class OnConflictInsert<SERVICE, MODEL> {
   }
 
   public apply = (updates: UpdateExpr): OnConflictInsert<SERVICE, MODEL> => {
-    this._aggregator.appendOnConflict(updates);
+    // this._aggregator.appendOnConflict(updates);
     return this;
   };
 

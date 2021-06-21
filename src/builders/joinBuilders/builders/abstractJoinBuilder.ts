@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import AbstractTable from '../../../tables/abstractTable';
-import { Expr } from '../../requestBuilders/where/where';
+import Expr from '../../requestBuilders/where/where';
 
 export default abstract class AbstractJoined<MODEL> {
   protected _table: AbstractTable<MODEL>;

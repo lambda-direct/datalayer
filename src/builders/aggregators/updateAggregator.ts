@@ -1,6 +1,6 @@
 import AbstractTable from '../../tables/abstractTable';
 import UpdateExpr from '../requestBuilders/updates/updates';
-import { Expr } from '../requestBuilders/where/where';
+import  Expr from '../requestBuilders/where/where';
 import Aggregator from './abstractAggregator';
 
 export default class UpdateAggregator<SERVICE> extends Aggregator<SERVICE> {

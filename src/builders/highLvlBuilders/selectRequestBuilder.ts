@@ -5,7 +5,7 @@ import AbstractTable from '../../tables/abstractTable';
 import { SelectTRBWithJoin } from '../joinBuilders';
 import Join from '../joinBuilders/join';
 import Select from '../lowLvlBuilders/selects/select';
-import { Expr } from '../requestBuilders/where/where';
+import Expr from '../requestBuilders/where/where';
 import TableRequestBuilder from './abstractRequestBuilder';
 
 export default class SelectTRB<MODEL> extends TableRequestBuilder<MODEL> {

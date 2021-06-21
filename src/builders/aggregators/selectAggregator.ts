@@ -1,7 +1,7 @@
 import ColumnType from '../../columns/types/columnType';
 import AbstractTable from '../../tables/abstractTable';
 import Join from '../joinBuilders/join';
-import { Expr } from '../requestBuilders/where/where';
+import Expr from '../requestBuilders/where/where';
 import Aggregator from './abstractAggregator';
 
 export default class SelectAggregator<SERVICE> extends Aggregator<SERVICE> {

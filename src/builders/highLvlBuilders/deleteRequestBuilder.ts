@@ -1,6 +1,6 @@
 import QueryResponseMapper from '../../mappers/responseMapper';
 import Delete from '../lowLvlBuilders/delets/delete';
-import { Expr } from '../requestBuilders/where/where';
+import Expr from '../requestBuilders/where/where';
 import TableRequestBuilder from './abstractRequestBuilder';
 
 export default class DeleteTRB<T> extends TableRequestBuilder<T> {

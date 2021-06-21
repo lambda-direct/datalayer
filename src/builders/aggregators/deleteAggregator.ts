@@ -1,5 +1,5 @@
 import AbstractTable from '../../tables/abstractTable';
-import { Expr } from '../requestBuilders/where/where';
+import Expr from '../requestBuilders/where/where';
 import Aggregator from './abstractAggregator';
 
 export default class DeleteAggregator<SERVICE> extends Aggregator<SERVICE> {
