@@ -1,5 +1,6 @@
 import Column from '../../columns/column';
 import AbstractTable from '../../tables/abstractTable';
+import { ecranate } from '../../utils/ecranate';
 
 export default class Create<SERVICE> {
   private tableBuilder: Array<string> = [];
@@ -27,7 +28,7 @@ export default class Create<SERVICE> {
       const column = columns[i];
 
       if (column instanceof Column) {
-        this.columnsBuilder.push(column.getColumnName());
+        this.columnsBuilder.push(ecranate(column.getColumnName()));
         this.columnsBuilder.push(' ');
         this.columnsBuilder.push(column.isAutoIncrement() ? 'SERIAL' : column.getColumnType().getDbName());
         this.columnsBuilder.push(' ');
