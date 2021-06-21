@@ -9,10 +9,17 @@ import PgText from '../columns/types/pgText';
 import PgJsonb from '../columns/types/pgJsonb';
 import ColumnType from '../columns/types/columnType';
 import Column from '../columns/column';
+
+// Was commented as long as table was injected in constructor
+// eslint-disable-next-line import/no-cycle
 import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
-import UpdateTRB from '../builders/highLvlBuilders/updateRequestBuilder';
+// Was commented as long as table was injected in constructor
+// eslint-disable-next-line import/no-cycle
 import InsertTRB from '../builders/highLvlBuilders/insertRequestBuilder';
+// Was commented as long as table was injected in constructor
+// eslint-disable-next-line import/no-cycle
 import DeleteTRB from '../builders/highLvlBuilders/deleteRequestBuilder';
+import UpdateTRB from '../builders/highLvlBuilders/updateRequestBuilder';
 
 export default abstract class AbstractTable<SERVICE> {
   private _pool: Pool;
@@ -20,31 +27,39 @@ export default abstract class AbstractTable<SERVICE> {
   public select = (): SelectTRB<SERVICE> => new SelectTRB(this, this._pool);
 
   public varchar = ({ name, size }: {name: string, size: number}):
-  Column<PgVarChar> => Column.varchar(this, name, size);
+  Column<PgVarChar> => new Column<PgVarChar, {}>(this.tableName(), name, new PgVarChar(size));
 
   public timestamp = ({ name }: {name: string}):
-  Column<PgTimestamp> => Column.timestamp(this, name);
+  Column<PgTimestamp> => new Column<PgTimestamp, {}>(this.tableName(), name, new PgTimestamp());
 
-  public int = ({ name }: {name: string}): Column<PgInteger> => Column.int(this, name);
+  public int = ({ name }: {name: string}):
+  Column<PgInteger> => new Column<PgInteger, {}>(this.tableName(), name, new PgInteger());
 
   public decimal = ({ name, precision, scale }:
   {name: string, precision: number, scale: number}):
-  Column<PgBigDecimal> => Column.decimal(this, name, precision, scale);
+  Column<PgBigDecimal> => new Column<PgBigDecimal, {}>(this.tableName(),
+    name, new PgBigDecimal(precision, scale));
 
-  public time = ({ name }: {name: string}): Column<PgTime> => Column.time(this, name);
+  public time = ({ name }: {name: string})
+  : Column<PgTime> => new Column<PgTime, {}>(this.tableName(), name, new PgTime());
 
-  public bool = ({ name }: {name: string}): Column<PgBoolean> => Column.bool(this, name);
+  public bool = ({ name }: {name: string}):
+  Column<PgBoolean> => new Column<PgBoolean, {}>(this.tableName(), name, new PgBoolean());
 
-  public text = ({ name }: {name: string}): Column<PgText> => Column.text(this, name);
+  public text = ({ name }: {name: string}):
+  Column<PgText> => new Column<PgText, {}>(this.tableName(), name, new PgText());
 
   public jsonb = <SUBTYPE>({ name }: {name: string}):
-  Column<PgJsonb> => Column.jsonb(this, name);
+  Column<PgJsonb> => new Column<PgJsonb, SUBTYPE>(this.tableName(), name, new PgJsonb());
 
   public withConnection = (connection: Pool) => {
     this._pool = connection;
   };
 
-  public update = (): UpdateTRB<SERVICE> => new UpdateTRB(this, this._pool);
+  public update = (): UpdateTRB<SERVICE> => {
+    const mappedServiceToDb = this.mapServiceToDb();
+    return new UpdateTRB(this.tableName(), this._pool, mappedServiceToDb, this.getColumns());
+  };
 
   public insert = (values: SERVICE[]):
   InsertTRB<SERVICE> => new InsertTRB(values, this, this._pool);
@@ -54,4 +69,14 @@ export default abstract class AbstractTable<SERVICE> {
   public abstract tableName(): string;
 
   public abstract mapServiceToDb(): {[name in keyof SERVICE]: Column<ColumnType>};
+
+  private getColumns = (): Column<ColumnType, {}>[] => {
+    const columns: Column<ColumnType, {}>[] = [];
+    Object.values(this).forEach((field: any) => {
+      if (field instanceof Column) {
+        columns.push(field);
+      }
+    });
+    return columns;
+  };
 }

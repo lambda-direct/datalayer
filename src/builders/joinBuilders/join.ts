@@ -1,6 +1,10 @@
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+// Was commented as long as table was injected in constructor
+// eslint-disable-next-line import/no-cycle
 import AbstractTable from '../../tables/abstractTable';
+// Was commented as long as table was injected in constructor
+// eslint-disable-next-line import/no-cycle
 import JoinWith from './joinWith';
 
 export default class Join<T extends ColumnType, K> {
@@ -15,8 +19,8 @@ export default class Join<T extends ColumnType, K> {
     this.fromColumn = fromColumn;
   }
 
-  public static with = <T extends ColumnType, K>(table: AbstractTable<K>):
-  JoinWith<T, K> => new JoinWith(table);
+  public static with = <COLUMN extends ColumnType, MODEL>(table: AbstractTable<MODEL>):
+  JoinWith<COLUMN, MODEL> => new JoinWith(table);
 
   public joinStrategy = (type: JoinStrategy): Join<T, K> => {
     this.type = type;

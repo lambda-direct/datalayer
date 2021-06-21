@@ -1,31 +1,30 @@
-import AbstractTable from '../../tables/abstractTable';
 import UpdateExpr from '../requestBuilders/updates/updates';
-import  Expr from '../requestBuilders/where/where';
+import Expr from '../requestBuilders/where/where';
 import Aggregator from './abstractAggregator';
 
-export default class UpdateAggregator<SERVICE> extends Aggregator<SERVICE> {
+export default class UpdateAggregator extends Aggregator {
   private _updates: Array<string> = [];
   private _filters: Array<string> = [];
   private _from: Array<string> = [];
   private _update: Array<string> = ['UPDATE'];
 
-  public constructor(table: AbstractTable<SERVICE>) {
-    super(table);
+  public constructor(tableName: string) {
+    super(tableName);
   }
 
-  public where = (filters: Expr): UpdateAggregator<SERVICE> => {
+  public where = (filters: Expr): UpdateAggregator => {
     this._filters.push('WHERE ');
     this._filters.push(filters.toQuery());
     return this;
   };
 
-  public appendFrom = (table: AbstractTable<SERVICE>): UpdateAggregator<SERVICE> => {
+  public appendFrom = (tableName: string): UpdateAggregator => {
     this._from.push(' ');
-    this._from.push(table.tableName());
+    this._from.push(tableName);
     return this;
   };
 
-  public set = (updates: UpdateExpr): UpdateAggregator<SERVICE> => {
+  public set = (updates: UpdateExpr): UpdateAggregator => {
     this._updates.push(`\nSET ${updates.toQuery()}`);
     return this;
   };

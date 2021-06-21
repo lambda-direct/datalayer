@@ -1,30 +1,30 @@
 import Column from '../../columns/column';
-import AbstractTable from '../../tables/abstractTable';
+import ColumnType from '../../columns/types/columnType';
 import { ecranate } from '../../utils/ecranate';
 
-export default class Aggregator<SERVICE> {
+export default class Aggregator {
   protected _fields: Array<string> = [];
-  protected _table: AbstractTable<SERVICE>;
+  protected _tableName: string;
 
-  public constructor(table: AbstractTable<SERVICE>) {
-    this._table = table;
+  public constructor(tableName: string) {
+    this._tableName = tableName;
   }
 
-  public appendFields = () => {
-    this._fields = this.generateSelectArray(this._table);
+  public appendFields = (columns: Column<ColumnType, {}>[]) => {
+    this._fields = this.generateSelectArray(this._tableName, columns);
   };
 
-  protected generateSelectArray = (table: AbstractTable<SERVICE>) => {
-    const selectFields: any = [];
+  protected generateSelectArray = (table: string, columns: Column<ColumnType, {}>[]) => {
+    const selectFields: string[] = [];
 
-    Object.values(table).forEach((field: any) => {
+    columns.forEach((field: any) => {
       if (field instanceof Column) {
         selectFields.push(' ');
-        selectFields.push(table.tableName());
+        selectFields.push(table);
         selectFields.push('.');
         selectFields.push(ecranate(field.columnName));
         selectFields.push(' AS ');
-        selectFields.push(ecranate(`${table.tableName().replace('.', '_')}_${field.columnName}`));
+        selectFields.push(ecranate(`${table.replace('.', '_')}_${field.columnName}`));
         selectFields.push(',');
       }
     });

@@ -1,13 +1,21 @@
 import { Pool } from 'pg';
-import AbstractTable from '../../tables/abstractTable';
+import Column from '../../columns/column';
+import ColumnType from '../../columns/types/columnType';
 
 export default abstract class TableRequestBuilder<T> {
-  protected _table: AbstractTable<T>;
+  protected _tableName: string;
   protected _pool: Pool;
+  protected _mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; };
+  protected _columns: Column<ColumnType, {}>[];
 
-  public constructor(table: AbstractTable<T>, pool: Pool) {
-    this._table = table;
+  public constructor(tableName: string,
+    pool: Pool,
+    mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
+    columns: Column<ColumnType, {}>[]) {
+    this._mappedServiceToDb = mappedServiceToDb;
+    this._tableName = tableName;
     this._pool = pool;
+    this._columns = columns;
   }
 
   public all = async (): Promise<T[]> => this.execute();

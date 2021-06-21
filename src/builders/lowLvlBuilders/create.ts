@@ -36,7 +36,7 @@ export default class Create<SERVICE> {
         this.columnsBuilder.push(column.getIsNullable() ? '' : ' NOT NULL');
 
         const referenced: Column<any> = column.getReferenced();
-        this.columnsBuilder.push(referenced != null ? ` REFERENCES ${referenced.getParent().tableName()} (${referenced.getColumnName()})` : '');
+        this.columnsBuilder.push(referenced != null ? ` REFERENCES ${referenced.getParent()} (${referenced.getColumnName()})` : '');
 
         if (i !== columns.length - 1) {
           this.columnsBuilder.push(',');

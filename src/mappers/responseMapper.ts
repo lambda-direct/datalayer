@@ -1,16 +1,17 @@
 import { QueryResult } from 'pg';
-import AbstractTable from '../tables/abstractTable';
+import Column from '../columns/column';
+import ColumnType from '../columns/types/columnType';
 
 export default abstract class QueryResponseMapper {
-  public static map = <RES>(table: AbstractTable<RES>, queryResult: QueryResult<any>) => {
+  public static map = <RES>(mappedServiceToDb: { [name in keyof RES]: Column<ColumnType, {}>; },
+    queryResult: QueryResult<any>) => {
     const response: Array<RES> = [];
 
     queryResult.rows.forEach((row) => {
       const mappedRow: RES = {} as RES;
-      const mapped = table.mapServiceToDb();
 
-      Object.keys(mapped).forEach((key) => {
-        const column = mapped[key as keyof RES];
+      Object.keys(mappedServiceToDb).forEach((key) => {
+        const column = mappedServiceToDb[key as keyof RES];
         mappedRow[key as keyof RES] = row[column.getAlias()];
       });
       response.push(mappedRow);

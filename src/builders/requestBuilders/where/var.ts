@@ -11,5 +11,5 @@ export default class Var<T extends ColumnType> extends Expr {
     this.column = column;
   }
 
-  public toQuery = (): string => `${this.column.getParent().tableName()}.${ecranate(this.column.columnName)}`;
+  public toQuery = (): string => `${this.column.getParent()}.${ecranate(this.column.columnName)}`;
 }
