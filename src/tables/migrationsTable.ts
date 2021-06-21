@@ -1,32 +1,22 @@
-import { Column, ColumnType } from "..";
-import { AbstractTable, RowMapper } from "../tables/abstractTable";
+import { Column, ColumnType } from '..';
+import AbstractTable from './abstractTable';
 
-export class MigrationsTable extends AbstractTable<MigrationsModel> {
-    id = this.int({name: "id"}).autoIncrement().primaryKey();
-    version = this.int({name: "version"}).unique();
-    created_at = this.timestamp({name: "created_at"});
+export default class MigrationsTable extends AbstractTable<MigrationsModel> {
+  public id = this.int({ name: 'id' }).autoIncrement().primaryKey();
+  public version = this.int({ name: 'version' }).unique();
+  public created_at = this.timestamp({ name: 'created_at' });
 
-    tableName(): string {
-        return "migrations";
-    }
+  public tableName = (): string => 'migrations';
 
-    mapServiceToDb(): {[name in keyof MigrationsModel]: Column<ColumnType>}{
-        return {
-            id: this.id,
-            version: this.version,
-            createdAt: this.created_at
-        }
-    }
+  public mapServiceToDb = (): {[name in keyof MigrationsModel]: Column<ColumnType>} => ({
+    id: this.id,
+    version: this.version,
+    createdAt: this.created_at,
+  });
 }
 
 export interface MigrationsModel {
-    id?: number;
-    version: number;
-    createdAt: Date;
-}
-
-interface DbMigration {
-    id?: number;
-    version: number;
-    created_at: Date;
+  id?: number;
+  version: number;
+  createdAt: Date;
 }

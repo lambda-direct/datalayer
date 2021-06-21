@@ -1,20 +1,16 @@
-import { ColumnType } from "./columnType";
+import ColumnType from './columnType';
 
-export class PgVarChar extends ColumnType {
-    protected size: number;
-    protected dbName: string;
+export default class PgVarChar extends ColumnType {
+  protected size: number;
+  protected dbName: string;
 
-    constructor(size: number) {
-        super();
-        this.size = size;
-        this.dbName = `character varying(${this.size})`
-    }
+  public constructor(size: number) {
+    super();
+    this.size = size;
+    this.dbName = `character varying(${this.size})`;
+  }
 
-    getDbName(): string {
-        return this.dbName;
-    }
+  public getDbName = (): string => this.dbName;
 
-    insertStrategy(value: any): string {
-        return `'${value.replace("'", "''")}'`
-    }
+  public insertStrategy = (value: any): string => `'${value.replace("'", "''")}'`;
 }

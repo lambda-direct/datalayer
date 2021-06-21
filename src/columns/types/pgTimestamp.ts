@@ -1,18 +1,14 @@
-import { ColumnType } from "./columnType";
+import ColumnType from './columnType';
 
-export class PgTimestamp extends ColumnType {
-    dbName: string;
+export default class PgTimestamp extends ColumnType {
+  public dbName: string;
 
-    constructor() {
-        super();
-        this.dbName = "timestamp without time zone";
-    }
+  public constructor() {
+    super();
+    this.dbName = 'timestamp without time zone';
+  }
 
-    getDbName(): string {
-        return this.dbName;
-    }
+  public getDbName = (): string => this.dbName;
 
-    insertStrategy(value: any): string {
-        return `'${value.toISOString()}'`
-    }
+  public insertStrategy = (value: any): string => `'${value.toISOString()}'`;
 }

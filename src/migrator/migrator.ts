@@ -1,71 +1,59 @@
-import { Db } from "../db";
-import { Create } from "../builders/lowLvlBuilders";
-import { MigrationsModel, MigrationsTable } from "../tables/migrationsTable";
+import { Db } from '../db';
+import { Create } from '../builders/lowLvlBuilders';
+import { MigrationsModel, MigrationsTable } from '../tables/migrationsTable';
+import SessionWrapper from './sessionWrapper';
 
-export class Migrator {
-    private _db: Db;
-    private migrationsPerVersion: Map<number, () => Promise<boolean>> = new Map<number, () => Promise<boolean>>();
-  
-    constructor(db: Db){
-        this._db = db;
-    }
+export default class Migrator {
+  private _db: Db;
+  private migrationsPerVersion: Map<number,
+  () => Promise<boolean>> = new Map<number, () => Promise<boolean>>();
 
-    chain<M>(version: number, migration: (sessionWrapper: SessionWrapper) => M): Migrator {
-        this.migrationsPerVersion.set(version, async () => {
-            migration(new SessionWrapper(this._db));
-            return true;
-        });
-        return this;
-    }
+  public constructor(db: Db) {
+    this._db = db;
+  }
 
-    async execute() {
-        const migrationsTable = new MigrationsTable();
-        this._db.use(migrationsTable);
+  public chain = <M>(version: number,
+    migration: (sessionWrapper: SessionWrapper) => M): Migrator => {
+    this.migrationsPerVersion.set(version, async () => {
+      migration(new SessionWrapper(this._db));
+      return true;
+    });
+    return this;
+  };
 
-        await this._db._pool.query(Create.table(migrationsTable).build());
+  public execute = async () => {
+    const migrationsTable = new MigrationsTable();
+    this._db.use(migrationsTable);
 
-        const migrations: Array<MigrationsModel> = await migrationsTable.select().all();
-        const latestMigration: MigrationsModel | null = this.getLastOrNull(migrations);
-        let queriesToExecute: Map<number, () => Promise<boolean>> = this.migrationsPerVersion;
-  
-        if (latestMigration != null) {
-            let queriesToExecuteTest: Map<number, () => Promise<boolean>> = new Map<number, () => Promise<boolean>>();
+    await this._db._pool.query(Create.table(migrationsTable).build());
 
-            for (let [key, value] of this.migrationsPerVersion) {
-                if (key > latestMigration.version) {
-                    queriesToExecuteTest.set(key, value);
-                }
-            }
-            queriesToExecute = queriesToExecuteTest;
+    const migrations: Array<MigrationsModel> = await migrationsTable.select().all();
+    const latestMigration: MigrationsModel | null = this.getLastOrNull(migrations);
+    let queriesToExecute: Map<number, () => Promise<boolean>> = this.migrationsPerVersion;
+
+    if (latestMigration != null) {
+      const queriesToExecuteTest:
+      Map<number, () => Promise<boolean>> = new Map<number, () => Promise<boolean>>();
+
+      for (const [key, value] of this.migrationsPerVersion) {
+        if (key > latestMigration.version) {
+          queriesToExecuteTest.set(key, value);
         }
-
-        for (let [key, value] of queriesToExecute) {
-           await value();
-           migrationsTable.insert([{version: key, createdAt: new Date()}]).returningAll();
-        }
+      }
+      queriesToExecute = queriesToExecuteTest;
     }
 
-    getLastOrNull(list: Array<MigrationsModel>): MigrationsModel | null {
-        let latestMigration: MigrationsModel | null = null;
-        if (list.length != 0) {
-            latestMigration = list[list.length - 1];
-        }
-        return latestMigration;
+    for (const [key, value] of queriesToExecute) {
+      await value();
+      migrationsTable.insert([{ version: key, createdAt: new Date() }]).returningAll();
     }
-}
+  };
 
-export class SessionWrapper {
-    private _db: Db;
-
-    constructor(db: Db) {
-        this._db = db;
+  getLastOrNull(list: Array<MigrationsModel>): MigrationsModel | null {
+    let latestMigration: MigrationsModel | null = null;
+    if (list.length != 0) {
+      latestMigration = list[list.length - 1];
     }
-
-    async execute(query: string): Promise<void> {
-        await this._db._pool.query(query);
-    }
-
-    async update(query: string): Promise<void> {
-        await this._db._pool.query(query);
-    }
+    return latestMigration;
+  }
 }
