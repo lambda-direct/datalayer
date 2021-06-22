@@ -18,8 +18,28 @@ import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
 export default abstract class AbstractTable<SERVICE> {
   private _pool: Pool;
 
+  public abstract tableName(): string;
+
+  public abstract mapServiceToDb(): {[name in keyof SERVICE]: Column<ColumnType>};
+
+  public withConnection = (connection: Pool) => {
+    this._pool = connection;
+  };
+
   public select = (): SelectTRB<SERVICE> => new SelectTRB(this.tableName(),
     this._pool, this.mapServiceToDb(), this.getColumns());
+
+  public update = (): UpdateTRB<SERVICE> => {
+    const mappedServiceToDb = this.mapServiceToDb();
+    return new UpdateTRB(this.tableName(), this._pool, mappedServiceToDb, this.getColumns());
+  };
+
+  public insert = (values: SERVICE[]):
+  InsertTRB<SERVICE> => new InsertTRB(values, this.tableName(), this._pool,
+    this.mapServiceToDb(), this.getColumns());
+
+  public delete = (): DeleteTRB<SERVICE> => new DeleteTRB(this.tableName(), this._pool,
+    this.mapServiceToDb(), this.getColumns());
 
   public varchar = ({ name, size }: {name: string, size: number}):
   Column<PgVarChar> => new Column<PgVarChar, {}>(this.tableName(), name, new PgVarChar(size));
@@ -46,24 +66,6 @@ export default abstract class AbstractTable<SERVICE> {
 
   public jsonb = <SUBTYPE>({ name }: {name: string}):
   Column<PgJsonb> => new Column<PgJsonb, SUBTYPE>(this.tableName(), name, new PgJsonb());
-
-  public withConnection = (connection: Pool) => {
-    this._pool = connection;
-  };
-
-  public update = (): UpdateTRB<SERVICE> => {
-    const mappedServiceToDb = this.mapServiceToDb();
-    return new UpdateTRB(this.tableName(), this._pool, mappedServiceToDb, this.getColumns());
-  };
-
-  public insert = (values: SERVICE[]):
-  InsertTRB<SERVICE> => new InsertTRB(values, this, this._pool);
-
-  public delete = (): DeleteTRB<SERVICE> => new DeleteTRB(this, this._pool);
-
-  public abstract tableName(): string;
-
-  public abstract mapServiceToDb(): {[name in keyof SERVICE]: Column<ColumnType>};
 
   private getColumns = (): Column<ColumnType, {}>[] => {
     const columns: Column<ColumnType, {}>[] = [];

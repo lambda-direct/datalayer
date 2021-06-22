@@ -2,8 +2,8 @@ import ColumnType from '../../../columns/types/columnType';
 import SelectAggregator from '../../aggregators/selectAggregator';
 import Join from '../../joinBuilders/join';
 import Expr from '../../requestBuilders/where/where';
-import WhereSelect from '../updates/whereSelect';
 import SelectJoined from './selectJoined';
+import WhereSelect from './whereSelect';
 
 export default class SelectFrom {
   private _aggregator: SelectAggregator;

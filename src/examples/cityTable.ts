@@ -15,7 +15,9 @@ export class CitiesTable extends AbstractTable<CitiesModel> {
     data: this.data,
   });
 
-  public tableName = (): string => 'citiess';
+  public tableName(): string {
+    return 'citiess';
+  }
 }
 
 export interface CitiesModel {

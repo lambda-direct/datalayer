@@ -1,14 +1,18 @@
+import Column from '../../../columns/column';
+import ColumnType from '../../../columns/types/columnType';
 import InsertAggregator from '../../aggregators/insertAggregator';
 import ValuesInsert from './valuesInsert';
 
-export default class InsertInto<SERVICE, MODEL> {
-  private _aggregator: InsertAggregator<SERVICE, MODEL>;
+export default class InsertInto {
+  private _aggregator: InsertAggregator;
 
-  public constructor(aggregator: InsertAggregator<SERVICE, MODEL>) {
+  public constructor(aggregator: InsertAggregator) {
     this._aggregator = aggregator;
   }
 
-  public values = <T>(values: Array<T>) => new ValuesInsert(this._aggregator).apply(values);
+  // @TODO refactor!!
+  public values = <T>(values: {[name: string]: any}[], columns: {[name in keyof T]:
+    Column<ColumnType, {}>}) => new ValuesInsert(this._aggregator).apply(values, columns);
 
   public build = () => this._aggregator.buildQuery();
 }

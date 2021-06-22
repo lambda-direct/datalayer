@@ -1,19 +1,18 @@
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
-// Was commented as long as table was injected in constructor
-// eslint-disable-next-line import/no-cycle
-import AbstractTable from '../../tables/abstractTable';
-// Was commented as long as table was injected in constructor
-// eslint-disable-next-line import/no-cycle
 import Join from './join';
 
 export default class JoinWith<T extends ColumnType, K> {
-  public joinTable: AbstractTable<K>;
+  public joinTableName: string;
+  public mappedServiceToDb: { [name in keyof K]: Column<ColumnType, {}>; };
 
-  public constructor(joinTable: AbstractTable<K>) {
-    this.joinTable = joinTable;
+  public constructor(joinTableName: string,
+    mappedServiceToDb: { [name in keyof K]: Column<ColumnType, {}>; }) {
+    this.joinTableName = joinTableName;
+    this.mappedServiceToDb = mappedServiceToDb;
   }
 
   public columns = (fromColumn:Column<T>,
-    toColumn:Column<T>): Join<T, K> => new Join(this.joinTable, fromColumn, toColumn);
+    toColumn:Column<T>): Join<T, K> => new Join(this.joinTableName,
+    fromColumn, toColumn, this.mappedServiceToDb);
 }

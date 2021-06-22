@@ -27,13 +27,14 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
 
   public join = <COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1>):
   SelectTRBWithJoin<COLUMN, T1,
-  T> => new SelectTRBWithJoin(this._tableName, this._pool, this._filter, join);
+  T> => new SelectTRBWithJoin(this._tableName, this._pool,
+    this._filter, join, this._mappedServiceToDb);
   // if (join.toColumn.getParent() === this._table) {
   //   throw Error('We are not supporting self joining in this version');
   // }
 
   public execute = async (): Promise<T[]> => {
-    const queryBuilder = Select.from(this._tableName);
+    const queryBuilder = Select.from(this._tableName, this._columns);
     if (this._filter) {
       queryBuilder.filteredBy(this._filter);
     }

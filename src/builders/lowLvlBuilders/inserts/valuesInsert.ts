@@ -1,23 +1,25 @@
+import Column from '../../../columns/column';
+import ColumnType from '../../../columns/types/columnType';
 import InsertAggregator from '../../aggregators/insertAggregator';
-import UpdateExpr from '../../requestBuilders/updates/updates';
-import OnConflictInsert from './onConflictInsert';
 
-export default class ValuesInsert<SERVICE, MODEL> {
-  private _aggregator: InsertAggregator<SERVICE, MODEL>;
+export default class ValuesInsert {
+  private _aggregator: InsertAggregator;
 
-  public constructor(aggregator: InsertAggregator<SERVICE, MODEL>) {
+  public constructor(aggregator: InsertAggregator) {
     this._aggregator = aggregator;
   }
 
-  public apply = <T>(values: Array<T>): ValuesInsert<SERVICE, MODEL> => {
+  public apply = <T>(values: {[name: string]: any}[], columns: {[name in keyof T]
+    : Column<ColumnType, {}>})
+  : ValuesInsert => {
     this._aggregator.appendColumns(values);
-    this._aggregator.appendValues(values);
+    this._aggregator.appendValues(columns, values);
 
     return this;
   };
 
-  public onConflict = (updates:
-  UpdateExpr) => new OnConflictInsert(this._aggregator).apply(updates);
+  // public onConflict = (updates:
+  // UpdateExpr) => new OnConflictInsert(this._aggregator).apply(updates);
 
   public build = () => this._aggregator.buildQuery();
 }

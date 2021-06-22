@@ -5,7 +5,7 @@ import SessionWrapper from './sessionWrapper';
 
 export default class Migrator {
   private _db: Db;
-  private migrationsPerVersion: {[key: number]: () => Promise<boolean>};
+  private migrationsPerVersion: {[key: number]: () => Promise<boolean>} = {};
 
   public constructor(db: Db) {
     this._db = db;
@@ -42,9 +42,9 @@ export default class Migrator {
       queriesToExecute = queriesToExecuteTest;
     }
 
-    Object.entries(queriesToExecute).forEach(async (key: any, value: any) => {
+    Object.entries(queriesToExecute).forEach(async ([key, value]) => {
       await value();
-      migrationsTable.insert([{ version: key, createdAt: new Date() }]).returningAll();
+      migrationsTable.insert([{ version: +key, createdAt: new Date() }]).returningAll();
     });
   };
 

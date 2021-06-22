@@ -15,8 +15,9 @@ export default class Combine extends UpdateExpr {
       const setter = this._setters[index];
       response.push(setter.toQuery());
 
-      //   if (index === this._setters.length - 1) continue;
-      response.push(', ');
+      if (index !== this._setters.length - 1) {
+        response.push(', ');
+      }
     }
 
     return response.join('');
