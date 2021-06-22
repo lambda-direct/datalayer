@@ -1,123 +1,67 @@
-import { AbstractTable } from "../tables/abstractTable";
-import { ColumnType } from "./types/columnType";
-import { PgInteger } from "./types/pgInteger";
-import { PgVarChar } from "./types/pgVarChar";
-import { PgTimestamp } from "./types/pgTimestamp";
-import { PgBigDecimal } from "./types/pgBigDecimal";
-import { PgTime } from "./types/pgTime";
-import { PgBoolean } from "./types/pgBoolean";
-import { PgText } from "./types/pgText";
-import { PgJsonb } from "./types/pgJsonb";
+import ColumnType from './types/columnType';
 
-export class Column<T extends ColumnType, SUBTYPE = {}> {
-    private parent: AbstractTable<{}>;
+export default class Column<T extends ColumnType, SUBTYPE = {}> {
+  public columnType: T;
+  public columnName: string;
+  public isNullableFlag: boolean = false;
+  public autoIncrementFlag: boolean = false;
+  public primaryKeyName: string | undefined = undefined;
+  public uniqueKeyName: string | undefined = undefined;
+  public defaultParam: any = null;
+  public referenced: Column<T>;
+  public subtype: SUBTYPE;
 
-    columnType: T;
-    columnName: string;
-    isNullableFlag: boolean = false;
-    autoIncrementFlag: boolean = false;
-    primaryKeyName: string | undefined = undefined;
-    uniqueKeyName: string | undefined = undefined;
-    defaultParam: any = null;
-    referenced: Column<T>;
+  private parentTableName: string;
 
-    private constructor(parent: AbstractTable<{}>, columnName: string, columnType: T){
-        this.columnType = columnType;
-        this.columnName = columnName;
-        this.parent = parent;
-    }
+  public constructor(parentTableName: string, columnName: string, columnType: T) {
+    this.columnType = columnType;
+    this.columnName = columnName;
+    this.parentTableName = parentTableName;
+  }
 
-    static varchar(parent:AbstractTable<{}>, name:string, size: number): Column<PgVarChar> {
-        return new Column<PgVarChar>(parent, name, new PgVarChar(size));
-    }
+  public getAlias = (): string => `${this.parentTableName.replace('.', '_')}_${this.columnName}`;
 
-    static timestamp(parent:AbstractTable<{}>, name:string): Column<PgTimestamp> {
-        return new Column<PgTimestamp>(parent, name, new PgTimestamp());
-    }
+  public getParent = (): string => this.parentTableName;
 
-    static int(parent:AbstractTable<{}>, name:string): Column<PgInteger> {
-        return new Column<PgInteger>(parent, name, new PgInteger());
-    }
+  public references = (column: Column<T>): Column<T> => {
+    this.referenced = column;
+    return this;
+  };
 
-    static decimal(parent:AbstractTable<{}>, name:string, precision: number, scale: number): Column<PgBigDecimal> {
-        return new Column<PgBigDecimal>(parent, name, new PgBigDecimal(precision, scale));
-    }
+  public isNullable = () => {
+    this.isNullableFlag = true;
+    return this;
+  };
 
-    static time(parent:AbstractTable<{}>, name:string): Column<PgTime> {
-        return new Column<PgTime>(parent, name, new PgTime());
-    }
+  public defaultValue = (value: any) => {
+    this.defaultParam = value;
+    return this;
+  };
 
-    static bool(parent:AbstractTable<{}>, name:string): Column<PgBoolean> {
-        return new Column<PgBoolean>(parent, name, new PgBoolean());
-    }
+  public autoIncrement = () => {
+    this.autoIncrementFlag = true;
+    return this;
+  };
 
-    static text(parent:AbstractTable<{}>, name:string): Column<PgText> {
-        return new Column<PgText>(parent, name, new PgText());
-    }
+  public primaryKey = () => {
+    this.primaryKeyName = `${this.parentTableName}_${this.columnName}`;
+    return this;
+  };
 
-    static jsonb<SUBTYPE = {}>(parent:AbstractTable<{}>, name:string): Column<PgJsonb> {
-        return new Column<PgJsonb, SUBTYPE>(parent, name, new PgJsonb());
-    }
+  public unique = () => {
+    this.uniqueKeyName = this.columnName;
+    return this;
+  };
 
-    getAlias(): string {
-        return this.parent.tableName().replace(".", "_") + "_" + this.columnName;
-    }
+  public isAutoIncrement = (): boolean => this.autoIncrementFlag;
 
-    getParent(): AbstractTable<{}> {
-        return this.parent;
-    }
+  public getIsNullable = (): boolean => this.isNullableFlag;
 
-    references(column: Column<T>): Column<T> {
-        this.referenced = column;
-        return this;
-    }
+  public getColumnName = (): string => this.columnName;
 
-    isNullable() {
-        this.isNullableFlag = true;
-        return this;
-    }
+  public getReferenced = (): Column<T> => this.referenced;
 
-    defaultValue(value: any) {
-        this.defaultParam = value;
-        return this;
-    }
+  public getColumnType = (): T => this.columnType;
 
-    autoIncrement() {
-        this.autoIncrementFlag = true;
-        return this;
-    }
-
-    primaryKey() {
-        this.primaryKeyName = this.parent.tableName() + "_" + this.columnName;
-        return this;
-    }
-
-    unique() {
-        this.uniqueKeyName = this.columnName;
-        return this;
-    }
-
-    isAutoIncrement(): boolean {
-        return this.autoIncrementFlag;
-    }
-
-    getIsNullable(): boolean {
-        return this.isNullableFlag;
-    }
-
-    getColumnName(): string {
-        return this.columnName;
-    }
-
-    getReferenced(): Column<T> {
-        return this.referenced;
-    }
-
-    getColumnType(): T {
-        return this.columnType;
-    }
-
-    getDefaultValue(): any {
-        return this.defaultParam;
-    }
+  public getDefaultValue = (): any => this.defaultParam;
 }

@@ -1,42 +1,46 @@
-import { Pool } from "pg";
-import { Column } from "../../columns/column";
-import { ColumnType } from "../../columns/types/columnType";
-import { QueryResponseMapper } from "../../mappers/responseMapper";
-import { AbstractTable } from "../../tables/abstractTable";
-import { Insert } from "../lowLvlBuilders/insert";
-import { TableRequestBuilder } from "./abstractRequestBuilder";
+import { Pool } from 'pg';
+import Column from '../../columns/column';
+import ColumnType from '../../columns/types/columnType';
+import QueryResponseMapper from '../../mappers/responseMapper';
+import Insert from '../lowLvlBuilders/inserts/insert';
+import TableRequestBuilder from './abstractRequestBuilder';
 
-export class InsertTRB<T> extends TableRequestBuilder<T> {
-    private _values: T[];
+export default class InsertTRB<T> extends TableRequestBuilder<T> {
+  private _values: T[];
 
-    constructor(values: T[], table: AbstractTable<T>, pool: Pool) {
-        super(table, pool);
-        this._values = values;
-    }
+  public constructor(
+    values: T[],
+    tableName: string,
+    pool: Pool,
+    mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
+    columns: Column<ColumnType, {}>[],
+  ) {
+    super(tableName, pool, mappedServiceToDb, columns);
+    this._values = values;
+  }
 
-    async returningAll() {
-        return this.execute();
-    }
+  public returningAll = async () => this.execute();
 
-    protected async execute(): Promise<T[]> {
-        const queryBuilder = Insert.into(this._table);
-        if(!this._values) throw Error('Values should be provided firestly\nExample: table.values().execute()');
-        
-        const mappedRows: {[name: string]: any}[] = []
-        const mapper = this._table.mapServiceToDb()
+  protected execute = async (): Promise<T[]> => {
+    const queryBuilder = Insert.into(this._tableName, this._columns);
+    if (!this._values) throw Error('Values should be provided firestly\nExample: table.values().execute()');
 
-        for (const valueToInsert of this._values) {
-            const mappedValue: {[name: string]: any} = {}
-            for (let [key, value] of Object.entries(valueToInsert)){
-                const column = mapper[key as keyof T];
-                mappedValue[column.columnName] = value
-            }
-            mappedRows.push(mappedValue);
-        }
+    const mappedRows: {[name: string]: any}[] = [];
+    const mapper = this._mappedServiceToDb;
 
-        const query = queryBuilder.values(mappedRows).build();
-        console.log(query)
-        const result = await this._pool!.query(query);
-        return QueryResponseMapper.map(this._table, result);
-    }
+    this._values.forEach((valueToInsert) => {
+      const mappedValue: {[name: string]: any} = {};
+      Object.entries(valueToInsert).forEach(([key, value]) => {
+        const column = mapper[key as keyof T];
+        mappedValue[column.columnName] = value;
+      });
+      mappedRows.push(mappedValue);
+    });
+
+    // @TODO refactor!!
+    const query = queryBuilder.values(mappedRows, mapper).build();
+    console.log(query);
+    const result = await this._pool!.query(query);
+    return QueryResponseMapper.map(this._mappedServiceToDb, result);
+  };
 }

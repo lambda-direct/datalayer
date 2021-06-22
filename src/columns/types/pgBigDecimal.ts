@@ -1,22 +1,18 @@
-import { ColumnType } from "./columnType";
+import ColumnType from './columnType';
 
-export class PgBigDecimal extends ColumnType {
-    precision: number;
-    scale: number;
-    dbName: string;
+export default class PgBigDecimal extends ColumnType {
+  public precision: number;
+  public scale: number;
+  public dbName: string;
 
-    constructor(precision: number, scale: number) {
-        super();
-        this.precision = precision;
-        this.scale = scale;
-        this.dbName = `numeric(${this.precision},${this.scale})`;
-    }
+  public constructor(precision: number, scale: number) {
+    super();
+    this.precision = precision;
+    this.scale = scale;
+    this.dbName = `numeric(${this.precision},${this.scale})`;
+  }
 
-    getDbName(): string {
-        return this.dbName;
-    }
+  public getDbName = (): string => this.dbName;
 
-    insertStrategy(value: any): string {
-        return `${value}`;
-    }
+  public insertStrategy = (value: any): string => `${value}`;
 }

@@ -1,18 +1,14 @@
-import { ColumnType } from "./columnType";
+import ColumnType from './columnType';
 
-export class PgBoolean extends ColumnType {
-    dbName: string;
+export default class PgBoolean extends ColumnType {
+  public dbName: string;
 
-    constructor() {
-        super();
-        this.dbName = "boolean";
-    }
+  public constructor() {
+    super();
+    this.dbName = 'boolean';
+  }
 
-    getDbName(): string {
-        return this.dbName;
-    }
+  public getDbName = (): string => this.dbName;
 
-    insertStrategy(value: any): string {
-        return `${value}`
-    }
+  public insertStrategy = (value: any): string => `${value}`;
 }

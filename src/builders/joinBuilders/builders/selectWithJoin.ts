@@ -1,43 +1,47 @@
-import { Pool } from "pg";
-import { ColumnType } from "../../../columns/types/columnType";
-import { QueryResponseMapper } from "../../../mappers/responseMapper";
-import { AbstractTable } from "../../../tables/abstractTable";
-import { Select } from "../../lowLvlBuilders/select";
-import { Expr } from "../../requestBuilders/where";
-import { Join } from "../join";
-import { SelectResponseJoin } from "../responses/SelectResponseWithJoin";
-import { AbstractJoined } from "./abstractJoinBuilder";
-import { SelectTRBWithTwoJoins } from "./selectWithTwoJoins";
+import { Pool } from 'pg';
+import Column from '../../../columns/column';
+import ColumnType from '../../../columns/types/columnType';
+import QueryResponseMapper from '../../../mappers/responseMapper';
+import Select from '../../lowLvlBuilders/selects/select';
+import Expr from '../../requestBuilders/where/where';
+import Join from '../join';
+import SelectResponseJoin from '../responses/selectResponseWithJoin';
+import AbstractJoined from './abstractJoinBuilder';
+import SelectTRBWithTwoJoins from './selectWithTwoJoins';
 
-export class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL> extends AbstractJoined<MODEL> {
-    private _join: Join<COLUMN, T1>;
+export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
+  extends AbstractJoined<MODEL> {
+  private _join: Join<COLUMN, T1>;
 
-    constructor(table: AbstractTable<MODEL>, pool: Pool, filter: Expr, join: Join<COLUMN, T1>) {
-        super(filter, table, pool);
-        this._join = join;
+  public constructor(tableName: string, pool: Pool,
+    filter: Expr,
+    join: Join<COLUMN, T1>,
+    columns: { [name in keyof MODEL]: Column<ColumnType, {}>; }) {
+    super(filter, tableName, pool, columns);
+    this._join = join;
+  }
+
+  public join = <T2>(join: Join<COLUMN, T2>):
+  SelectTRBWithTwoJoins<COLUMN, T1, T2, MODEL> => new SelectTRBWithTwoJoins(this._tableName,
+    this._pool, this._filter, this._join, join, this._columns);
+
+  public execute = async (): Promise<SelectResponseJoin<MODEL, T1>> => {
+    const queryBuilder = Select.from(this._tableName, Object.values(this._columns));
+    if (this._filter) {
+      queryBuilder.filteredBy(this._filter);
     }
 
-    join<T2>(join: Join<COLUMN, T2>): SelectTRBWithTwoJoins<COLUMN, T1, T2, MODEL>{  
-        return new SelectTRBWithTwoJoins(this._table, this._pool, this._filter, this._join, join);
-    }
+    queryBuilder.joined([this._join]);
 
-    async execute(): Promise<SelectResponseJoin<MODEL, T1>> {
-        const queryBuilder = Select.from(this._table);
-        if (this._filter){
-            queryBuilder.filteredBy(this._filter);
-        }
+    const query = queryBuilder.build();
 
-        queryBuilder.joined([this._join])
-        
-        const query = queryBuilder.build();
+    const result = await this._pool!.query(query);
 
-        const result = await this._pool!.query(query);
-    
-        const parent: AbstractTable<T1>  = this._join.joinTable;
+    const parent:{ [name in keyof T1]: Column<ColumnType, {}>; } = this._join.mappedServiceToDb;
 
-        const response = QueryResponseMapper.map(this._table, result);
-        const objects = QueryResponseMapper.map(parent, result);
+    const response = QueryResponseMapper.map(this._columns, result);
+    const objects = QueryResponseMapper.map(parent, result);
 
-        return new SelectResponseJoin(response, objects);
-    }
+    return new SelectResponseJoin(response, objects);
+  };
 }

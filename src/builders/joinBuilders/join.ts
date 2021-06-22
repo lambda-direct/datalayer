@@ -1,49 +1,35 @@
-import { Column } from "../../columns/column";
-import { ColumnType } from "../../columns/types/columnType";
-import { AbstractTable } from "../../tables/abstractTable";
+import Column from '../../columns/column';
+import ColumnType from '../../columns/types/columnType';
 
-export class Join<T extends ColumnType, K> {
-    fromColumn: Column<T>;
-    toColumn: Column<T>;
-    joinTable: AbstractTable<K>;
-    type: JoinStrategy;
+export default class Join<T extends ColumnType, K> {
+  public fromColumn: Column<T>;
+  public toColumn: Column<T>;
+  public joinTableName: string;
+  public mappedServiceToDb: { [name in keyof K]: Column<ColumnType, {}>; };
+  public type: JoinStrategy;
 
-    constructor(joinTable: AbstractTable<K>, fromColumn: Column<T>, toColumn: Column<T>,) {
-        this.joinTable = joinTable;
-        this.toColumn = toColumn;
-        this.fromColumn = fromColumn;
-    }
+  public constructor(joinTableName: string, fromColumn: Column<T>, toColumn: Column<T>,
+    mappedServiceToDb: { [name in keyof K]: Column<ColumnType, {}>; }) {
+    this.joinTableName = joinTableName;
+    this.toColumn = toColumn;
+    this.fromColumn = fromColumn;
+    this.mappedServiceToDb = mappedServiceToDb;
+  }
 
-    static with<T extends ColumnType,K, DB>(table: AbstractTable<K>): JoinWith<T, K> {
-        return new JoinWith(table);
-    }
+  public joinStrategy = (type: JoinStrategy): Join<T, K> => {
+    this.type = type;
+    return this;
+  };
 
-    joinStrategy(type: JoinStrategy): Join<T, K> {
-        this.type = type;
-        return this;
-    }
-
-    columns(fromColumn:Column<T> , toColumn:Column<T> ): Join<T, K>  {
-        this.toColumn = toColumn;
-        this.fromColumn = fromColumn;
-        return this;
-    }
-}
-
-export class JoinWith<T extends ColumnType, K> {
-    joinTable: AbstractTable<K>;
-
-    constructor(joinTable: AbstractTable<K>) {
-        this.joinTable = joinTable;
-    }
-
-    columns(fromColumn:Column<T> , toColumn:Column<T>): Join<T, K>  {
-        return new Join(this.joinTable, fromColumn, toColumn);
-    }
+  public columns = (fromColumn:Column<T>, toColumn:Column<T>): Join<T, K> => {
+    this.toColumn = toColumn;
+    this.fromColumn = fromColumn;
+    return this;
+  };
 }
 
 export enum JoinStrategy {
-    INNER_JOIN = 'INNER JOIN',
-    LEFT_JOIN = 'LEFT JOIN',
-    RIGHT_JOIN = 'RIGHT JOIN',
+  INNER_JOIN = 'INNER JOIN',
+  LEFT_JOIN = 'LEFT JOIN',
+  RIGHT_JOIN = 'RIGHT JOIN',
 }

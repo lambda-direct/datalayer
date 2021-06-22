@@ -1,18 +1,14 @@
-import { ColumnType } from "./columnType";
+import ColumnType from './columnType';
 
-export class PgJsonb extends ColumnType {
-    dbName: string;
+export default class PgJsonb extends ColumnType {
+  public dbName: string;
 
-    constructor() {
-        super();
-        this.dbName = "JSONB";
-    }
+  public constructor() {
+    super();
+    this.dbName = 'JSONB';
+  }
 
-    getDbName(): string {
-        return this.dbName;
-    }
+  public getDbName = (): string => this.dbName;
 
-    insertStrategy(value: any): string {
-        return `'${JSON.stringify(value)}'::jsonb`
-    }
+  public insertStrategy = (value: any): string => `'${JSON.stringify(value)}'::jsonb`;
 }

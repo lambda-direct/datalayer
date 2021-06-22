@@ -1,114 +1,79 @@
-import { Pool } from "pg";
-import { Column } from "../columns/column";
-import { PgVarChar } from "../columns/types/pgVarChar";
-import { PgTimestamp } from "../columns/types/pgTimestamp";
-import { PgInteger } from "../columns/types/pgInteger";
-import { PgBigDecimal } from "../columns/types/pgBigDecimal";
-import { PgTime } from "../columns/types/pgTime";
-import { PgBoolean } from "../columns/types/pgBoolean";
-import { PgText } from "../columns/types/pgText";
-import { DeleteTRB, InsertTRB, SelectTRB, UpdateTRB } from "../builders/highLvlBuilders";
-import { PgJsonb } from "../columns/types/pgJsonb";
-import { ColumnType } from "../columns/types/columnType";
+import { Pool } from 'pg';
+import PgVarChar from '../columns/types/pgVarChar';
+import PgTimestamp from '../columns/types/pgTimestamp';
+import PgInteger from '../columns/types/pgInteger';
+import PgBigDecimal from '../columns/types/pgBigDecimal';
+import PgTime from '../columns/types/pgTime';
+import PgBoolean from '../columns/types/pgBoolean';
+import PgText from '../columns/types/pgText';
+import PgJsonb from '../columns/types/pgJsonb';
+import ColumnType from '../columns/types/columnType';
+import Column from '../columns/column';
 
+import InsertTRB from '../builders/highLvlBuilders/insertRequestBuilder';
+import DeleteTRB from '../builders/highLvlBuilders/deleteRequestBuilder';
+import UpdateTRB from '../builders/highLvlBuilders/updateRequestBuilder';
+import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
 
-export abstract class AbstractTable<SERVICE> {
-    private _pool: Pool;
+export default abstract class AbstractTable<SERVICE> {
+  private _pool: Pool;
 
-    protected varchar({name, size}: {name: string, size: number}): Column<PgVarChar> {
-        return Column.varchar(this, name, size);
-    }
+  public abstract tableName(): string;
 
-    protected timestamp({name}: {name: string}): Column<PgTimestamp> {
-        return Column.timestamp(this, name);
-    }
+  public abstract mapServiceToDb(): {[name in keyof SERVICE]: Column<ColumnType>};
 
-    protected int({name}: {name: string}): Column<PgInteger> {
-        return Column.int(this, name);
-    }
+  public withConnection = (connection: Pool) => {
+    this._pool = connection;
+  };
 
-    protected decimal({name, precision, scale}: {name: string, precision: number, scale: number}): Column<PgBigDecimal> {
-        return Column.decimal(this, name, precision, scale);
-    }
+  public select = (): SelectTRB<SERVICE> => new SelectTRB(this.tableName(),
+    this._pool, this.mapServiceToDb(), this.getColumns());
 
-    protected time({name}: {name: string}): Column<PgTime> {
-        return Column.time(this, name);
-    }
+  public update = (): UpdateTRB<SERVICE> => {
+    const mappedServiceToDb = this.mapServiceToDb();
+    return new UpdateTRB(this.tableName(), this._pool, mappedServiceToDb, this.getColumns());
+  };
 
-    protected bool({name}: {name: string}): Column<PgBoolean> {
-        return Column.bool(this, name);
-    }
+  public insert = (values: SERVICE[]):
+  InsertTRB<SERVICE> => new InsertTRB(values, this.tableName(), this._pool,
+    this.mapServiceToDb(), this.getColumns());
 
-    protected text({name}: {name: string}): Column<PgText> {
-        return Column.text(this, name);
-    }
+  public delete = (): DeleteTRB<SERVICE> => new DeleteTRB(this.tableName(), this._pool,
+    this.mapServiceToDb(), this.getColumns());
 
-    protected jsonb<SUBTYPE>({name}: {name: string}): Column<PgJsonb> {
-        return Column.jsonb<SUBTYPE>(this, name);
-    }
+  public varchar = ({ name, size }: {name: string, size: number}):
+  Column<PgVarChar> => new Column<PgVarChar, {}>(this.tableName(), name, new PgVarChar(size));
 
+  public timestamp = ({ name }: {name: string}):
+  Column<PgTimestamp> => new Column<PgTimestamp, {}>(this.tableName(), name, new PgTimestamp());
 
-    withConnection(connection: Pool) {
-        this._pool = connection;
-    }
+  public int = ({ name }: {name: string}):
+  Column<PgInteger> => new Column<PgInteger, {}>(this.tableName(), name, new PgInteger());
 
-    select(): SelectTRB<SERVICE> {
-        return new SelectTRB(this, this._pool);
-    }
+  public decimal = ({ name, precision, scale }:
+  {name: string, precision: number, scale: number}):
+  Column<PgBigDecimal> => new Column<PgBigDecimal, {}>(this.tableName(),
+    name, new PgBigDecimal(precision, scale));
 
-    update(): UpdateTRB<SERVICE> {
-        return new UpdateTRB(this, this._pool);
-    }
+  public time = ({ name }: {name: string})
+  : Column<PgTime> => new Column<PgTime, {}>(this.tableName(), name, new PgTime());
 
-    insert(values: SERVICE[]): InsertTRB<SERVICE> {
-        return new InsertTRB(values, this, this._pool);
-    }
+  public bool = ({ name }: {name: string}):
+  Column<PgBoolean> => new Column<PgBoolean, {}>(this.tableName(), name, new PgBoolean());
 
-    delete(): DeleteTRB<SERVICE> {
-        return new DeleteTRB(this, this._pool);
-    }
+  public text = ({ name }: {name: string}):
+  Column<PgText> => new Column<PgText, {}>(this.tableName(), name, new PgText());
 
-    abstract tableName(): string;
-    
-    abstract mapServiceToDb(): {[name in keyof SERVICE]: Column<ColumnType>};
-}
+  public jsonb = <SUBTYPE>({ name }: {name: string}):
+  Column<PgJsonb> => new Column<PgJsonb, SUBTYPE>(this.tableName(), name, new PgJsonb());
 
-export class RowMapper {
-    private row: any
-
-    constructor(row: any) {
-        this.row = row;
-    }
-
-    getVarchar(column: Column<PgVarChar>): string {
-        return this.row[column.getAlias()];
-    }
-
-    getInt(column: Column<PgInteger>): number {
-        return this.row[column.getAlias()];
-    }
-
-    getTimestamp(column: Column<PgTimestamp>): Date {
-        return this.row[column.getAlias()];
-    }
-
-    getJsonb<TYPE>(column: Column<PgJsonb, TYPE>): TYPE {
-        return this.row[column.getAlias()] as TYPE;
-    }
-
-    getDecimal(column: Column<PgBigDecimal>): number {
-        return this.row[column.getAlias()];
-    }
-
-    getTime(column: Column<PgTime>): Date {
-        return this.row[column.getAlias()];
-    }
-
-    getBool(column: Column<PgBoolean>): boolean {
-        return this.row[column.getAlias()];
-    }
-
-    getText(column: Column<PgText>): string {
-        return this.row[column.getAlias()];
-    }
+  private getColumns = (): Column<ColumnType, {}>[] => {
+    const columns: Column<ColumnType, {}>[] = [];
+    Object.values(this).forEach((field: any) => {
+      if (field instanceof Column) {
+        columns.push(field);
+      }
+    });
+    return columns;
+  };
 }
