@@ -1,4 +1,4 @@
-import { Db } from '../db';
+import Db from '../db/db';
 
 export default class SessionWrapper {
   private _db: Db;

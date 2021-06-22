@@ -1,10 +1,10 @@
-export default './tables/abstractTable';
+// export default './tables/abstractTable';
 export { Db } from './db/db';
 export { DbConnector } from './db/dbConnector';
-export default './columns/column';
-export default './columns/types/columnType';
-export default './columns/types/pgVarChar';
-export { SelectAggregator } from './builders/aggregators';
+// export default './columns/column';
+// export default './columns/types/columnType';
+// export default './columns/types/pgVarChar';
+export { SelectAggregator } from './builders/aggregators/selectAggregator';
 export { InsertAggregator } from './builders/aggregators';
 export { DeleteAggregator } from './builders/aggregators';
 export { UpdateAggregator } from './builders/aggregators';

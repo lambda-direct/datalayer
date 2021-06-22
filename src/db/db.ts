@@ -1,14 +1,14 @@
-import { AbstractTable } from '../tables/abstractTable';
 import { Pool } from 'pg';
+import AbstractTable from '../tables/abstractTable';
 
-export class Db {
-    _pool: Pool;
+export default class Db {
+  public _pool: Pool;
 
-    constructor(pool: Pool){
-        this._pool = pool;
-    }
+  public constructor(pool: Pool) {
+    this._pool = pool;
+  }
 
-    use<T extends AbstractTable<{}>>(table: T){
-        table.withConnection(this._pool);
-    }
+  public use = <T extends AbstractTable<any>>(table: T): void => {
+    table.withConnection(this._pool);
+  };
 }

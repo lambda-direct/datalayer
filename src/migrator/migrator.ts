@@ -1,12 +1,11 @@
 import Create from '../builders/lowLvlBuilders/create';
-import { Db } from '../db';
+import Db from '../db/db';
 import MigrationsTable, { MigrationsModel } from '../tables/migrationsTable';
 import SessionWrapper from './sessionWrapper';
 
 export default class Migrator {
   private _db: Db;
-  private migrationsPerVersion: Map<number,
-  () => Promise<boolean>> = new Map<number, () => Promise<boolean>>();
+  private migrationsPerVersion: {[key: number]: () => Promise<boolean>};
 
   public constructor(db: Db) {
     this._db = db;
@@ -14,10 +13,10 @@ export default class Migrator {
 
   public chain = <M>(version: number,
     migration: (sessionWrapper: SessionWrapper) => M): Migrator => {
-    this.migrationsPerVersion.set(version, async () => {
+    this.migrationsPerVersion[version] = async () => {
       migration(new SessionWrapper(this._db));
       return true;
-    });
+    };
     return this;
   };
 
@@ -29,22 +28,21 @@ export default class Migrator {
 
     const migrations: Array<MigrationsModel> = await migrationsTable.select().all();
     const latestMigration: MigrationsModel | null = this.getLastOrNull(migrations);
-    let queriesToExecute: Map<number, () => Promise<boolean>> = this.migrationsPerVersion;
+    let queriesToExecute: {[key: number]: () => Promise<boolean>} = this.migrationsPerVersion;
 
     if (latestMigration != null) {
-      const queriesToExecuteTest:
-      Map<number, () => Promise<boolean>> = new Map<number, () => Promise<boolean>>();
+      const queriesToExecuteTest: {[key: number]: () => Promise<boolean>} = {};
 
-      this.migrationsPerVersion.forEach((key: any, value: any) => {
-        if (key > latestMigration.version) {
-          queriesToExecuteTest.set(key, value);
+      Object.entries(this.migrationsPerVersion).forEach(([key, value]) => {
+        if (+key > latestMigration.version) {
+          queriesToExecuteTest[+key] = value;
         }
       });
 
       queriesToExecute = queriesToExecuteTest;
     }
 
-    queriesToExecute.forEach(async (key: any, value: any) => {
+    Object.entries(queriesToExecute).forEach(async (key: any, value: any) => {
       await value();
       migrationsTable.insert([{ version: key, createdAt: new Date() }]).returningAll();
     });
