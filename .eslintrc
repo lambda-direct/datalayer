@@ -18,7 +18,8 @@
           "protected-method",
           "private-method"
           ] }],
-        "prefer-arrow/prefer-arrow-functions": ["error", { "classPropertiesAllowed": true }],
+        "class-methods-use-this": "off",
+        // "prefer-arrow/prefer-arrow-functions": ["error", { "classPropertiesAllowed": true }],
         "import/no-extraneous-dependencies": ["error", { "devDependencies": ["webpack.config.ts"] }],
         "linebreak-style": 0
     }

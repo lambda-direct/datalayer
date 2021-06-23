@@ -1,44 +1,33 @@
-// import { AbstractTable, RowMapper } from "../tables/abstractTable";
+import Column from '../columns/column';
+import ColumnType from '../columns/types/columnType';
+import AbstractTable from '../tables/abstractTable';
 
-// export class UsersTable extends AbstractTable<UsersModel, DbUser> {
-//     id = this.int({name: "id"}).autoIncrement().primaryKey()
-//     name = this.varchar({name: "name", size: 256});
-//     city = this.varchar({name: "city", size: 256});
-//     country = this.varchar({name: "country", size: 256});
+export class UsersTable extends AbstractTable<UserModel> {
+  public static INSTANCE: UsersTable = new UsersTable();
 
-//     tableName(): string {
-//         return "users";
-//     }
+  public id = this.int({ name: 'id' }).autoIncrement().primaryKey();
+  public phone = this.varchar({ name: 'phone', size: 256 });
+  public fullName = this.varchar({ name: 'full_name', size: 256 }).isNullable();
+  public createdAt = this.timestamp({ name: 'created_at' });
+  public updatedAt = this.timestamp({ name: 'updated_at' });
 
-//     toServiceModel(response: RowMapper): UsersModel {
-//         return {
-//             name: response.getVarchar(this.name),
-//             city: response.getVarchar(this.city),
-//             country: response.getVarchar(this.country),
-//         };
-//     }
+  public tableName(): string {
+    return 'users';
+  }
 
-//     toDbModel(response: UsersModel): DbUser {
-//         return response;
-//     }
+  public mapServiceToDb = ():{[name in keyof UserModel]: Column<ColumnType>} => ({
+    id: this.id,
+    phone: this.phone,
+    fullName: this.fullName,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
+  });
+}
 
-//     map(response: RowMapper): UsersModel {
-//         return {
-//             name: response.getVarchar(this.name),
-//             city: response.getVarchar(this.city),
-//             country: response.getVarchar(this.country),
-//         };
-//     }
-// }
-
-// interface DbUser {
-//     name: string;
-//     city: string;
-//     country: string;
-// }
-
-// export interface UsersModel {
-//     name: string;
-//     city: string;
-//     country: string;
-// }
+export interface UserModel {
+  id: number;
+  phone: string;
+  fullName: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}

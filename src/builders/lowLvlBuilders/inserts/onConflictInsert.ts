@@ -1,10 +1,10 @@
 import InsertAggregator from '../../aggregators/insertAggregator';
 // import UpdateExpr from '../../requestBuilders/updates/updates';
 
-export default class OnConflictInsert<SERVICE, MODEL> {
-  private _aggregator: InsertAggregator<SERVICE, MODEL>;
+export default class OnConflictInsert {
+  private _aggregator: InsertAggregator;
 
-  public constructor(aggregator: InsertAggregator<SERVICE, MODEL>) {
+  public constructor(aggregator: InsertAggregator) {
     this._aggregator = aggregator;
   }
 

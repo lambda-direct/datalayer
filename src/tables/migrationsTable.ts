@@ -7,13 +7,15 @@ export default class MigrationsTable extends AbstractTable<MigrationsModel> {
   public version = this.int({ name: 'version' }).unique();
   public created_at = this.timestamp({ name: 'created_at' });
 
-  public tableName = (): string => 'migrations';
-
   public mapServiceToDb = (): {[name in keyof MigrationsModel]: Column<ColumnType>} => ({
     id: this.id,
     version: this.version,
     createdAt: this.created_at,
   });
+
+  public tableName(): string {
+    return 'migrations';
+  }
 }
 
 export interface MigrationsModel {

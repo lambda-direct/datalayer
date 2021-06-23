@@ -1,14 +1,14 @@
 import SelectAggregator from '../../aggregators/selectAggregator';
 import Expr from '../../requestBuilders/where/where';
 
-export default class WhereSelect<SERVICE, DB> {
-  private _aggregator: SelectAggregator<SERVICE>;
+export default class WhereSelect {
+  private _aggregator: SelectAggregator;
 
-  public constructor(aggregator: SelectAggregator<SERVICE>) {
+  public constructor(aggregator: SelectAggregator) {
     this._aggregator = aggregator;
   }
 
-  public apply = (filters: Expr): WhereSelect<SERVICE, DB> => {
+  public apply = (filters: Expr): WhereSelect => {
     this._aggregator.filters(filters);
     return this;
   };

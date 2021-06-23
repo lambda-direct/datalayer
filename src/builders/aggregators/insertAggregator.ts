@@ -1,7 +1,8 @@
-import { shouldEcranate } from '../../utils/ecranate';
+import Column from '../../columns/column';
+import ColumnType from '../../columns/types/columnType';
 import Aggregator from './abstractAggregator';
 
-export default class InsertAggregator<SERVICE, MODEL> extends Aggregator {
+export default class InsertAggregator extends Aggregator {
   private _onConflict: Array<string> = [];
   private _columns: Array<string> = [];
   private _values: Array<string> = [];
@@ -12,13 +13,14 @@ export default class InsertAggregator<SERVICE, MODEL> extends Aggregator {
     super(tableName);
   }
 
-  public appendFrom = (tableName: string): InsertAggregator<SERVICE, MODEL> => {
+  public appendFrom = (tableName: string): InsertAggregator => {
     this._from.push(' ');
     this._from.push(tableName);
     this._tableName = tableName;
     return this;
   };
 
+  // @TODO refactor!!
   public appendColumns = <T>(values: Array<T>) => {
     // @TODO Check if values not empty
     const columns = Object.keys(values[0]);
@@ -36,28 +38,28 @@ export default class InsertAggregator<SERVICE, MODEL> extends Aggregator {
     }
   };
 
-  public appendValues = <T>(values: Array<T>) => {
+  // @TODO refactor!!
+  public appendValues = <T>(mapper: {[name in keyof T]: Column<ColumnType, {}>},
+    values: {[name: string]: any}[]) => {
     // @TODO Check if values not empty
     for (let i = 0; i < values.length; i += 1) {
       const value = values[i];
       const insertValues = Object.values(value);
+      const insertKeys = Object.keys(value);
 
       this._values.push('(');
       for (let j = 0; j < insertValues.length; j += 1) {
         const insertValue = insertValues[j];
+        const insertKey = insertKeys[j];
 
-        if (shouldEcranate(insertValue)) {
-          let ecranatedValue = insertValue;
-          if (insertValue instanceof String) ecranatedValue = insertValue.replace("'", "''");
-          if (insertValue instanceof Date) ecranatedValue = insertValue.toISOString();
-          // const ecranatedValue = insertValue instanceof String ?
-          //   insertValue.replace("'", "''") : insertValue;
+        const columnKey = Object.keys(mapper)
+          .find((it) => mapper[it as keyof T].columnName === insertKey)!;
+        const column = mapper[columnKey as keyof T];
 
-          this._values.push("'");
-          this._values.push(ecranatedValue);
-          this._values.push("'");
+        if (insertValue) {
+          this._values.push(column.columnType.insertStrategy(insertValue));
         } else {
-          this._values.push(insertValue);
+          this._values.push('null');
         }
 
         if (j < insertValues.length - 1) {
@@ -72,7 +74,7 @@ export default class InsertAggregator<SERVICE, MODEL> extends Aggregator {
     }
   };
 
-  //   public appendOnConflict = (updates: UpdateExpr) => this;
+  // public appendOnConflict = (updates: UpdateExpr) => this;
 
   public buildQuery = () => {
     this._insert.push(this._from.join(''));

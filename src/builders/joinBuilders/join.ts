@@ -1,22 +1,20 @@
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
-import AbstractTable from '../../tables/abstractTable';
-import JoinWith from './joinWith';
 
 export default class Join<T extends ColumnType, K> {
   public fromColumn: Column<T>;
   public toColumn: Column<T>;
-  public joinTable: AbstractTable<K>;
+  public joinTableName: string;
+  public mappedServiceToDb: { [name in keyof K]: Column<ColumnType, {}>; };
   public type: JoinStrategy;
 
-  public constructor(joinTable: AbstractTable<K>, fromColumn: Column<T>, toColumn: Column<T>) {
-    this.joinTable = joinTable;
+  public constructor(joinTableName: string, fromColumn: Column<T>, toColumn: Column<T>,
+    mappedServiceToDb: { [name in keyof K]: Column<ColumnType, {}>; }) {
+    this.joinTableName = joinTableName;
     this.toColumn = toColumn;
     this.fromColumn = fromColumn;
+    this.mappedServiceToDb = mappedServiceToDb;
   }
-
-  public static with = <COLUMN extends ColumnType, MODEL>(table: AbstractTable<MODEL>):
-  JoinWith<COLUMN, MODEL> => new JoinWith(table);
 
   public joinStrategy = (type: JoinStrategy): Join<T, K> => {
     this.type = type;

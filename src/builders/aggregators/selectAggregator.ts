@@ -1,4 +1,3 @@
-import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import Join from '../joinBuilders/join';
 import Expr from '../requestBuilders/where/where';
@@ -28,27 +27,26 @@ export default class SelectAggregator extends Aggregator {
 
   // Add select generator for second table also
   public join = <COLUMN extends ColumnType>(joins: Array<Join<COLUMN,
-  {}>>,
-    columns: Column<ColumnType, {}>[]): SelectAggregator => {
-    joins.forEach((join: any) => {
+  {}>>): SelectAggregator => {
+    joins.forEach((join: Join<COLUMN, {}>) => {
       const tableFrom = join.fromColumn.getParent();
       const tableTo = join.toColumn.getParent();
       const { type } = join;
 
-      const selectString = this.generateSelectArray(tableTo, columns).join('');
+      const selectString = this.generateSelectArray(tableTo, Object.values(join.mappedServiceToDb)).join('');
       this._fields.push(', ');
       this._fields.push(selectString);
       this._join.push('\n');
       this._join.push(type);
       this._join.push(' ');
-      this._join.push(tableTo.tableName());
+      this._join.push(tableTo);
       this._join.push('\n');
       this._join.push('ON ');
-      this._join.push(tableFrom.tableName());
+      this._join.push(tableFrom);
       this._join.push('.');
       this._join.push(join.fromColumn.columnName);
       this._join.push(' = ');
-      this._join.push(tableTo.tableName());
+      this._join.push(tableTo);
       this._join.push('.');
       this._join.push(join.toColumn.columnName);
     });
