@@ -5,7 +5,7 @@ import EqWhere from './eqWhere';
 import Var from './var';
 import Expr from './where';
 
-export const eq = <T extends ColumnType>(left: Column<T>,
+const eq = <T extends ColumnType>(left: Column<T>,
   value: any): Expr => new EqWhere(new Var<T>(left), new Const(value));
 
 export default eq;
