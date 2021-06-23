@@ -42,10 +42,11 @@ export default class Migrator {
       queriesToExecute = queriesToExecuteTest;
     }
 
-    Object.entries(queriesToExecute).forEach(async ([key, value]) => {
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const [key, value] of new Map(Object.entries(queriesToExecute))) {
       await value();
       migrationsTable.insert([{ version: +key, createdAt: new Date() }]).returningAll();
-    });
+    }
   };
 
   public getLastOrNull = (list: Array<MigrationsModel>): MigrationsModel | null => {
