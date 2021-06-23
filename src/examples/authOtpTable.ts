@@ -2,30 +2,33 @@ import Column from '../columns/column';
 import ColumnType from '../columns/types/columnType';
 import AbstractTable from '../tables/abstractTable';
 
-export class UsersTable extends AbstractTable<UserModel> {
+export class AuthOtpTable extends AbstractTable<AuthOtpModel> {
   public id = this.int({ name: 'id' }).autoIncrement().primaryKey();
   public phone = this.varchar({ name: 'phone', size: 256 });
-  public fullName = this.varchar({ name: 'full_name', size: 256 }).isNullable();
+  public otp = this.varchar({ name: 'otp', size: 256 });
+  public issuedAt = this.timestamp({ name: 'issued_at' });
   public createdAt = this.timestamp({ name: 'created_at' });
   public updatedAt = this.timestamp({ name: 'updated_at' });
 
   public tableName(): string {
-    return 'users';
+    return 'auth_otp';
   }
 
-  public mapServiceToDb = ():{[name in keyof UserModel]: Column<ColumnType>} => ({
+  public mapServiceToDb = (): {[name in keyof AuthOtpModel]: Column<ColumnType>} => ({
     id: this.id,
     phone: this.phone,
-    fullName: this.fullName,
+    otp: this.otp,
+    issuedAt: this.issuedAt,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
   });
 }
 
-export interface UserModel {
+export interface AuthOtpModel {
   id: number;
   phone: string;
-  fullName: string | null;
+  otp: string;
+  issuedAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
