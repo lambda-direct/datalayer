@@ -6,10 +6,10 @@ import Insert from '../lowLvlBuilders/inserts/insert';
 import TableRequestBuilder from './abstractRequestBuilder';
 
 export default class InsertTRB<T> extends TableRequestBuilder<T> {
-  private _values: T[];
+  private _values: Partial<T>[];
 
   public constructor(
-    values: T[],
+    values: Partial<T>[],
     tableName: string,
     pool: Pool,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },

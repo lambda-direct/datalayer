@@ -35,7 +35,7 @@ export default abstract class AbstractTable<SERVICE> {
     return new UpdateTRB(this.tableName(), this._pool, mappedServiceToDb, this.getColumns());
   };
 
-  public insert = (values: SERVICE[]):
+  public insert = (values: Partial<SERVICE>[]):
   InsertTRB<SERVICE> => new InsertTRB(values, this.tableName(), this._pool,
     this.mapServiceToDb(), this.getColumns());
 

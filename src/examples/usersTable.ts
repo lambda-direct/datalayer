@@ -2,29 +2,32 @@ import Column from '../columns/column';
 import ColumnType from '../columns/types/columnType';
 import AbstractTable from '../tables/abstractTable';
 
-export class UsersTable extends AbstractTable<UsersModel> {
-  public readonly id = this.int({ name: 'id' }).autoIncrement().primaryKey();
-  public readonly name = this.varchar({ name: 'name', size: 256 });
-  public readonly city = this.varchar({ name: 'city', size: 256 });
-  public readonly country = this.varchar({ name: 'country', size: 256 });
+export class UsersTable extends AbstractTable<UserModel> {
+  public static INSTANCE: UsersTable = new UsersTable();
 
-  public mapServiceToDb(): { [name in keyof UsersModel]: Column<ColumnType, {}> } {
-    return {
-      id: this.id,
-      name: this.name,
-      city: this.city,
-      country: this.country,
-    };
-  }
+  public id = this.int({ name: 'id' }).autoIncrement().primaryKey();
+  public phone = this.varchar({ name: 'phone', size: 256 });
+  public fullName = this.varchar({ name: 'full_name', size: 256 }).isNullable();
+  public createdAt = this.timestamp({ name: 'created_at' });
+  public updatedAt = this.timestamp({ name: 'updated_at' });
 
   public tableName(): string {
     return 'users';
   }
+
+  public mapServiceToDb = ():{[name in keyof UserModel]: Column<ColumnType>} => ({
+    id: this.id,
+    phone: this.phone,
+    fullName: this.fullName,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
+  });
 }
 
-export interface UsersModel {
+export interface UserModel {
   id: number;
-  name: string;
-  city: string;
-  country: string;
+  phone: string;
+  fullName: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
