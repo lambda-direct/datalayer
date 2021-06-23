@@ -18,6 +18,7 @@ import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
 export default abstract class AbstractTable<SERVICE> {
   private _pool: Pool;
 
+  // @TODO document, that you should not use arrow functions for abstract classes
   public abstract tableName(): string;
 
   public abstract mapServiceToDb(): {[name in keyof SERVICE]: Column<ColumnType>};

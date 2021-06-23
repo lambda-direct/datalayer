@@ -39,14 +39,14 @@ export default class SelectAggregator extends Aggregator {
       this._join.push('\n');
       this._join.push(type);
       this._join.push(' ');
-      this._join.push(tableTo.tableName());
+      this._join.push(tableTo);
       this._join.push('\n');
       this._join.push('ON ');
-      this._join.push(tableFrom.tableName());
+      this._join.push(tableFrom);
       this._join.push('.');
       this._join.push(join.fromColumn.columnName);
       this._join.push(' = ');
-      this._join.push(tableTo.tableName());
+      this._join.push(tableTo);
       this._join.push('.');
       this._join.push(join.toColumn.columnName);
     });

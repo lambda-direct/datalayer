@@ -34,6 +34,7 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
     queryBuilder.joined([this._join]);
 
     const query = queryBuilder.build();
+    console.log(query);
 
     const result = await this._pool!.query(query);
 

@@ -1,44 +1,30 @@
-// import { AbstractTable, RowMapper } from "../tables/abstractTable";
+import Column from '../columns/column';
+import ColumnType from '../columns/types/columnType';
+import AbstractTable from '../tables/abstractTable';
 
-// export class UsersTable extends AbstractTable<UsersModel, DbUser> {
-//     id = this.int({name: "id"}).autoIncrement().primaryKey()
-//     name = this.varchar({name: "name", size: 256});
-//     city = this.varchar({name: "city", size: 256});
-//     country = this.varchar({name: "country", size: 256});
+export class UsersTable extends AbstractTable<UsersModel> {
+  public readonly id = this.int({ name: 'id' }).autoIncrement().primaryKey();
+  public readonly name = this.varchar({ name: 'name', size: 256 });
+  public readonly city = this.varchar({ name: 'city', size: 256 });
+  public readonly country = this.varchar({ name: 'country', size: 256 });
 
-//     tableName(): string {
-//         return "users";
-//     }
+  public mapServiceToDb(): { [name in keyof UsersModel]: Column<ColumnType, {}> } {
+    return {
+      id: this.id,
+      name: this.name,
+      city: this.city,
+      country: this.country,
+    };
+  }
 
-//     toServiceModel(response: RowMapper): UsersModel {
-//         return {
-//             name: response.getVarchar(this.name),
-//             city: response.getVarchar(this.city),
-//             country: response.getVarchar(this.country),
-//         };
-//     }
+  public tableName(): string {
+    return 'users';
+  }
+}
 
-//     toDbModel(response: UsersModel): DbUser {
-//         return response;
-//     }
-
-//     map(response: RowMapper): UsersModel {
-//         return {
-//             name: response.getVarchar(this.name),
-//             city: response.getVarchar(this.city),
-//             country: response.getVarchar(this.country),
-//         };
-//     }
-// }
-
-// interface DbUser {
-//     name: string;
-//     city: string;
-//     country: string;
-// }
-
-// export interface UsersModel {
-//     name: string;
-//     city: string;
-//     country: string;
-// }
+export interface UsersModel {
+  id: number;
+  name: string;
+  city: string;
+  country: string;
+}
