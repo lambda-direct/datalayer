@@ -8,7 +8,7 @@ export default class Db {
     this._pool = pool;
   }
 
-  public use = <T extends AbstractTable<any>>(table: T): void => {
+  public use = <T extends AbstractTable<{}>>(table: T): void => {
     table.withConnection(this._pool);
   };
 }
