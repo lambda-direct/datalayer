@@ -14,6 +14,7 @@ import InsertTRB from '../builders/highLvlBuilders/insertRequestBuilder';
 import DeleteTRB from '../builders/highLvlBuilders/deleteRequestBuilder';
 import UpdateTRB from '../builders/highLvlBuilders/updateRequestBuilder';
 import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
+import PgBigInt from '../columns/types/pgBigInt';
 
 export default abstract class AbstractTable<SERVICE> {
   private _pool: Pool;
@@ -50,6 +51,9 @@ export default abstract class AbstractTable<SERVICE> {
 
   public int = ({ name }: {name: string}):
   Column<PgInteger> => new Column<PgInteger, {}>(this.tableName(), name, new PgInteger());
+
+  public bigint = ({ name }: {name: string}):
+  Column<PgBigInt> => new Column<PgBigInt, {}>(this.tableName(), name, new PgBigInt());
 
   public decimal = ({ name, precision, scale }:
   {name: string, precision: number, scale: number}):
