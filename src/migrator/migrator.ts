@@ -5,7 +5,7 @@ import SessionWrapper from './sessionWrapper';
 
 export default class Migrator {
   private _db: Db;
-  private migrationsPerVersion: {[key: number]: () => Promise<boolean>} = {};
+  private migrationsPerVersion: Map<number, () => Promise<boolean>> = new Map();
 
   public constructor(db: Db) {
     this._db = db;
@@ -13,10 +13,10 @@ export default class Migrator {
 
   public chain = <M>(version: number,
     migration: (sessionWrapper: SessionWrapper) => M): Migrator => {
-    this.migrationsPerVersion[version] = async () => {
+    this.migrationsPerVersion.set(version, async () => {
       migration(new SessionWrapper(this._db));
       return true;
-    };
+    });
     return this;
   };
 
@@ -28,24 +28,31 @@ export default class Migrator {
 
     const migrations: Array<MigrationsModel> = await migrationsTable.select().all();
     const latestMigration: MigrationsModel | null = this.getLastOrNull(migrations);
-    let queriesToExecute: {[key: number]: () => Promise<boolean>} = this.migrationsPerVersion;
+    let queriesToExecute: Map<number, () => Promise<boolean>> = this.migrationsPerVersion;
 
     if (latestMigration != null) {
-      const queriesToExecuteTest: {[key: number]: () => Promise<boolean>} = {};
+      const queriesToExecuteTest: Map<number, () => Promise<boolean>> = new Map();
 
-      Object.entries(this.migrationsPerVersion).forEach(([key, value]) => {
-        if (+key > latestMigration.version) {
-          queriesToExecuteTest[+key] = value;
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [key, value] of this.migrationsPerVersion) {
+        if (key > latestMigration.version) {
+          queriesToExecuteTest.set(key, value);
         }
-      });
+      }
 
       queriesToExecute = queriesToExecuteTest;
     }
 
     // eslint-disable-next-line no-restricted-syntax
-    for await (const [key, value] of new Map(Object.entries(queriesToExecute))) {
-      await value();
-      migrationsTable.insert([{ version: +key, createdAt: new Date() }]).returningAll();
+    for await (const key of queriesToExecute.keys()) {
+      try {
+        const value = queriesToExecute.get(+key)!;
+        await value();
+        await migrationsTable
+          .insert([{ version: +key, createdAt: new Date() }]).returningAll();
+      } catch (e) {
+        console.log(e);
+      }
     }
   };
 
