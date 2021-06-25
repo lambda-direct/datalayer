@@ -2,7 +2,7 @@ import Column from '../columns/column';
 import ColumnType from '../columns/types/columnType';
 import AbstractTable from './abstractTable';
 
-export default class MigrationsTable extends AbstractTable<MigrationsModel> {
+export class MigrationsTable extends AbstractTable<MigrationsModel> {
   public id = this.int({ name: 'id' }).autoIncrement().primaryKey();
   public version = this.int({ name: 'version' }).unique();
   public created_at = this.timestamp({ name: 'created_at' });

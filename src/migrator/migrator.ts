@@ -1,6 +1,6 @@
 import Create from '../builders/lowLvlBuilders/create';
 import Db from '../db/db';
-import MigrationsTable, { MigrationsModel } from '../tables/migrationsTable';
+import { MigrationsModel, MigrationsTable } from '../tables/migrationsTable';
 import SessionWrapper from './sessionWrapper';
 
 export default class Migrator {
