@@ -1,4 +1,5 @@
 import Create from '../builders/lowLvlBuilders/create';
+import Transaction from '../builders/transaction/transaction';
 import Db from '../db/db';
 import MigrationsTable, { MigrationsModel } from '../tables/migrationsTable';
 import SessionWrapper from './sessionWrapper';
@@ -45,6 +46,8 @@ export default class Migrator {
 
     // eslint-disable-next-line no-restricted-syntax
     for await (const key of queriesToExecute.keys()) {
+      const transaction = new Transaction(this._db._pool);
+      transaction.begin();
       try {
         const value = queriesToExecute.get(+key)!;
         await value();
@@ -52,7 +55,9 @@ export default class Migrator {
           .insert([{ version: +key, createdAt: new Date() }]).returningAll();
       } catch (e) {
         console.log(e);
+        transaction.rollback();
       }
+      transaction.commit();
     }
   };
 
