@@ -10,7 +10,7 @@ export class UsersTable extends AbstractTable<UserModel> {
   public fullName = this.varchar({ name: 'full_name', size: 256 }).isNullable();
   public createdAt = this.timestamp({ name: 'created_at' });
   public updatedAt = this.timestamp({ name: 'updated_at' });
-  public numberr = this.bigint({ name: 'number_bigint' });
+  // public numberr = this.bigint({ name: 'number_bigint' });
 
   public tableName(): string {
     return 'users';
@@ -22,7 +22,7 @@ export class UsersTable extends AbstractTable<UserModel> {
     fullName: this.fullName,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
-    numberr: this.numberr,
+    // numberr: this.numberr,
   });
 }
 
@@ -32,5 +32,5 @@ export interface UserModel {
   fullName: string | null;
   createdAt: Date;
   updatedAt: Date;
-  numberr: number;
+  // numberr: number;
 }

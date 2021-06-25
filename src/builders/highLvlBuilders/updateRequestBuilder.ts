@@ -36,7 +36,6 @@ export default class UpdateTRB<T> extends TableRequestBuilder<T> {
       .set(this._update).filteredBy(this._filter)
       .build();
 
-    console.log(query);
     const result = await this._pool.query(query);
     return QueryResponseMapper.map(this._mappedServiceToDb, result);
   };

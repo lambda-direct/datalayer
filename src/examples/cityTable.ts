@@ -4,7 +4,7 @@ import AbstractTable from '../tables/abstractTable';
 import { UsersTable } from './usersTable';
 
 export class CitiesTable extends AbstractTable<CityModel> {
-  public name = this.timestamp({ name: 'name' });
+  public name = this.timestamp({ name: 'name' }).defaultValue(new Date());
   public page = this.varchar({ name: 'page', size: 256 }).isNullable();
   public userId = this.int({ name: 'user_id' }).references(UsersTable.INSTANCE.id).isNullable();
   public data = this.jsonb<string[]>({ name: 'data' });

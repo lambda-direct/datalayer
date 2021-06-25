@@ -1,24 +1,21 @@
-import { Pool } from 'pg';
+import { SessionWrapper } from '../../migrator';
 
 export default class Transaction {
-  private pool: Pool;
-
-  public constructor(pool: Pool) {
-    this.pool = pool;
+  public constructor(private sessionWrapper: SessionWrapper) {
   }
 
   public begin = async (): Promise<Transaction> => {
-    await this.pool.query('BEGIN;');
+    await this.sessionWrapper.execute('BEGIN;');
     return this;
   };
 
   public commit = async (): Promise<Transaction> => {
-    await this.pool.query('COMMIT;');
+    await this.sessionWrapper.execute('COMMIT;');
     return this;
   };
 
   public rollback = async (): Promise<Transaction> => {
-    await this.pool.query('ROLLBACK;');
+    await this.sessionWrapper.execute('ROLLBACK;');
     return this;
   };
 }

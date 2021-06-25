@@ -39,7 +39,6 @@ export default class InsertTRB<T> extends TableRequestBuilder<T> {
 
     // @TODO refactor!!
     const query = queryBuilder.values(mappedRows, mapper).build();
-    console.log(query);
     const result = await this._pool!.query(query);
     return QueryResponseMapper.map(this._mappedServiceToDb, result);
   };
