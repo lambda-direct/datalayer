@@ -19,7 +19,7 @@
     // "emitDecoratorMetadata": true,
     // "isolatedModules": true,
     "skipLibCheck": true,
-    "moduleResolution": "Node",
+    // "moduleResolution": "Node",
     // "noImplicitAny": true,
     // "sourceMap": true,
     // "noFallthroughCasesInSwitch": true, 

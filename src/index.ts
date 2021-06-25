@@ -1,1 +1,1 @@
-// s
+export * from './db';
