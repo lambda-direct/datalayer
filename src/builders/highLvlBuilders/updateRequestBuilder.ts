@@ -1,6 +1,6 @@
-import { Pool } from 'pg';
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import Session from '../../db/session';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import Update from '../lowLvlBuilders/updates/update';
 import UpdateExpr from '../requestBuilders/updates/updates';
@@ -13,11 +13,11 @@ export default class UpdateTRB<T> extends TableRequestBuilder<T> {
 
   public constructor(
     tableName: string,
-    pool: Pool,
+    session: Session,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
     columns: Column<ColumnType, {}>[],
   ) {
-    super(tableName, pool, mappedServiceToDb, columns);
+    super(tableName, session, mappedServiceToDb, columns);
   }
 
   public where = (expr: Expr): UpdateTRB<T> => {
@@ -36,7 +36,7 @@ export default class UpdateTRB<T> extends TableRequestBuilder<T> {
       .set(this._update).filteredBy(this._filter)
       .build();
 
-    const result = await this._pool.query(query);
+    const result = await this._session.execute(query);
     return QueryResponseMapper.map(this._mappedServiceToDb, result);
   };
 }

@@ -1,6 +1,6 @@
-import { Pool } from 'pg';
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import Session from '../../db/session';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import Insert from '../lowLvlBuilders/inserts/insert';
 import TableRequestBuilder from './abstractRequestBuilder';
@@ -11,11 +11,11 @@ export default class InsertTRB<T> extends TableRequestBuilder<T> {
   public constructor(
     values: Partial<T>[],
     tableName: string,
-    pool: Pool,
+    session: Session,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
     columns: Column<ColumnType, {}>[],
   ) {
-    super(tableName, pool, mappedServiceToDb, columns);
+    super(tableName, session, mappedServiceToDb, columns);
     this._values = values;
   }
 
@@ -37,9 +37,9 @@ export default class InsertTRB<T> extends TableRequestBuilder<T> {
       mappedRows.push(mappedValue);
     });
 
-    // @TODO refactor!!
+    // @TODO refactor values() part!!
     const query = queryBuilder.values(mappedRows, mapper).build();
-    const result = await this._pool!.query(query);
+    const result = await this._session.execute(query);
     return QueryResponseMapper.map(this._mappedServiceToDb, result);
   };
 }

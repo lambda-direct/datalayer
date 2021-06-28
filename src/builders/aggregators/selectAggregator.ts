@@ -20,7 +20,7 @@ export default class SelectAggregator extends Aggregator {
   };
 
   public appendFrom = (tableName: string): SelectAggregator => {
-    this._from.push(' FROM ');
+    this._from.push('FROM ');
     this._from.push(tableName);
     return this;
   };
@@ -60,7 +60,9 @@ export default class SelectAggregator extends Aggregator {
     this._select.push(this._from.join(''));
     this._select.push('\n');
     this._select.push(this._join.join(''));
-    this._select.push('\n');
+    if (this._join.length > 0) {
+      this._select.push('\n');
+    }
     this._select.push(this._filters.join(''));
 
     return this._select.join('');
