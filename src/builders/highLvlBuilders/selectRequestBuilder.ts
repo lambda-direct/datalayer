@@ -2,7 +2,7 @@ import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
-import DbSelectError from '../../errors/dbError';
+import { DatabaseSelectError } from '../../errors/dbErrors';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import SelectTRBWithJoin from '../joinBuilders/builders/selectWithJoin';
 import Join from '../joinBuilders/join';
@@ -44,12 +44,11 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
     } catch (e) {
       throw new BuilderError(BuilderType.SELECT, this._tableName, this._columns, e, this._filter);
     }
-    query = 'SELECT * FROM test';
-    this._tableName = 'test';
-    const result = await this._session.executeTest(query);
+
+    const result = await this._session.execute(query);
     if (result.isLeft()) {
       const { reason } = result.value;
-      throw new DbSelectError(this._tableName, reason, query);
+      throw new DatabaseSelectError(this._tableName, reason, query);
     } else {
       return QueryResponseMapper.map(this._mappedServiceToDb, result.value);
     }

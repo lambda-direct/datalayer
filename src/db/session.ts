@@ -8,9 +8,6 @@ export default class Session {
   }
 
   public execute = async (query: string)
-  : Promise<QueryResult<any>> => this.pool.query(query);
-
-  public executeTest = async (query: string)
   : Promise<Either<Failure, QueryResult<any>>> => {
     try {
       return right(await this.pool.query(query));

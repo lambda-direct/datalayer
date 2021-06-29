@@ -1,6 +1,8 @@
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
+import BuilderError, { BuilderType } from '../../errors/builderError';
+import { DatabaseInsertError } from '../../errors/dbErrors';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import Insert from '../lowLvlBuilders/inserts/insert';
 import TableRequestBuilder from './abstractRequestBuilder';
@@ -38,8 +40,18 @@ export default class InsertTRB<T> extends TableRequestBuilder<T> {
     });
 
     // @TODO refactor values() part!!
-    const query = queryBuilder.values(mappedRows, mapper).build();
+    let query = '';
+    try {
+      query = queryBuilder.values(mappedRows, mapper).build();
+    } catch (e) {
+      throw new BuilderError(BuilderType.INSERT, this._tableName, this._columns, e);
+    }
     const result = await this._session.execute(query);
-    return QueryResponseMapper.map(this._mappedServiceToDb, result);
+    if (result.isLeft()) {
+      const { reason } = result.value;
+      throw new DatabaseInsertError(this._tableName, reason, query);
+    } else {
+      return QueryResponseMapper.map(this._mappedServiceToDb, result.value);
+    }
   };
 }

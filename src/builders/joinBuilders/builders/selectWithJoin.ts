@@ -1,6 +1,8 @@
 import Column from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import Session from '../../../db/session';
+import BuilderError, { BuilderType } from '../../../errors/builderError';
+import { DatabaseSelectError } from '../../../errors/dbErrors';
 import QueryResponseMapper from '../../../mappers/responseMapper';
 import Select from '../../lowLvlBuilders/selects/select';
 import Expr from '../../requestBuilders/where/where';
@@ -33,15 +35,25 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
 
     queryBuilder.joined([this._join]);
 
-    const query = queryBuilder.build();
-
-    const result = await this._session.execute(query);
+    let query = '';
+    try {
+      query = queryBuilder.build();
+    } catch (e) {
+      throw new BuilderError(BuilderType.JOINED_SELECT,
+        this._tableName, Object.values(this._columns), e, this._filter);
+    }
 
     const parent:{ [name in keyof T1]: Column<ColumnType, {}>; } = this._join.mappedServiceToDb;
 
-    const response = QueryResponseMapper.map(this._columns, result);
-    const objects = QueryResponseMapper.map(parent, result);
+    const result = await this._session.execute(query);
+    if (result.isLeft()) {
+      const { reason } = result.value;
+      throw new DatabaseSelectError(this._tableName, reason, query);
+    } else {
+      const response = QueryResponseMapper.map(this._columns, result.value);
+      const objects = QueryResponseMapper.map(parent, result.value);
 
-    return new SelectResponseJoin(response, objects);
+      return new SelectResponseJoin(response, objects);
+    }
   };
 }

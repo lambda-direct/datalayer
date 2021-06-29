@@ -1,6 +1,8 @@
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
+import BuilderError, { BuilderType } from '../../errors/builderError';
+import { DatabaseDeleteError } from '../../errors/dbErrors';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import Delete from '../lowLvlBuilders/delets/delete';
 import Expr from '../requestBuilders/where/where';
@@ -31,9 +33,19 @@ export default class DeleteTRB<T> extends TableRequestBuilder<T> {
       queryBuilder.filteredBy(this._filter);
     }
 
-    const query = queryBuilder.build();
+    let query = '';
+    try {
+      query = queryBuilder.build();
+    } catch (e) {
+      throw new BuilderError(BuilderType.DELETE, this._tableName, this._columns, e, this._filter);
+    }
 
     const result = await this._session.execute(query);
-    return QueryResponseMapper.map(this._mappedServiceToDb, result);
+    if (result.isLeft()) {
+      const { reason } = result.value;
+      throw new DatabaseDeleteError(this._tableName, reason, query);
+    } else {
+      return QueryResponseMapper.map(this._mappedServiceToDb, result.value);
+    }
   };
 }
