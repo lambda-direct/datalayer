@@ -1,25 +1,25 @@
 import Create from '../builders/lowLvlBuilders/create';
 import Transaction from '../builders/transaction/transaction';
 import Db from '../db/db';
+import Session from '../db/session';
 import { MigrationsModel, MigrationsTable } from '../tables/migrationsTable';
-import SessionWrapper from './sessionWrapper';
 
 export default class Migrator {
   private _db: Db;
   private migrationsPerVersion: Map<number,
-  (sessionWrapper: SessionWrapper) => Promise<void>> = new Map();
+  (session: Session) => Promise<void>> = new Map();
 
-  private sessionWrapper: SessionWrapper;
+  private session: Session;
 
   public constructor(db: Db) {
     this._db = db;
-    this.sessionWrapper = new SessionWrapper(this._db);
+    this.session = db.session();
   }
 
   public chain = (version: number,
-    migration: (sessionWrapper: SessionWrapper) => Promise<void>): Migrator => {
-    this.migrationsPerVersion.set(version, async (sessionWrapper) => {
-      await migration(sessionWrapper);
+    migration: (session: Session) => Promise<void>): Migrator => {
+    this.migrationsPerVersion.set(version, async (session) => {
+      await migration(session);
     });
     return this;
   };
@@ -28,16 +28,16 @@ export default class Migrator {
     const migrationsTable = new MigrationsTable();
     this._db.use(migrationsTable);
 
-    await this.sessionWrapper.execute(Create.table(migrationsTable).build());
+    await this.session.execute(Create.table(migrationsTable).build());
 
     const migrations: Array<MigrationsModel> = await migrationsTable.select().all();
     const latestMigration: MigrationsModel | null = this.getLastOrNull(migrations);
     let queriesToExecute: Map<number,
-    (sessionWrapper: SessionWrapper) => Promise<void>> = this.migrationsPerVersion;
+    (session: Session) => Promise<void>> = this.migrationsPerVersion;
 
     if (latestMigration != null) {
       const queriesToExecuteTest: Map<number,
-      (sessionWrapper: SessionWrapper) => Promise<void>> = new Map();
+      (session: Session) => Promise<void>> = new Map();
 
       // eslint-disable-next-line no-restricted-syntax
       for (const [key, value] of this.migrationsPerVersion) {
@@ -49,13 +49,13 @@ export default class Migrator {
       queriesToExecute = queriesToExecuteTest;
     }
 
-    const transaction = new Transaction(this.sessionWrapper);
+    const transaction = new Transaction(this.session);
     await transaction.begin();
     // eslint-disable-next-line no-restricted-syntax
     for await (const key of queriesToExecute.keys()) {
       try {
         const value = queriesToExecute.get(+key)!;
-        await value(this.sessionWrapper);
+        await value(this.session);
         await migrationsTable
           .insert([{ version: +key, createdAt: new Date() }]).returningAll();
       } catch (e) {
@@ -75,39 +75,5 @@ export default class Migrator {
       latestMigration = list[list.length - 1];
     }
     return latestMigration;
-  };
-
-  private forLoop = async (migrationsTable: MigrationsTable,
-    queriesToExecute: Map<number, () => Promise<void>>) => {
-    queriesToExecute.forEach(async (value, i) => {
-      const transaction = new Transaction(this.sessionWrapper);
-      transaction.begin();
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        await value();
-        // eslint-disable-next-line no-await-in-loop
-        await migrationsTable.insert([{ version: i, createdAt: new Date() }]).returningAll();
-      } catch (e) {
-        transaction.rollback();
-        throw new Error(`Migration chain ${i} was not migrated sucessfully.\nError: ${e.message}`);
-      }
-      transaction.commit();
-    });
-    // for (let i = 0; i < queriesToExecute.size; i += 1) {
-    //   const value = queriesToExecute.get(i)!;
-    //   const transaction = new Transaction(this._db._pool);
-    //   transaction.begin();
-    //   try {
-    //     // eslint-disable-next-line no-await-in-loop
-    //     await value();
-    //     // eslint-disable-next-line no-await-in-loop
-    //     await migrationsTable.insert([{ version: i, createdAt: new Date() }]).returningAll();
-    //   } catch (e) {
-    //     transaction.rollback();
-    //     throw new Error(`Migration chain ${i}
-    // was not migrated sucessfully.\nError: ${e.message}`);
-    //   }
-    //   transaction.commit();
-    // }
   };
 }

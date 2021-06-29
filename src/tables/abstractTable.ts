@@ -1,4 +1,3 @@
-import { Pool } from 'pg';
 import PgVarChar from '../columns/types/pgVarChar';
 import PgTimestamp from '../columns/types/pgTimestamp';
 import PgInteger from '../columns/types/pgInteger';
@@ -15,32 +14,33 @@ import DeleteTRB from '../builders/highLvlBuilders/deleteRequestBuilder';
 import UpdateTRB from '../builders/highLvlBuilders/updateRequestBuilder';
 import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
 import PgBigInt from '../columns/types/pgBigInt';
+import Session from '../db/session';
 
 export default abstract class AbstractTable<SERVICE> {
-  private _pool: Pool;
+  private _session: Session;
 
   // @TODO document, that you should not use arrow functions for abstract classes
   public abstract tableName(): string;
 
   public abstract mapServiceToDb(): {[name in keyof SERVICE]: Column<ColumnType>};
 
-  public withConnection = (connection: Pool) => {
-    this._pool = connection;
+  public withConnection = (connection: Session) => {
+    this._session = connection;
   };
 
   public select = (): SelectTRB<SERVICE> => new SelectTRB(this.tableName(),
-    this._pool, this.mapServiceToDb(), this.getColumns());
+    this._session, this.mapServiceToDb(), this.getColumns());
 
   public update = (): UpdateTRB<SERVICE> => {
     const mappedServiceToDb = this.mapServiceToDb();
-    return new UpdateTRB(this.tableName(), this._pool, mappedServiceToDb, this.getColumns());
+    return new UpdateTRB(this.tableName(), this._session, mappedServiceToDb, this.getColumns());
   };
 
   public insert = (values: Partial<SERVICE>[]):
-  InsertTRB<SERVICE> => new InsertTRB(values, this.tableName(), this._pool,
+  InsertTRB<SERVICE> => new InsertTRB(values, this.tableName(), this._session,
     this.mapServiceToDb(), this.getColumns());
 
-  public delete = (): DeleteTRB<SERVICE> => new DeleteTRB(this.tableName(), this._pool,
+  public delete = (): DeleteTRB<SERVICE> => new DeleteTRB(this.tableName(), this._session,
     this.mapServiceToDb(), this.getColumns());
 
   public varchar = ({ name, size }: {name: string, size: number}):

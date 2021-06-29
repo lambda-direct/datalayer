@@ -1,21 +1,21 @@
-import { SessionWrapper } from '../../migrator';
+import Session from '../../db/session';
 
 export default class Transaction {
-  public constructor(private sessionWrapper: SessionWrapper) {
+  public constructor(private session: Session) {
   }
 
   public begin = async (): Promise<Transaction> => {
-    await this.sessionWrapper.execute('BEGIN;');
+    await this.session.execute('BEGIN;');
     return this;
   };
 
   public commit = async (): Promise<Transaction> => {
-    await this.sessionWrapper.execute('COMMIT;');
+    await this.session.execute('COMMIT;');
     return this;
   };
 
   public rollback = async (): Promise<Transaction> => {
-    await this.sessionWrapper.execute('ROLLBACK;');
+    await this.session.execute('ROLLBACK;');
     return this;
   };
 }

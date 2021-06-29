@@ -1,6 +1,8 @@
-import { Pool } from 'pg';
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import Session from '../../db/session';
+import BuilderError, { BuilderType } from '../../errors/builderError';
+import { DatabaseSelectError } from '../../errors/dbErrors';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import SelectTRBWithJoin from '../joinBuilders/builders/selectWithJoin';
 import Join from '../joinBuilders/join';
@@ -13,11 +15,11 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
 
   public constructor(
     tableName: string,
-    pool: Pool,
+    session: Session,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
     columns: Column<ColumnType, {}>[],
   ) {
-    super(tableName, pool, mappedServiceToDb, columns);
+    super(tableName, session, mappedServiceToDb, columns);
   }
 
   public where = (expr: Expr): SelectTRB<T> => {
@@ -27,11 +29,8 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
 
   public join = <COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1>):
   SelectTRBWithJoin<COLUMN, T1,
-  T> => new SelectTRBWithJoin(this._tableName, this._pool,
+  T> => new SelectTRBWithJoin(this._tableName, this._session,
     this._filter, join, this._mappedServiceToDb);
-  // if (join.toColumn.getParent() === this._table) {
-  //   throw Error('We are not supporting self joining in this version');
-  // }
 
   public execute = async (): Promise<T[]> => {
     const queryBuilder = Select.from(this._tableName, this._columns);
@@ -39,10 +38,19 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
       queryBuilder.filteredBy(this._filter);
     }
 
-    const query = queryBuilder.build();
-    // TODO Add logger true/false for sql query logging?
+    let query = '';
+    try {
+      query = queryBuilder.build();
+    } catch (e) {
+      throw new BuilderError(BuilderType.SELECT, this._tableName, this._columns, e, this._filter);
+    }
 
-    const result = await this._pool!.query(query);
-    return QueryResponseMapper.map(this._mappedServiceToDb, result);
+    const result = await this._session.execute(query);
+    if (result.isLeft()) {
+      const { reason } = result.value;
+      throw new DatabaseSelectError(this._tableName, reason, query);
+    } else {
+      return QueryResponseMapper.map(this._mappedServiceToDb, result.value);
+    }
   };
 }
