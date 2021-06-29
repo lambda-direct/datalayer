@@ -3,6 +3,7 @@ import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseSelectError } from '../../errors/dbErrors';
+import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import SelectTRBWithJoin from '../joinBuilders/builders/selectWithJoin';
 import Join from '../joinBuilders/join';
@@ -18,8 +19,9 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
     session: Session,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
     columns: Column<ColumnType, {}>[],
+    logger: BaseLogger,
   ) {
-    super(tableName, session, mappedServiceToDb, columns);
+    super(tableName, session, mappedServiceToDb, columns, logger);
   }
 
   public where = (expr: Expr): SelectTRB<T> => {
@@ -44,6 +46,8 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
     } catch (e) {
       throw new BuilderError(BuilderType.SELECT, this._tableName, this._columns, e, this._filter);
     }
+
+    this._logger.info(`Select query from Console Logger implementation:\n ${query}`);
 
     const result = await this._session.execute(query);
     if (result.isLeft()) {

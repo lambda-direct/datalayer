@@ -25,8 +25,7 @@ export default class Migrator {
   };
 
   public execute = async (): Promise<boolean> => {
-    const migrationsTable = new MigrationsTable();
-    this._db.use(migrationsTable);
+    const migrationsTable = new MigrationsTable(this._db);
 
     await this.session.execute(Create.table(migrationsTable).build());
 

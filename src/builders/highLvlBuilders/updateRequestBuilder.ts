@@ -3,6 +3,7 @@ import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseUpdateError } from '../../errors/dbErrors';
+import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import Update from '../lowLvlBuilders/updates/update';
 import UpdateExpr from '../requestBuilders/updates/updates';
@@ -18,8 +19,9 @@ export default class UpdateTRB<T> extends TableRequestBuilder<T> {
     session: Session,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
     columns: Column<ColumnType, {}>[],
+    logger: BaseLogger,
   ) {
-    super(tableName, session, mappedServiceToDb, columns);
+    super(tableName, session, mappedServiceToDb, columns, logger);
   }
 
   public where = (expr: Expr): UpdateTRB<T> => {

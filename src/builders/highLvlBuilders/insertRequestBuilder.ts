@@ -3,6 +3,7 @@ import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseInsertError } from '../../errors/dbErrors';
+import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import Insert from '../lowLvlBuilders/inserts/insert';
 import TableRequestBuilder from './abstractRequestBuilder';
@@ -16,8 +17,9 @@ export default class InsertTRB<T> extends TableRequestBuilder<T> {
     session: Session,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
     columns: Column<ColumnType, {}>[],
+    logger: BaseLogger,
   ) {
-    super(tableName, session, mappedServiceToDb, columns);
+    super(tableName, session, mappedServiceToDb, columns, logger);
     this._values = values;
   }
 

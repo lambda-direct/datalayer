@@ -3,6 +3,7 @@ import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseDeleteError } from '../../errors/dbErrors';
+import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import Delete from '../lowLvlBuilders/delets/delete';
 import Expr from '../requestBuilders/where/where';
@@ -16,8 +17,9 @@ export default class DeleteTRB<T> extends TableRequestBuilder<T> {
     session: Session,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
     columns: Column<ColumnType, {}>[],
+    logger: BaseLogger,
   ) {
-    super(tableName, session, mappedServiceToDb, columns);
+    super(tableName, session, mappedServiceToDb, columns, logger);
   }
 
   public where = (expr: Expr): DeleteTRB<T> => {
