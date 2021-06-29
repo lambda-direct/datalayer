@@ -106,3 +106,4 @@ web_modules/
 dist
 .DS_Store
 publi.sh
+src/test.ts
