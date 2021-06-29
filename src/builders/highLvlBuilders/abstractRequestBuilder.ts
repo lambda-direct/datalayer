@@ -1,20 +1,20 @@
-import { Pool } from 'pg';
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import Session from '../../db/session';
 
 export default abstract class TableRequestBuilder<T> {
   protected _tableName: string;
-  protected _pool: Pool;
+  protected _session: Session;
   protected _mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; };
   protected _columns: Column<ColumnType, {}>[];
 
   public constructor(tableName: string,
-    pool: Pool,
+    session: Session,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
     columns: Column<ColumnType, {}>[]) {
     this._mappedServiceToDb = mappedServiceToDb;
     this._tableName = tableName;
-    this._pool = pool;
+    this._session = session;
     this._columns = columns;
   }
 

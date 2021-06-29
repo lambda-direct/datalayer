@@ -1,6 +1,8 @@
-import { Pool } from 'pg';
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import Session from '../../db/session';
+import BuilderError, { BuilderType } from '../../errors/builderError';
+import { DatabaseUpdateError } from '../../errors/dbErrors';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import Update from '../lowLvlBuilders/updates/update';
 import UpdateExpr from '../requestBuilders/updates/updates';
@@ -13,11 +15,11 @@ export default class UpdateTRB<T> extends TableRequestBuilder<T> {
 
   public constructor(
     tableName: string,
-    pool: Pool,
+    session: Session,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
     columns: Column<ColumnType, {}>[],
   ) {
-    super(tableName, pool, mappedServiceToDb, columns);
+    super(tableName, session, mappedServiceToDb, columns);
   }
 
   public where = (expr: Expr): UpdateTRB<T> => {
@@ -31,12 +33,22 @@ export default class UpdateTRB<T> extends TableRequestBuilder<T> {
   };
 
   public execute = async (): Promise<T[]> => {
-    const query: string = Update.in(this._tableName)
-      .columns(this._columns)
-      .set(this._update).filteredBy(this._filter)
-      .build();
+    let query = '';
+    try {
+      query = Update.in(this._tableName)
+        .columns(this._columns)
+        .set(this._update).filteredBy(this._filter)
+        .build();
+    } catch (e) {
+      throw new BuilderError(BuilderType.UPDATE, this._tableName, this._columns, e, this._filter);
+    }
 
-    const result = await this._pool.query(query);
-    return QueryResponseMapper.map(this._mappedServiceToDb, result);
+    const result = await this._session.execute(query);
+    if (result.isLeft()) {
+      const { reason } = result.value;
+      throw new DatabaseUpdateError(this._tableName, reason, query);
+    } else {
+      return QueryResponseMapper.map(this._mappedServiceToDb, result.value);
+    }
   };
 }
