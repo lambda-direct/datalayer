@@ -42,7 +42,7 @@ export default abstract class AbstractTable<SERVICE> {
   };
 
   public select = (): SelectTRB<SERVICE> => {
-    if (!this._session || !this._logger) {
+    if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
 
@@ -51,7 +51,7 @@ export default abstract class AbstractTable<SERVICE> {
   };
 
   public update = (): UpdateTRB<SERVICE> => {
-    if (!this._session || !this._logger) {
+    if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
     const mappedServiceToDb = this.mapServiceToDb();
@@ -61,7 +61,7 @@ export default abstract class AbstractTable<SERVICE> {
 
   public insert = (values: Partial<SERVICE>[]):
   InsertTRB<SERVICE> => {
-    if (!this._session || !this._logger) {
+    if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
     return new InsertTRB(values, this.tableName(), this._session,
@@ -69,7 +69,7 @@ export default abstract class AbstractTable<SERVICE> {
   };
 
   public delete = (): DeleteTRB<SERVICE> => {
-    if (!this._session || !this._logger) {
+    if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
     return new DeleteTRB(this.tableName(), this._session,

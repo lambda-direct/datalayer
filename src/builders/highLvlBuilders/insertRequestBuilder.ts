@@ -48,6 +48,11 @@ export default class InsertTRB<T> extends TableRequestBuilder<T> {
     } catch (e) {
       throw new BuilderError(BuilderType.INSERT, this._tableName, this._columns, e);
     }
+
+    if (this._logger) {
+      this._logger.info(`Inserting to ${this._tableName} using query:\n ${query}`);
+    }
+
     const result = await this._session.execute(query);
     if (result.isLeft()) {
       const { reason } = result.value;

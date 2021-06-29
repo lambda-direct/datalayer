@@ -47,7 +47,9 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
       throw new BuilderError(BuilderType.SELECT, this._tableName, this._columns, e, this._filter);
     }
 
-    this._logger.info(`Select query from Console Logger implementation:\n ${query}`);
+    if (this._logger) {
+      this._logger.info(`Selecting from ${this._tableName} using query:\n ${query}`);
+    }
 
     const result = await this._session.execute(query);
     if (result.isLeft()) {

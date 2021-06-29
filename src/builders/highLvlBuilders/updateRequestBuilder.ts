@@ -45,6 +45,9 @@ export default class UpdateTRB<T> extends TableRequestBuilder<T> {
       throw new BuilderError(BuilderType.UPDATE, this._tableName, this._columns, e, this._filter);
     }
 
+    if (this._logger) {
+      this._logger.info(`Updating ${this._tableName} using query:\n ${query}`);
+    }
     const result = await this._session.execute(query);
     if (result.isLeft()) {
       const { reason } = result.value;
