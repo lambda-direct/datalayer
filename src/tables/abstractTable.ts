@@ -18,12 +18,14 @@ import Session from '../db/session';
 import BaseLogger from '../logger/abstractLogger';
 import { Db } from '../db';
 
+type Stub = {};
+
 export default abstract class AbstractTable<SERVICE> {
   private _session: Session;
   private _logger: BaseLogger;
 
-  public constructor(db?: Db) {
-    if (db) {
+  public constructor(db: Db | Stub) {
+    if (db instanceof Db) {
       this._session = db.session();
       this._logger = db.logger();
     } else {
@@ -59,7 +61,16 @@ export default abstract class AbstractTable<SERVICE> {
       this.getColumns(), this._logger);
   };
 
-  public insert = (values: Partial<SERVICE>[]):
+  public insert = (value: Partial<SERVICE>):
+  InsertTRB<SERVICE> => {
+    if (!this._session) {
+      throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
+    }
+    return new InsertTRB([value], this.tableName(), this._session,
+      this.mapServiceToDb(), this.getColumns(), this._logger);
+  };
+
+  public insertMany = (values: Partial<SERVICE>[]):
   InsertTRB<SERVICE> => {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);

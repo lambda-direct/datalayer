@@ -23,9 +23,11 @@ export default class InsertTRB<T> extends TableRequestBuilder<T> {
     this._values = values;
   }
 
-  public returningAll = async () => this.execute();
+  public execute = async () => {
+    this._execute();
+  };
 
-  protected execute = async (): Promise<T[]> => {
+  protected _execute = async (): Promise<T[]> => {
     const queryBuilder = Insert.into(this._tableName, this._columns);
     if (!this._values) throw Error('Values should be provided firestly\nExample: table.values().execute()');
 

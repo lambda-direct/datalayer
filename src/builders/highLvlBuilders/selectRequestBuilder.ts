@@ -34,7 +34,9 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
   T> => new SelectTRBWithJoin(this._tableName, this._session,
     this._filter, join, this._mappedServiceToDb);
 
-  public execute = async (): Promise<T[]> => {
+  public execute = async () => this._execute();
+
+  protected _execute = async (): Promise<T[]> => {
     const queryBuilder = Select.from(this._tableName, this._columns);
     if (this._filter) {
       queryBuilder.filteredBy(this._filter);

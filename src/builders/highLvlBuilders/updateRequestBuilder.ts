@@ -34,7 +34,11 @@ export default class UpdateTRB<T> extends TableRequestBuilder<T> {
     return this;
   };
 
-  public execute = async (): Promise<T[]> => {
+  public execute = async () => {
+    this._execute();
+  };
+
+  protected _execute = async (): Promise<T[]> => {
     let query = '';
     try {
       query = Update.in(this._tableName)

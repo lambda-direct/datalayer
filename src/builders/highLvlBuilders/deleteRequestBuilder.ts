@@ -27,9 +27,11 @@ export default class DeleteTRB<T> extends TableRequestBuilder<T> {
     return this;
   };
 
-  public returningAll = async () => this.execute();
+  public execute = async () => {
+    this._execute();
+  };
 
-  protected execute = async (): Promise<T[]> => {
+  protected _execute = async (): Promise<T[]> => {
     const queryBuilder = Delete.from(this._tableName);
     if (this._filter) {
       queryBuilder.filteredBy(this._filter);

@@ -22,13 +22,13 @@ export default abstract class TableRequestBuilder<T> {
     this._logger = logger;
   }
 
-  public all = async (): Promise<T[]> => this.execute();
+  public all = async (): Promise<T[]> => this._execute();
 
   public first = async (): Promise<T> => {
-    const executionRes = await this.execute();
+    const executionRes = await this._execute();
     // TODO add checks for undefined or null
     return executionRes[0];
   };
 
-  protected abstract execute(): Promise<Array<T>>;
+  protected abstract _execute(): Promise<Array<T>>;
 }

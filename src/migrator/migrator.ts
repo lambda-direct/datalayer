@@ -56,7 +56,7 @@ export default class Migrator {
         const value = queriesToExecute.get(+key)!;
         await value(this.session);
         await migrationsTable
-          .insert([{ version: +key, createdAt: new Date() }]).returningAll();
+          .insert({ version: +key, createdAt: new Date() }).all();
       } catch (e) {
         await transaction.rollback();
         throw new Error(`Migration chain ${key} was not migrated sucessfully.\nMessage: ${e.message}`);
