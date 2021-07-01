@@ -3,6 +3,7 @@ import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseSelectError } from '../../errors/dbErrors';
+import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import SelectTRBWithJoin from '../joinBuilders/builders/selectWithJoin';
 import Join from '../joinBuilders/join';
@@ -18,8 +19,9 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
     session: Session,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
     columns: Column<ColumnType, {}>[],
+    logger: BaseLogger,
   ) {
-    super(tableName, session, mappedServiceToDb, columns);
+    super(tableName, session, mappedServiceToDb, columns, logger);
   }
 
   public where = (expr: Expr): SelectTRB<T> => {
@@ -32,7 +34,9 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
   T> => new SelectTRBWithJoin(this._tableName, this._session,
     this._filter, join, this._mappedServiceToDb);
 
-  public execute = async (): Promise<T[]> => {
+  public execute = async () => this._execute();
+
+  protected _execute = async (): Promise<T[]> => {
     const queryBuilder = Select.from(this._tableName, this._columns);
     if (this._filter) {
       queryBuilder.filteredBy(this._filter);
@@ -43,6 +47,10 @@ export default class SelectTRB<T> extends TableRequestBuilder<T> {
       query = queryBuilder.build();
     } catch (e) {
       throw new BuilderError(BuilderType.SELECT, this._tableName, this._columns, e, this._filter);
+    }
+
+    if (this._logger) {
+      this._logger.info(`Selecting from ${this._tableName} using query:\n ${query}`);
     }
 
     const result = await this._session.execute(query);

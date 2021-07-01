@@ -3,7 +3,7 @@ import ColumnType from '../columns/types/columnType';
 import AbstractTable from '../tables/abstractTable';
 
 export class UsersTable extends AbstractTable<UserModel> {
-  public static INSTANCE: UsersTable = new UsersTable();
+  public static INSTANCE: UsersTable = new UsersTable({});
 
   public id = this.int({ name: 'id' }).autoIncrement().primaryKey();
   public phone = this.varchar({ name: 'phone', size: 256 });

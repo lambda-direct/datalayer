@@ -15,34 +15,77 @@ import UpdateTRB from '../builders/highLvlBuilders/updateRequestBuilder';
 import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
 import PgBigInt from '../columns/types/pgBigInt';
 import Session from '../db/session';
-// import PgEnum from '../columns/types/pgEnum';
+import BaseLogger from '../logger/abstractLogger';
+import { Db } from '../db';
+
+type Stub = {};
 
 export default abstract class AbstractTable<SERVICE> {
   private _session: Session;
+  private _logger: BaseLogger;
+
+  public constructor(db: Db | Stub) {
+    if (db instanceof Db) {
+      this._session = db.session();
+      this._logger = db.logger();
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(`\n--------\nWARNING: If you are not using static instance of ${this.constructor.name} class, make sure you have provided db in constructor\n--------\n`);
+    }
+  }
 
   // @TODO document, that you should not use arrow functions for abstract classes
   public abstract tableName(): string;
 
   public abstract mapServiceToDb(): {[name in keyof SERVICE]: Column<ColumnType>};
 
-  public withConnection = (connection: Session) => {
-    this._session = connection;
+  public withLogger = (logger: BaseLogger) => {
+    this._logger = logger;
   };
 
-  public select = (): SelectTRB<SERVICE> => new SelectTRB(this.tableName(),
-    this._session, this.mapServiceToDb(), this.getColumns());
+  public select = (): SelectTRB<SERVICE> => {
+    if (!this._session) {
+      throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
+    }
+
+    return new SelectTRB(this.tableName(),
+      this._session, this.mapServiceToDb(), this.getColumns(), this._logger);
+  };
 
   public update = (): UpdateTRB<SERVICE> => {
+    if (!this._session) {
+      throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
+    }
     const mappedServiceToDb = this.mapServiceToDb();
-    return new UpdateTRB(this.tableName(), this._session, mappedServiceToDb, this.getColumns());
+    return new UpdateTRB(this.tableName(), this._session, mappedServiceToDb,
+      this.getColumns(), this._logger);
   };
 
-  public insert = (values: Partial<SERVICE>[]):
-  InsertTRB<SERVICE> => new InsertTRB(values, this.tableName(), this._session,
-    this.mapServiceToDb(), this.getColumns());
+  public insert = (value: Partial<SERVICE>):
+  InsertTRB<SERVICE> => {
+    if (!this._session) {
+      throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
+    }
+    return new InsertTRB([value], this.tableName(), this._session,
+      this.mapServiceToDb(), this.getColumns(), this._logger);
+  };
 
-  public delete = (): DeleteTRB<SERVICE> => new DeleteTRB(this.tableName(), this._session,
-    this.mapServiceToDb(), this.getColumns());
+  public insertMany = (values: Partial<SERVICE>[]):
+  InsertTRB<SERVICE> => {
+    if (!this._session) {
+      throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
+    }
+    return new InsertTRB(values, this.tableName(), this._session,
+      this.mapServiceToDb(), this.getColumns(), this._logger);
+  };
+
+  public delete = (): DeleteTRB<SERVICE> => {
+    if (!this._session) {
+      throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
+    }
+    return new DeleteTRB(this.tableName(), this._session,
+      this.mapServiceToDb(), this.getColumns(), this._logger);
+  };
 
   public varchar = ({ name, size }: {name: string, size: number}):
   Column<PgVarChar> => new Column<PgVarChar, {}>(this.tableName(), name, new PgVarChar(size));

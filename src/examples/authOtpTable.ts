@@ -4,8 +4,6 @@ import AbstractTable from '../tables/abstractTable';
 import { UsersTable } from './usersTable';
 
 export class AuthOtpTable extends AbstractTable<AuthOtpModel> {
-  public static INSTANCE: AuthOtpTable = new AuthOtpTable();
-
   public id = this.int({ name: 'id' }).autoIncrement().primaryKey();
   public phone = this.varchar({ name: 'phone', size: 256 });
   public otp = this.varchar({ name: 'otp', size: 256 });
