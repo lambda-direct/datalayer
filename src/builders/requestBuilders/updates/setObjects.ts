@@ -12,12 +12,6 @@ export default class SetObject<T extends ColumnType> extends UpdateExpr {
     this._value = value;
   }
 
-  public toQuery = (): string => {
-    if (typeof this._value === 'string' || this._value instanceof Date) {
-      this._value = typeof this._value === 'string' ? this._value.replace("'", "''") : this._value;
-      if (this._value instanceof Date) this._value = this._value.toISOString();
-      return `"${this._column.columnName}"='${this._column.columnType.insertStrategy(this._value.toString())}'`;
-    }
-    return `"${this._column.columnName}"=${this._column.columnType.insertStrategy(this._value.toString())}`;
-  };
+  public toQuery = (): string => `"${this._column.columnName}"=${this._column.columnType.insertStrategy(this._value.toString())}`
+  ;
 }
