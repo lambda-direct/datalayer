@@ -12,6 +12,6 @@ export default class SetObject<T extends ColumnType> extends UpdateExpr {
     this._value = value;
   }
 
-  public toQuery = (): string => `"${this._column.columnName}"=${this._column.columnType.insertStrategy(this._value.toString())}`
+  public toQuery = (): string => `"${this._column.columnName}"=${this._column.columnType.insertStrategy(this._value)}`
   ;
 }
