@@ -15,6 +15,7 @@ import UpdateTRB from '../builders/highLvlBuilders/updateRequestBuilder';
 import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
 import PgBigInt from '../columns/types/pgBigInt';
 import Session from '../db/session';
+// import PgEnum from '../columns/types/pgEnum';
 
 export default abstract class AbstractTable<SERVICE> {
   private _session: Session;
@@ -51,6 +52,9 @@ export default abstract class AbstractTable<SERVICE> {
 
   public int = ({ name }: {name: string}):
   Column<PgInteger> => new Column<PgInteger, {}>(this.tableName(), name, new PgInteger());
+
+  // public enum = <Object>({ name } : { name: string }):
+  // Column<PgEnum<Object>> => new Column<PgEnum<Object>, {}>(this.tableName(), name, new PgEnum());
 
   public bigint = ({ name }: {name: string}):
   Column<PgBigInt> => new Column<PgBigInt, {}>(this.tableName(), name, new PgBigInt());

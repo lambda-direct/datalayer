@@ -16,6 +16,9 @@ export default class Create<SERVICE> {
   public static table = <SSERVICE>(tableClass:
   AbstractTable<SSERVICE>): Create<SSERVICE> => new Create(tableClass);
 
+  public static type = <SSERVICE>(enumType:
+  any): Create<SSERVICE> => new Create(enumType);
+
   public build = (): string => {
     this.tableBuilder.push('CREATE TABLE IF NOT EXISTS ');
     this.tableBuilder.push(this.tableClass.tableName());
