@@ -1,52 +1,71 @@
 import Create from '../builders/lowLvlBuilders/create';
+import Transaction from '../builders/transaction/transaction';
 import Db from '../db/db';
-import MigrationsTable, { MigrationsModel } from '../tables/migrationsTable';
-import SessionWrapper from './sessionWrapper';
+import Session from '../db/session';
+import { MigrationsModel, MigrationsTable } from '../tables/migrationsTable';
 
 export default class Migrator {
   private _db: Db;
-  private migrationsPerVersion: {[key: number]: () => Promise<boolean>} = {};
+  private migrationsPerVersion: Map<number,
+  (session: Session) => Promise<void>> = new Map();
+
+  private session: Session;
 
   public constructor(db: Db) {
     this._db = db;
+    this.session = db.session();
   }
 
-  public chain = <M>(version: number,
-    migration: (sessionWrapper: SessionWrapper) => M): Migrator => {
-    this.migrationsPerVersion[version] = async () => {
-      migration(new SessionWrapper(this._db));
-      return true;
-    };
+  public chain = (version: number,
+    migration: (session: Session) => Promise<void>): Migrator => {
+    this.migrationsPerVersion.set(version, async (session) => {
+      await migration(session);
+    });
     return this;
   };
 
-  public execute = async () => {
-    const migrationsTable = new MigrationsTable();
-    this._db.use(migrationsTable);
+  public execute = async (): Promise<boolean> => {
+    const migrationsTable = new MigrationsTable(this._db);
 
-    await this._db._pool.query(Create.table(migrationsTable).build());
+    await this.session.execute(Create.table(migrationsTable).build());
 
     const migrations: Array<MigrationsModel> = await migrationsTable.select().all();
     const latestMigration: MigrationsModel | null = this.getLastOrNull(migrations);
-    let queriesToExecute: {[key: number]: () => Promise<boolean>} = this.migrationsPerVersion;
+    let queriesToExecute: Map<number,
+    (session: Session) => Promise<void>> = this.migrationsPerVersion;
 
     if (latestMigration != null) {
-      const queriesToExecuteTest: {[key: number]: () => Promise<boolean>} = {};
+      const queriesToExecuteTest: Map<number,
+      (session: Session) => Promise<void>> = new Map();
 
-      Object.entries(this.migrationsPerVersion).forEach(([key, value]) => {
-        if (+key > latestMigration.version) {
-          queriesToExecuteTest[+key] = value;
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [key, value] of this.migrationsPerVersion) {
+        if (key > latestMigration.version) {
+          queriesToExecuteTest.set(key, value);
         }
-      });
+      }
 
       queriesToExecute = queriesToExecuteTest;
     }
 
+    const transaction = new Transaction(this.session);
+    await transaction.begin();
     // eslint-disable-next-line no-restricted-syntax
-    for await (const [key, value] of new Map(Object.entries(queriesToExecute))) {
-      await value();
-      migrationsTable.insert([{ version: +key, createdAt: new Date() }]).returningAll();
+    for await (const key of queriesToExecute.keys()) {
+      try {
+        const value = queriesToExecute.get(+key)!;
+        await value(this.session);
+        await migrationsTable
+          .insert({ version: +key, createdAt: new Date() }).all();
+      } catch (e) {
+        await transaction.rollback();
+        throw new Error(`Migration chain ${key} was not migrated sucessfully.\nMessage: ${e.message}`);
+      }
     }
+
+    await transaction.commit();
+
+    return true;
   };
 
   public getLastOrNull = (list: Array<MigrationsModel>): MigrationsModel | null => {

@@ -16,6 +16,9 @@ export default class Create<SERVICE> {
   public static table = <SSERVICE>(tableClass:
   AbstractTable<SSERVICE>): Create<SSERVICE> => new Create(tableClass);
 
+  public static type = <SSERVICE>(enumType:
+  any): Create<SSERVICE> => new Create(enumType);
+
   public build = (): string => {
     this.tableBuilder.push('CREATE TABLE IF NOT EXISTS ');
     this.tableBuilder.push(this.tableClass.tableName());
@@ -32,7 +35,7 @@ export default class Create<SERVICE> {
         this.columnsBuilder.push(' ');
         this.columnsBuilder.push(column.isAutoIncrement() ? 'SERIAL' : column.getColumnType().getDbName());
         this.columnsBuilder.push(' ');
-        this.columnsBuilder.push(column.getDefaultValue() != null ? `DEFAULT ${column.getDefaultValue()}` : '');
+        this.columnsBuilder.push(column.getDefaultValue() != null ? `DEFAULT ${column.getColumnType().insertStrategy(column.getDefaultValue())}` : '');
         this.columnsBuilder.push(column.getIsNullable() ? '' : ' NOT NULL');
 
         const referenced: Column<any> = column.getReferenced();

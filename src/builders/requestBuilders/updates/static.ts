@@ -5,6 +5,6 @@ import SetObject from './setObjects';
 import UpdateExpr from './updates';
 
 export const set = <T extends ColumnType>(column: Column<T>,
-  value: any): UpdateExpr => new SetObject(column.columnName, value);
+  value: any): UpdateExpr => new SetObject<T>(column, value);
 
 export const combine = (updates: Array<UpdateExpr>): UpdateExpr => new Combine(updates);

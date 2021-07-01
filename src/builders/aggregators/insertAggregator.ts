@@ -55,8 +55,7 @@ export default class InsertAggregator extends Aggregator {
         const columnKey = Object.keys(mapper)
           .find((it) => mapper[it as keyof T].columnName === insertKey)!;
         const column = mapper[columnKey as keyof T];
-
-        if (insertValue) {
+        if (insertValue !== undefined && insertValue !== null) {
           this._values.push(column.columnType.insertStrategy(insertValue));
         } else {
           this._values.push('null');

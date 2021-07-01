@@ -1,6 +1,9 @@
-import { Pool } from 'pg';
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import Session from '../../db/session';
+import BuilderError, { BuilderType } from '../../errors/builderError';
+import { DatabaseDeleteError } from '../../errors/dbErrors';
+import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import Delete from '../lowLvlBuilders/delets/delete';
 import Expr from '../requestBuilders/where/where';
@@ -11,11 +14,12 @@ export default class DeleteTRB<T> extends TableRequestBuilder<T> {
 
   public constructor(
     tableName: string,
-    pool: Pool,
+    session: Session,
     mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
     columns: Column<ColumnType, {}>[],
+    logger: BaseLogger,
   ) {
-    super(tableName, pool, mappedServiceToDb, columns);
+    super(tableName, session, mappedServiceToDb, columns, logger);
   }
 
   public where = (expr: Expr): DeleteTRB<T> => {
@@ -23,17 +27,33 @@ export default class DeleteTRB<T> extends TableRequestBuilder<T> {
     return this;
   };
 
-  public returningAll = async () => this.execute();
+  public execute = async () => {
+    this._execute();
+  };
 
-  protected execute = async (): Promise<T[]> => {
+  protected _execute = async (): Promise<T[]> => {
     const queryBuilder = Delete.from(this._tableName);
     if (this._filter) {
       queryBuilder.filteredBy(this._filter);
     }
 
-    const query = queryBuilder.build();
+    let query = '';
+    try {
+      query = queryBuilder.build();
+    } catch (e) {
+      throw new BuilderError(BuilderType.DELETE, this._tableName, this._columns, e, this._filter);
+    }
 
-    const result = await this._pool.query(query);
-    return QueryResponseMapper.map(this._mappedServiceToDb, result);
+    if (this._logger) {
+      this._logger.info(`Deleting from ${this._tableName} using query:\n ${query}`);
+    }
+
+    const result = await this._session.execute(query);
+    if (result.isLeft()) {
+      const { reason } = result.value;
+      throw new DatabaseDeleteError(this._tableName, reason, query);
+    } else {
+      return QueryResponseMapper.map(this._mappedServiceToDb, result.value);
+    }
   };
 }

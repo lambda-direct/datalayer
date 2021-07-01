@@ -3,13 +3,14 @@ import ColumnType from '../columns/types/columnType';
 import AbstractTable from '../tables/abstractTable';
 
 export class UsersTable extends AbstractTable<UserModel> {
-  public static INSTANCE: UsersTable = new UsersTable();
+  public static INSTANCE: UsersTable = new UsersTable({});
 
   public id = this.int({ name: 'id' }).autoIncrement().primaryKey();
   public phone = this.varchar({ name: 'phone', size: 256 });
   public fullName = this.varchar({ name: 'full_name', size: 256 }).isNullable();
   public createdAt = this.timestamp({ name: 'created_at' });
   public updatedAt = this.timestamp({ name: 'updated_at' });
+  // public numberr = this.bigint({ name: 'number_bigint' });
 
   public tableName(): string {
     return 'users';
@@ -21,6 +22,7 @@ export class UsersTable extends AbstractTable<UserModel> {
     fullName: this.fullName,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
+    // numberr: this.numberr,
   });
 }
 
@@ -30,4 +32,5 @@ export interface UserModel {
   fullName: string | null;
   createdAt: Date;
   updatedAt: Date;
+  // numberr: number;
 }
