@@ -11,6 +11,7 @@ export class AuthOtpTable extends AbstractTable<AuthOtpModel> {
   public createdAt = this.timestamp({ name: 'created_at' });
   public updatedAt = this.timestamp({ name: 'updated_at' });
   public userId = this.int({ name: 'user_id' }).references(UsersTable.INSTANCE.id).isNullable();
+  public test = this.jsonb<string[]>({ name: 'test' }).isNullable();
 
   public tableName(): string {
     return 'auth_otp';
@@ -24,6 +25,7 @@ export class AuthOtpTable extends AbstractTable<AuthOtpModel> {
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
     userId: this.userId,
+    test: this.test,
   });
 }
 
@@ -35,4 +37,5 @@ export interface AuthOtpModel {
   createdAt: Date;
   updatedAt: Date;
   userId: number | null;
+  test: string[] | null;
 }
