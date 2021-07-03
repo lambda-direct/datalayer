@@ -9,14 +9,16 @@ export default class Column<T extends ColumnType, SUBTYPE = {}> {
   public uniqueKeyName: string | undefined = undefined;
   public defaultParam: any = null;
   public referenced: Column<T>;
-  public subtype: SUBTYPE;
+  public subtype?: SUBTYPE;
 
   private parentTableName: string;
 
-  public constructor(parentTableName: string, columnName: string, columnType: T) {
+  public constructor(parentTableName: string, columnName: string, columnType: T,
+    subtype?: SUBTYPE) {
     this.columnType = columnType;
     this.columnName = columnName;
     this.parentTableName = parentTableName;
+    this.subtype = subtype;
   }
 
   public getAlias = (): string => `${this.parentTableName.replace('.', '_')}_${this.columnName}`;

@@ -1,9 +1,11 @@
 import Column from '../../columns/column';
+import PgEnum from '../../columns/types/pgEnum';
 import AbstractTable from '../../tables/abstractTable';
 import { ecranate } from '../../utils/ecranate';
 
 export default class Create<SERVICE> {
   private tableBuilder: Array<string> = [];
+  private enumBuilder: Array<string> = [];
   private columnsBuilder: Array<string> = [];
   private primaryKey: Array<string> = [];
   private uniqueKey: Array<string> = [];
@@ -28,6 +30,19 @@ export default class Create<SERVICE> {
       const column = columns[i];
 
       if (column instanceof Column) {
+        if (column.columnType instanceof PgEnum) {
+          console.log(column.subtype);
+          const enumValues = Object.values(column.subtype) as string[];
+
+          let resValue = '';
+          for (let j = 0; j < enumValues.length; j += 1) {
+            resValue += `'${enumValues[j]}'`;
+            if (j !== enumValues.length - 1) {
+              resValue += ',';
+            }
+          }
+          this.enumBuilder.push(`CREATE TYPE ${column.columnType.name} AS ENUM (${resValue});`);
+        }
         this.columnsBuilder.push(ecranate(column.getColumnName()));
         this.columnsBuilder.push(' ');
         this.columnsBuilder.push(column.isAutoIncrement() ? 'SERIAL' : column.getColumnType().getDbName());
@@ -91,6 +106,6 @@ export default class Create<SERVICE> {
       this.uniqueKey.push(')');
     }
 
-    return `${this.tableBuilder.join('') + this.columnsBuilder.join('') + this.primaryKey.join('') + this.uniqueKey.join('')});`;
+    return `${this.enumBuilder.join('')} ${this.tableBuilder.join('') + this.columnsBuilder.join('') + this.primaryKey.join('') + this.uniqueKey.join('')});`;
   };
 }
