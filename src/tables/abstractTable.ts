@@ -17,6 +17,7 @@ import PgBigInt from '../columns/types/pgBigInt';
 import Session from '../db/session';
 import BaseLogger from '../logger/abstractLogger';
 import { Db } from '../db';
+import PgEnum from '../columns/types/pgEnum';
 
 type Stub = {};
 
@@ -96,8 +97,11 @@ export default abstract class AbstractTable<SERVICE> {
   public int = ({ name }: {name: string}):
   Column<PgInteger> => new Column<PgInteger, {}>(this.tableName(), name, new PgInteger());
 
-  // public enum = <Object>({ name } : { name: string }):
-  // Column<PgEnum<Object>> => new Column<PgEnum<Object>, {}>(this.tableName(), name, new PgEnum());
+  public enum = (from: { [s: number]: string }, { columnName, enumName } : {
+    columnName: string, enumName: string }):
+  Column<PgEnum, {}> => new Column<PgEnum, {}>(this.tableName(),
+    // eslint-disable-next-line new-cap
+    columnName, new PgEnum(enumName), from);
 
   public bigint = ({ name }: {name: string}):
   Column<PgBigInt> => new Column<PgBigInt, {}>(this.tableName(), name, new PgBigInt());

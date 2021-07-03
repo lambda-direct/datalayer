@@ -1,6 +1,6 @@
 enum TestEnum{
-  FIRST,
-  SECOND,
+  FIRST = 'first',
+  SECOND = 'second',
 }
 
 export default TestEnum;
