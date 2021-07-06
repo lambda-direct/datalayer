@@ -1,6 +1,6 @@
 import ColumnType from './columnType';
 
-export default class PgVarChar extends ColumnType {
+export default class PgVarChar extends ColumnType<string> {
   protected size: number;
   protected dbName: string;
 

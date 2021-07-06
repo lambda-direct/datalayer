@@ -1,9 +1,9 @@
 import ColumnType from './types/columnType';
 
-export default class Column<T extends ColumnType, SUBTYPE = {}> {
+export default class Column<T extends ColumnType, TNullable extends boolean = true, SUBTYPE = {}> {
   public columnType: T;
   public columnName: string;
-  public isNullableFlag: boolean = false;
+  public isNullableFlag: TNullable;
   public autoIncrementFlag: boolean = false;
   public primaryKeyName: string | undefined = undefined;
   public uniqueKeyName: string | undefined = undefined;
