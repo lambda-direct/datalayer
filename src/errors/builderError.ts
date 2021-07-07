@@ -15,7 +15,7 @@ export default class BuilderError extends Error {
   public constructor(
     builderType: BuilderType,
     tableName: string,
-    columns: Column<ColumnType, {}>[],
+    columns: Column<ColumnType>[],
     reason: Error,
     filter?: Expr,
   ) {

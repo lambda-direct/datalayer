@@ -5,38 +5,38 @@ import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseSelectError } from '../../errors/dbErrors';
 import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
+import { ExtractModel } from '../../tables/inferTypes';
 import SelectTRBWithJoin from '../joinBuilders/builders/selectWithJoin';
 import Join from '../joinBuilders/join';
 import Select from '../lowLvlBuilders/selects/select';
 import Expr from '../requestBuilders/where/where';
 import TableRequestBuilder from './abstractRequestBuilder';
 
-export default class SelectTRB<T> extends TableRequestBuilder<T> {
+export default class SelectTRB<TTable> extends TableRequestBuilder<TTable> {
   protected _filter: Expr;
 
   public constructor(
     tableName: string,
     session: Session,
-    mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
-    columns: Column<ColumnType, {}>[],
+    mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
     logger: BaseLogger,
   ) {
-    super(tableName, session, mappedServiceToDb, columns, logger);
+    super(tableName, session, mappedServiceToDb, logger);
   }
 
-  public where = (expr: Expr): SelectTRB<T> => {
+  public where = (expr: Expr): SelectTRB<ExtractModel<TTable>> => {
     this._filter = expr;
     return this;
   };
 
+  // @TODO Check joins
   public join = <COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1>):
-  SelectTRBWithJoin<COLUMN, T1,
-  T> => new SelectTRBWithJoin(this._tableName, this._session,
+  SelectTRBWithJoin<COLUMN, T1, TTable> => new SelectTRBWithJoin(this._tableName, this._session,
     this._filter, join, this._mappedServiceToDb);
 
   public execute = async () => this._execute();
 
-  protected _execute = async (): Promise<T[]> => {
+  protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
     const queryBuilder = Select.from(this._tableName, this._columns);
     if (this._filter) {
       queryBuilder.filteredBy(this._filter);

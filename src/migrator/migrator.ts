@@ -2,7 +2,10 @@ import Create from '../builders/lowLvlBuilders/create';
 import Transaction from '../builders/transaction/transaction';
 import Db from '../db/db';
 import Session from '../db/session';
-import { MigrationsModel, MigrationsTable } from '../tables/migrationsTable';
+import { MigrationsTable } from '../tables';
+import {
+  ExtractModel,
+} from '../tables/inferTypes';
 
 export default class Migrator {
   private _db: Db;
@@ -27,10 +30,12 @@ export default class Migrator {
   public execute = async (): Promise<boolean> => {
     const migrationsTable = new MigrationsTable(this._db);
 
+    console.log('here');
     await this.session.execute(Create.table(migrationsTable).build());
+    console.log(Create.table(migrationsTable).build());
 
-    const migrations: Array<MigrationsModel> = await migrationsTable.select().all();
-    const latestMigration: MigrationsModel | null = this.getLastOrNull(migrations);
+    const migrations: Array<ExtractModel<MigrationsTable>> = await migrationsTable.select().all();
+    const latestMigration: ExtractModel<MigrationsTable> | null = this.getLastOrNull(migrations);
     let queriesToExecute: Map<number,
     (session: Session) => Promise<void>> = this.migrationsPerVersion;
 
@@ -68,8 +73,9 @@ export default class Migrator {
     return true;
   };
 
-  public getLastOrNull = (list: Array<MigrationsModel>): MigrationsModel | null => {
-    let latestMigration: MigrationsModel | null = null;
+  public getLastOrNull = (list: Array<ExtractModel<MigrationsTable>>)
+  : ExtractModel<MigrationsTable> | null => {
+    let latestMigration: ExtractModel<MigrationsTable> | null = null;
     if (list.length !== 0) {
       latestMigration = list[list.length - 1];
     }

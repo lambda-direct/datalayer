@@ -5,24 +5,24 @@ import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseDeleteError } from '../../errors/dbErrors';
 import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
+import { ExtractModel } from '../../tables/inferTypes';
 import Delete from '../lowLvlBuilders/delets/delete';
 import Expr from '../requestBuilders/where/where';
 import TableRequestBuilder from './abstractRequestBuilder';
 
-export default class DeleteTRB<T> extends TableRequestBuilder<T> {
+export default class DeleteTRB<TTable> extends TableRequestBuilder<TTable> {
   private _filter: Expr;
 
   public constructor(
     tableName: string,
     session: Session,
-    mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
-    columns: Column<ColumnType, {}>[],
+    mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
     logger: BaseLogger,
   ) {
-    super(tableName, session, mappedServiceToDb, columns, logger);
+    super(tableName, session, mappedServiceToDb, logger);
   }
 
-  public where = (expr: Expr): DeleteTRB<T> => {
+  public where = (expr: Expr): DeleteTRB<ExtractModel<TTable>> => {
     this._filter = expr;
     return this;
   };
@@ -31,7 +31,7 @@ export default class DeleteTRB<T> extends TableRequestBuilder<T> {
     this._execute();
   };
 
-  protected _execute = async (): Promise<T[]> => {
+  protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
     const queryBuilder = Delete.from(this._tableName);
     if (this._filter) {
       queryBuilder.filteredBy(this._filter);

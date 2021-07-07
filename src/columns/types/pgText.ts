@@ -1,6 +1,6 @@
 import ColumnType from './columnType';
 
-export default class PgText extends ColumnType {
+export default class PgText extends ColumnType<string> {
   protected dbName: string;
 
   public constructor() {
@@ -10,5 +10,5 @@ export default class PgText extends ColumnType {
 
   public getDbName = (): string => this.dbName;
 
-  public insertStrategy = (value: any): string => `'${value.replace("'", "''")}'`;
+  public insertStrategy = (value: string): string => `'${value.replace("'", "''")}'`;
 }

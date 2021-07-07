@@ -1,6 +1,7 @@
 import ColumnType from './columnType';
 
-export default class PgJsonb extends ColumnType {
+export default class PgJsonb<TCodeType> extends ColumnType<TCodeType> {
+  public codeType: TCodeType;
   public dbName: string;
 
   public constructor() {
@@ -10,5 +11,5 @@ export default class PgJsonb extends ColumnType {
 
   public getDbName = (): string => this.dbName;
 
-  public insertStrategy = (value: any): string => `'${JSON.stringify(value)}'::jsonb`;
+  public insertStrategy = (value: TCodeType): string => `'${JSON.stringify(value)}'::jsonb`;
 }

@@ -5,21 +5,21 @@ import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseInsertError } from '../../errors/dbErrors';
 import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
+import { ExtractModel } from '../../tables/inferTypes';
 import Insert from '../lowLvlBuilders/inserts/insert';
 import TableRequestBuilder from './abstractRequestBuilder';
 
-export default class InsertTRB<T> extends TableRequestBuilder<T> {
-  private _values: Partial<T>[];
+export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
+  private _values: ExtractModel<TTable>[];
 
   public constructor(
-    values: Partial<T>[],
+    values: ExtractModel<TTable>[],
     tableName: string,
     session: Session,
-    mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
-    columns: Column<ColumnType, {}>[],
+    mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
     logger: BaseLogger,
   ) {
-    super(tableName, session, mappedServiceToDb, columns, logger);
+    super(tableName, session, mappedServiceToDb, logger);
     this._values = values;
   }
 
@@ -27,7 +27,7 @@ export default class InsertTRB<T> extends TableRequestBuilder<T> {
     this._execute();
   };
 
-  protected _execute = async (): Promise<T[]> => {
+  protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
     const queryBuilder = Insert.into(this._tableName, this._columns);
     if (!this._values) throw Error('Values should be provided firestly\nExample: table.values().execute()');
 
@@ -37,7 +37,7 @@ export default class InsertTRB<T> extends TableRequestBuilder<T> {
     this._values.forEach((valueToInsert) => {
       const mappedValue: {[name: string]: any} = {};
       Object.entries(valueToInsert).forEach(([key, value]) => {
-        const column = mapper[key as keyof T];
+        const column = mapper[key as keyof ExtractModel<TTable>];
         mappedValue[column.columnName] = value;
       });
       mappedRows.push(mappedValue);

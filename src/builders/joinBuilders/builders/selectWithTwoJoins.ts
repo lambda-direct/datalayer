@@ -4,6 +4,7 @@ import Session from '../../../db/session';
 import BuilderError, { BuilderType } from '../../../errors/builderError';
 import { DatabaseSelectError } from '../../../errors/dbErrors';
 import QueryResponseMapper from '../../../mappers/responseMapper';
+import { ExtractModel } from '../../../tables/inferTypes';
 import Select from '../../lowLvlBuilders/selects/select';
 import Expr from '../../requestBuilders/where/where';
 import Join from '../join';
@@ -17,15 +18,13 @@ ColumnType, T1, T2, MODEL> extends AbstractJoined<MODEL> {
 
   public constructor(tableName: string, session: Session,
     filter: Expr, join1: Join<COLUMN, T1>, join2: Join<COLUMN, T2>,
-    columns: { [name in keyof MODEL]: Column<ColumnType, {}>; }) {
+    columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; }) {
     super(filter, tableName, session, columns);
     this._join1 = join1;
     this._join2 = join2;
   }
 
   public execute = async (): Promise<SelectResponseTwoJoins<MODEL, T1, T2>> => {
-    // List<Join<T, ?>> joinPropsList = Arrays.asList(join1, join2);
-
     const queryBuilder = Select.from(this._tableName, Object.values(this._columns));
     if (this._filter) {
       queryBuilder.filteredBy(this._filter);
@@ -41,8 +40,10 @@ ColumnType, T1, T2, MODEL> extends AbstractJoined<MODEL> {
         this._tableName, Object.values(this._columns), e, this._filter);
     }
 
-    const parent:{ [name in keyof T1]: Column<ColumnType, {}>; } = this._join1.mappedServiceToDb;
-    const parentTwo:{ [name in keyof T2]: Column<ColumnType, {}>; } = this._join2.mappedServiceToDb;
+    const parent:
+    { [name in keyof ExtractModel<T1>]: Column<ColumnType>; } = this._join1.mappedServiceToDb;
+    const parentTwo:
+    { [name in keyof ExtractModel<T2>]: Column<ColumnType>; } = this._join2.mappedServiceToDb;
 
     const result = await this._session.execute(query);
     if (result.isLeft()) {

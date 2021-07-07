@@ -11,7 +11,7 @@ export default class UpdateIn {
     this._aggregator = aggregator;
   }
 
-  public columns = (columns: Column<ColumnType, {}>[]) => {
+  public columns = (columns: Column<ColumnType>[]) => {
     this._aggregator.appendFields(columns);
     return new UpdateIn(this._aggregator);
   };

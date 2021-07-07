@@ -5,31 +5,31 @@ import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseUpdateError } from '../../errors/dbErrors';
 import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
+import { ExtractModel } from '../../tables/inferTypes';
 import Update from '../lowLvlBuilders/updates/update';
 import UpdateExpr from '../requestBuilders/updates/updates';
 import Expr from '../requestBuilders/where/where';
 import TableRequestBuilder from './abstractRequestBuilder';
 
-export default class UpdateTRB<T> extends TableRequestBuilder<T> {
+export default class UpdateTRB<TTable> extends TableRequestBuilder<TTable> {
   private _filter: Expr;
   private _update: UpdateExpr;
 
   public constructor(
     tableName: string,
     session: Session,
-    mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
-    columns: Column<ColumnType, {}>[],
+    mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
     logger: BaseLogger,
   ) {
-    super(tableName, session, mappedServiceToDb, columns, logger);
+    super(tableName, session, mappedServiceToDb, logger);
   }
 
-  public where = (expr: Expr): UpdateTRB<T> => {
+  public where = (expr: Expr): UpdateTRB<ExtractModel<TTable>> => {
     this._filter = expr;
     return this;
   };
 
-  public set = (expr: UpdateExpr): UpdateTRB<T> => {
+  public set = (expr: UpdateExpr): UpdateTRB<ExtractModel<TTable>> => {
     this._update = expr;
     return this;
   };
@@ -38,7 +38,7 @@ export default class UpdateTRB<T> extends TableRequestBuilder<T> {
     this._execute();
   };
 
-  protected _execute = async (): Promise<T[]> => {
+  protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
     let query = '';
     try {
       query = Update.in(this._tableName)

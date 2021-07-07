@@ -1,6 +1,6 @@
 import ColumnType from './columnType';
 
-export default class PgInteger extends ColumnType {
+export default class PgInteger extends ColumnType<number> {
   public dbName: string;
 
   public constructor() {
@@ -10,5 +10,5 @@ export default class PgInteger extends ColumnType {
 
   public getDbName = (): string => this.dbName;
 
-  public insertStrategy = (value: any): string => `${value}`;
+  public insertStrategy = (value: number): string => `${value}`;
 }
