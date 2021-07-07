@@ -12,5 +12,5 @@ export default class PgBigInt extends ColumnType<number> {
     return this.dbName;
   }
 
-  public insertStrategy = (value: any): string => `${value}`;
+  public insertStrategy = (value: number): string => `${value}`;
 }

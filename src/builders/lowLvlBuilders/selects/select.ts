@@ -4,7 +4,7 @@ import SelectAggregator from '../../aggregators/selectAggregator';
 import SelectFrom from './selectFrom';
 
 export default class Select {
-  public static from = (tableName: string, columns: Column<ColumnType, {}>[]) => {
+  public static from = (tableName: string, columns: Column<ColumnType>[]) => {
     const aggregator = new SelectAggregator(tableName);
     aggregator.appendFrom(tableName).appendFields(columns);
     return new SelectFrom(aggregator);

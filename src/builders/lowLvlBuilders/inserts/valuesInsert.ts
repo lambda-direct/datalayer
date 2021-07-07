@@ -1,5 +1,6 @@
 import Column from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
+import { ExtractModel } from '../../../tables/inferTypes';
 import InsertAggregator from '../../aggregators/insertAggregator';
 
 export default class ValuesInsert {
@@ -9,8 +10,8 @@ export default class ValuesInsert {
     this._aggregator = aggregator;
   }
 
-  public apply = <T>(values: {[name: string]: any}[], columns: {[name in keyof T]
-    : Column<ColumnType, {}>})
+  public apply = <T>(values: {[name: string]: any}[], columns: {[name in keyof ExtractModel<T>]
+    : Column<ColumnType>})
   : ValuesInsert => {
     this._aggregator.appendColumns(values);
     this._aggregator.appendValues(columns, values);

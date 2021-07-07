@@ -1,18 +1,20 @@
 import { QueryResult } from 'pg';
 import Column from '../columns/column';
 import ColumnType from '../columns/types/columnType';
+import { ExtractModel } from '../tables/inferTypes';
 
 export default class QueryResponseMapper {
-  public static map = <RES>(mappedServiceToDb: { [name in keyof RES]: Column<ColumnType, {}>; },
+  public static map = <RES>(mappedServiceToDb: { [name in keyof ExtractModel<RES>]
+    : Column<ColumnType>; },
     queryResult: QueryResult<any>) => {
-    const response: Array<RES> = [];
+    const response: Array<ExtractModel<RES>> = [];
 
     queryResult.rows.forEach((row) => {
-      const mappedRow: RES = {} as RES;
+      const mappedRow: ExtractModel<RES> = {} as ExtractModel<RES>;
 
       Object.keys(mappedServiceToDb).forEach((key) => {
-        const column = mappedServiceToDb[key as keyof RES];
-        mappedRow[key as keyof RES] = row[column.getAlias()];
+        const column = mappedServiceToDb[key as keyof ExtractModel<RES>];
+        mappedRow[key as keyof ExtractModel<RES>] = row[column.getAlias()];
       });
       response.push(mappedRow);
     });

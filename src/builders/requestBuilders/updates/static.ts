@@ -4,7 +4,7 @@ import Combine from './combine';
 import SetObject from './setObjects';
 import UpdateExpr from './updates';
 
-export const set = <T extends ColumnType>(column: Column<T>,
+export const set = <T extends ColumnType>(column: Column<T, boolean, boolean>,
   value: any): UpdateExpr => new SetObject<T>(column, value);
 
 export const combine = (updates: Array<UpdateExpr>): UpdateExpr => new Combine(updates);

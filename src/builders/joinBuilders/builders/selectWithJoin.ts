@@ -4,6 +4,7 @@ import Session from '../../../db/session';
 import BuilderError, { BuilderType } from '../../../errors/builderError';
 import { DatabaseSelectError } from '../../../errors/dbErrors';
 import QueryResponseMapper from '../../../mappers/responseMapper';
+import { ExtractModel } from '../../../tables/inferTypes';
 import Select from '../../lowLvlBuilders/selects/select';
 import Expr from '../../requestBuilders/where/where';
 import Join from '../join';
@@ -18,14 +19,20 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
   public constructor(tableName: string, session: Session,
     filter: Expr,
     join: Join<COLUMN, T1>,
-    columns: { [name in keyof MODEL]: Column<ColumnType, {}>; }) {
+    columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; }) {
     super(filter, tableName, session, columns);
     this._join = join;
   }
 
   public join = <T2>(join: Join<COLUMN, T2>):
-  SelectTRBWithTwoJoins<COLUMN, T1, T2, MODEL> => new SelectTRBWithTwoJoins(this._tableName,
-    this._session, this._filter, this._join, join, this._columns);
+  SelectTRBWithTwoJoins<COLUMN, T1, T2, MODEL> => new SelectTRBWithTwoJoins(
+    this._tableName,
+    this._session,
+    this._filter,
+    this._join,
+    join,
+    this._columns,
+  );
 
   public execute = async (): Promise<SelectResponseJoin<MODEL, T1>> => {
     const queryBuilder = Select.from(this._tableName, Object.values(this._columns));
@@ -43,7 +50,8 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
         this._tableName, Object.values(this._columns), e, this._filter);
     }
 
-    const parent:{ [name in keyof T1]: Column<ColumnType, {}>; } = this._join.mappedServiceToDb;
+    const parent:
+    { [name in keyof ExtractModel<T1>]: Column<ColumnType>; } = this._join.mappedServiceToDb;
 
     const result = await this._session.execute(query);
     if (result.isLeft()) {

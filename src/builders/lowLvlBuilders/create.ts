@@ -25,14 +25,15 @@ export default class Create<SERVICE> {
 
     const tableValues = Object.values(this.tableClass);
     const columns = tableValues.filter((value) => value instanceof Column);
-
     for (let i = 0; i < columns.length; i += 1) {
       const column = columns[i];
 
       if (column instanceof Column) {
         if (column.columnType instanceof PgEnum) {
-          console.log(column.subtype);
-          const enumValues = Object.values(column.subtype) as string[];
+          console.log('codeType:', column.columnType);
+
+          // eslint-disable-next-line new-cap
+          const enumValues = Object.values(column.columnType.codeType) as string[];
 
           let resValue = '';
           for (let j = 0; j < enumValues.length; j += 1) {
@@ -41,7 +42,7 @@ export default class Create<SERVICE> {
               resValue += ',';
             }
           }
-          this.enumBuilder.push(`CREATE TYPE ${column.columnType.name} AS ENUM (${resValue});`);
+          this.enumBuilder.push(`CREATE TYPE ${column.columnType.dbName} AS ENUM (${resValue});`);
         }
         this.columnsBuilder.push(ecranate(column.getColumnName()));
         this.columnsBuilder.push(' ');
@@ -50,7 +51,7 @@ export default class Create<SERVICE> {
         this.columnsBuilder.push(column.getDefaultValue() != null ? `DEFAULT ${column.getColumnType().insertStrategy(column.getDefaultValue())}` : '');
         this.columnsBuilder.push(column.getIsNullable() ? '' : ' NOT NULL');
 
-        const referenced: Column<any> = column.getReferenced();
+        const referenced = column.getReferenced();
         this.columnsBuilder.push(referenced != null ? ` REFERENCES ${referenced.getParent()} (${referenced.getColumnName()})` : '');
 
         if (i !== columns.length - 1) {

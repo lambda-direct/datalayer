@@ -1,6 +1,6 @@
 import ColumnType from './columnType';
 
-export default class PgTime extends ColumnType {
+export default class PgTime extends ColumnType<Date> {
   public dbName: string;
 
   public constructor() {
@@ -10,5 +10,5 @@ export default class PgTime extends ColumnType {
 
   public getDbName = (): string => this.dbName;
 
-  public insertStrategy = (value: any): string => value.toISOString();
+  public insertStrategy = (value: Date): string => value.toISOString();
 }

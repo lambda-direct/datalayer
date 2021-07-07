@@ -5,18 +5,18 @@ import { ecranate } from '../../utils/ecranate';
 export default class Aggregator {
   protected _fields: Array<string> = [];
   protected _tableName: string;
-  protected _columnsTypes: Column<ColumnType, {}>[];
+  protected _columnsTypes: Column<ColumnType>[];
 
   public constructor(tableName: string) {
     this._tableName = tableName;
   }
 
-  public appendFields = (columns: Column<ColumnType, {}>[]) => {
+  public appendFields = (columns: Column<ColumnType>[]) => {
     this._fields = this.generateSelectArray(this._tableName, columns);
     this._columnsTypes = columns;
   };
 
-  protected generateSelectArray = (table: string, columns: Column<ColumnType, {}>[]) => {
+  protected generateSelectArray = (table: string, columns: Column<ColumnType>[]) => {
     const selectFields: string[] = [];
 
     columns.forEach((field: any) => {

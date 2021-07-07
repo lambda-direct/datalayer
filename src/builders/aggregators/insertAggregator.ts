@@ -39,7 +39,7 @@ export default class InsertAggregator extends Aggregator {
   };
 
   // @TODO refactor!!
-  public appendValues = <T>(mapper: {[name in keyof T]: Column<ColumnType, {}>},
+  public appendValues = <T>(mapper: {[name in keyof T]: Column<ColumnType>},
     values: {[name: string]: any}[]) => {
     // @TODO Check if values not empty
     for (let i = 0; i < values.length; i += 1) {

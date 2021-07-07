@@ -18,10 +18,11 @@ import Session from '../db/session';
 import BaseLogger from '../logger/abstractLogger';
 import { Db } from '../db';
 import PgEnum from '../columns/types/pgEnum';
+import { ExtractModel } from './inferTypes';
 
 type Stub = {};
 
-export default abstract class AbstractTable<SERVICE> {
+export default abstract class AbstractTable<TTable> {
   private _session: Session;
   private _logger: BaseLogger;
 
@@ -38,98 +39,135 @@ export default abstract class AbstractTable<SERVICE> {
   // @TODO document, that you should not use arrow functions for abstract classes
   public abstract tableName(): string;
 
-  public abstract mapServiceToDb(): {[name in keyof SERVICE]: Column<ColumnType>};
-
   public withLogger = (logger: BaseLogger) => {
     this._logger = logger;
   };
 
-  public select = (): SelectTRB<SERVICE> => {
+  public select = (): SelectTRB<TTable> => {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
 
     return new SelectTRB(this.tableName(),
-      this._session, this.mapServiceToDb(), this.getColumns(), this._logger);
+      this._session, this.mapServiceToDb(), this._logger);
   };
 
-  public update = (): UpdateTRB<SERVICE> => {
+  public update = (): UpdateTRB<TTable> => {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
-    const mappedServiceToDb = this.mapServiceToDb();
-    return new UpdateTRB(this.tableName(), this._session, mappedServiceToDb,
-      this.getColumns(), this._logger);
+    return new UpdateTRB(this.tableName(), this._session, this.mapServiceToDb(), this._logger);
   };
 
-  public insert = (value: Partial<SERVICE>):
-  InsertTRB<SERVICE> => {
+  public insert = (value: ExtractModel<TTable>):
+  InsertTRB<TTable> => {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
     return new InsertTRB([value], this.tableName(), this._session,
-      this.mapServiceToDb(), this.getColumns(), this._logger);
+      this.mapServiceToDb(), this._logger);
   };
 
-  public insertMany = (values: Partial<SERVICE>[]):
-  InsertTRB<SERVICE> => {
+  public insertMany = (values: ExtractModel<TTable>[]):
+  InsertTRB<TTable> => {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
     return new InsertTRB(values, this.tableName(), this._session,
-      this.mapServiceToDb(), this.getColumns(), this._logger);
+      this.mapServiceToDb(), this._logger);
   };
 
-  public delete = (): DeleteTRB<SERVICE> => {
+  public delete = (): DeleteTRB<TTable> => {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
     return new DeleteTRB(this.tableName(), this._session,
-      this.mapServiceToDb(), this.getColumns(), this._logger);
+      this.mapServiceToDb(), this._logger);
   };
 
-  public varchar = ({ name, size }: {name: string, size: number}):
-  Column<PgVarChar> => new Column<PgVarChar, {}>(this.tableName(), name, new PgVarChar(size));
+  public varchar(name: string, params?: {size?: number, notNull: false}): Column<PgVarChar, true>;
+  public varchar(name: string, params: {size?: number, notNull: true}): Column<PgVarChar, false>;
+  public varchar(name: string, params?: {size?: number, notNull?: false}): Column<PgVarChar, true>;
+  public varchar(name: string, params: {size?: number, notNull?: true}): Column<PgVarChar, false>;
+  public varchar(name: string, params: {size?: number, notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgVarChar(params.size), params?.notNull ?? false);
+  }
 
-  public timestamp = ({ name }: {name: string}):
-  Column<PgTimestamp> => new Column<PgTimestamp, {}>(this.tableName(), name, new PgTimestamp());
+  public int(name: string, params?: {notNull: false}): Column<PgInteger, true>;
+  public int(name: string, params: {notNull: true}): Column<PgInteger, false>;
+  public int(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgInteger(), params?.notNull ?? false);
+  }
 
-  public int = ({ name }: {name: string}):
-  Column<PgInteger> => new Column<PgInteger, {}>(this.tableName(), name, new PgInteger());
+  public timestamp(name: string, params?: {notNull: false}): Column<PgTimestamp, true>;
+  public timestamp(name: string, params: {notNull: true}): Column<PgTimestamp, false>;
+  public timestamp(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgTimestamp(), params?.notNull ?? false);
+  }
 
-  public enum = (from: { [s: number]: string }, { columnName, enumName } : {
-    columnName: string, enumName: string }):
-  Column<PgEnum, {}> => new Column<PgEnum, {}>(this.tableName(),
-    // eslint-disable-next-line new-cap
-    columnName, new PgEnum(enumName), from);
+  public bigint(name: string, params?: {notNull: false}): Column<PgBigInt, true>;
+  public bigint(name: string, params: {notNull: true}): Column<PgBigInt, false>;
+  public bigint(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgBigInt(), params?.notNull ?? false);
+  }
 
-  public bigint = ({ name }: {name: string}):
-  Column<PgBigInt> => new Column<PgBigInt, {}>(this.tableName(), name, new PgBigInt());
+  public enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
+    name: string, dbName:string, params?: {notNull: false})
+  : Column<PgEnum<TSubType>, true>;
+  public enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
+    name: string, dbName:string, params: {notNull: true})
+  : Column<PgEnum<TSubType>, false>;
+  public enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
+    name: string, dbName:string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name,
+      new PgEnum<TSubType>(name, dbName, from as TSubType), params?.notNull ?? false);
+  }
 
-  public decimal = ({ name, precision, scale }:
-  {name: string, precision: number, scale: number}):
-  Column<PgBigDecimal> => new Column<PgBigDecimal, {}>(this.tableName(),
-    name, new PgBigDecimal(precision, scale));
+  public decimal(name: string, params?: {notNull: false, precision: number, scale: number})
+  : Column<PgBigDecimal, true>;
+  public decimal(name: string, params: {notNull: true, precision: number, scale: number})
+  : Column<PgBigDecimal, false>;
+  public decimal(name: string, params: {notNull?: boolean,
+    precision?: number, scale?: number} = {}) {
+    return new Column(this.tableName(), name,
+      new PgBigDecimal(params.precision, params.scale), params?.notNull ?? false);
+  }
 
-  public time = ({ name }: {name: string})
-  : Column<PgTime> => new Column<PgTime, {}>(this.tableName(), name, new PgTime());
+  public time(name: string, params?: {notNull: false}): Column<PgTime, true>;
+  public time(name: string, params: {notNull: true}): Column<PgTime, false>;
+  public time(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgTime(), params?.notNull ?? false);
+  }
 
-  public bool = ({ name }: {name: string}):
-  Column<PgBoolean> => new Column<PgBoolean, {}>(this.tableName(), name, new PgBoolean());
+  public bool(name: string, params?: {notNull: false}): Column<PgBoolean, true>;
+  public bool(name: string, params: {notNull: true}): Column<PgBoolean, false>;
+  public bool(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgBoolean(), params?.notNull ?? false);
+  }
 
-  public text = ({ name }: {name: string}):
-  Column<PgText> => new Column<PgText, {}>(this.tableName(), name, new PgText());
+  public text(name: string, params?: {notNull: false}): Column<PgText, true>;
+  public text(name: string, params: {notNull: true}): Column<PgText, false>;
+  public text(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgText(), params?.notNull ?? false);
+  }
 
-  public jsonb = <SUBTYPE>({ name }: {name: string}):
-  Column<PgJsonb> => new Column<PgJsonb, SUBTYPE>(this.tableName(), name, new PgJsonb());
+  public jsonb<TSubType>(name: string, params?: {notNull: false})
+  : Column<PgJsonb<TSubType>, true>;
+  public jsonb<TSubType>(name: string, params: {notNull: true})
+  : Column<PgJsonb<TSubType>, false>;
+  public jsonb<TSubType>(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name,
+      new PgJsonb<TSubType>(), params?.notNull ?? false);
+  }
 
-  private getColumns = (): Column<ColumnType, {}>[] => {
-    const columns: Column<ColumnType, {}>[] = [];
-    Object.values(this).forEach((field: any) => {
+  public mapServiceToDb(): {[name in keyof ExtractModel<TTable>]: Column<ColumnType>} {
+    return Object.getOwnPropertyNames(this)
+      .reduce<{[name in keyof ExtractModel<TTable>]: Column<ColumnType>}>((res, fieldName) => {
+      const field: unknown = (this as unknown as TTable)[fieldName as keyof TTable];
       if (field instanceof Column) {
-        columns.push(field);
+        res[fieldName as keyof ExtractModel<TTable>] = field;
       }
-    });
-    return columns;
-  };
+      return res;
+    }, {} as {[name in keyof ExtractModel<TTable>]: Column<ColumnType>});
+  }
 }
