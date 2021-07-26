@@ -4,9 +4,9 @@ import { ecranate } from '../../../utils/ecranate';
 import Expr from './where';
 
 export default class Var<T extends ColumnType> extends Expr {
-  private column: Column<T>;
+  private column: Column<T, boolean, boolean>;
 
-  public constructor(column: Column<T>) {
+  public constructor(column: Column<T, boolean, boolean>) {
     super();
     this.column = column;
   }
