@@ -22,7 +22,7 @@ export default class DeleteTRB<TTable> extends TableRequestBuilder<TTable> {
     super(tableName, session, mappedServiceToDb, logger);
   }
 
-  public where = (expr: Expr): DeleteTRB<ExtractModel<TTable>> => {
+  public where = (expr: Expr): DeleteTRB<TTable> => {
     this._filter = expr;
     return this;
   };

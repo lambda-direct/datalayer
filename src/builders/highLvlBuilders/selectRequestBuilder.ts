@@ -24,7 +24,7 @@ export default class SelectTRB<TTable> extends TableRequestBuilder<TTable> {
     super(tableName, session, mappedServiceToDb, logger);
   }
 
-  public where = (expr: Expr): SelectTRB<ExtractModel<TTable>> => {
+  public where = (expr: Expr): SelectTRB<TTable> => {
     this._filter = expr;
     return this;
   };

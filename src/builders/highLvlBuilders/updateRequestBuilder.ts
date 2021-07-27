@@ -24,12 +24,12 @@ export default class UpdateTRB<TTable> extends TableRequestBuilder<TTable> {
     super(tableName, session, mappedServiceToDb, logger);
   }
 
-  public where = (expr: Expr): UpdateTRB<ExtractModel<TTable>> => {
+  public where = (expr: Expr): UpdateTRB<TTable> => {
     this._filter = expr;
     return this;
   };
 
-  public set = (expr: UpdateExpr): UpdateTRB<ExtractModel<TTable>> => {
+  public set = (expr: UpdateExpr): UpdateTRB<TTable> => {
     this._update = expr;
     return this;
   };
