@@ -16,7 +16,7 @@ import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
 import PgBigInt from '../columns/types/pgBigInt';
 import Session from '../db/session';
 import BaseLogger from '../logger/abstractLogger';
-import { Db } from '../db';
+import { DB } from '../db';
 import PgEnum from '../columns/types/pgEnum';
 import { ExtractModel } from './inferTypes';
 
@@ -26,8 +26,8 @@ export default abstract class AbstractTable<TTable> {
   private _session: Session;
   private _logger: BaseLogger;
 
-  public constructor(db: Db | Stub) {
-    if (db instanceof Db) {
+  public constructor(db: DB | Stub) {
+    if (db instanceof DB) {
       this._session = db.session();
       this._logger = db.logger();
     } else {

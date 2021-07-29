@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import BaseLogger from '../logger/abstractLogger';
 import Session from './session';
 
-export default class Db {
+export default class DB {
   private _session: Session;
   private _logger: BaseLogger;
 
