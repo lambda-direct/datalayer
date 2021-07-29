@@ -8,7 +8,7 @@ export default class AuthOtpTable extends AbstractTable<AuthOtpTable> {
   public issuedAt = this.timestamp('issued_at', { notNull: true });
   public createdAt = this.timestamp('created_at', { notNull: true });
   public updatedAt = this.timestamp('updated_at', { notNull: true });
-  public userId = this.int('user_id').references(UsersTable.INSTANCE.id);
+  public userId = this.int('user_id').foreignKey(UsersTable.INSTANCE.id);
   public test = this.jsonb<string[]>('test');
 
   public tableName(): string {

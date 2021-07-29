@@ -26,7 +26,7 @@ TAutoIncrement extends boolean = false> {
 
   public getParent = (): string => this.parentTableName;
 
-  public references = (column: Column<T, boolean, boolean>)
+  public foreignKey = (column: Column<T, boolean, boolean>)
   : Column<T, TNullable, TAutoIncrement> => {
     this.referenced = column;
     return this;
@@ -53,8 +53,6 @@ TAutoIncrement extends boolean = false> {
   };
 
   public isAutoIncrement = (): boolean => this.autoIncrementFlag;
-
-  public getIsNullable = (): boolean => this.isNullableFlag;
 
   public getColumnName = (): string => this.columnName;
 
