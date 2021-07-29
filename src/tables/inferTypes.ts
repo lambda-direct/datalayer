@@ -22,7 +22,7 @@ export type ExtractModel<TTable> =
   {[Key in ExtractFieldNames<TTable>]: ExtractCodeType<TTable[Key]>} &
   {[Key in ExtractOptionalFieldNames<TTable>]?: ExtractCodeType<TTable[Key]>};
 
-export type ExtractCodeType<T extends Column<ColumnType<any>>> =
+export type ExtractCodeType<T extends Column<ColumnType<any>, boolean, boolean>> =
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       T extends Column<ColumnType<infer TCodeType>, infer TNullable, infer TAutoIncrement> ?
         TCodeType

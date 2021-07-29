@@ -1,3 +1,5 @@
+/* eslint-disable import/export */
+/* eslint-disable max-classes-per-file */
 import Create from '../builders/lowLvlBuilders/create';
 import Transaction from '../builders/transaction/transaction';
 import Db from '../db/db';
@@ -7,11 +9,22 @@ import {
   ExtractModel,
 } from '../tables/inferTypes';
 
+export class MigrationSession {
+  private finalQuery = '';
+
+  public execute = (query: string): void => {
+    this.finalQuery += query;
+    this.finalQuery += '\n';
+  };
+
+  public getQuery = (): string => this.finalQuery;
+}
+
+type MigrationType = string | ((session: Session) => Promise<void>);
+
 export default class Migrator {
   private _db: Db;
-  private migrationsPerVersion: Map<number,
-  (session: Session) => Promise<void>> = new Map();
-
+  private migrationsPerVersion: Map<number, MigrationType> = new Map();
   private session: Session;
 
   public constructor(db: Db) {
@@ -20,28 +33,41 @@ export default class Migrator {
   }
 
   public chain = (version: number,
-    migration: (session: Session) => Promise<void>): Migrator => {
-    this.migrationsPerVersion.set(version, async (session) => {
-      await migration(session);
-    });
+    migration: (dbSession: MigrationSession) => void): Migrator => {
+    const migrationSession = new MigrationSession();
+    migration(migrationSession);
+    this.migrationsPerVersion.set(version, migrationSession.getQuery());
     return this;
+  };
+
+  public scriptChain = (version: number,
+    migration: (dbSession: Session) => Promise<void>): Migrator => {
+    this.migrationsPerVersion.set(version, migration);
+    return this;
+  };
+
+  public getResultScript = (): string[] => {
+    const values: string[] = [];
+    // eslint-disable-next-line no-restricted-syntax
+    for (const value of this.migrationsPerVersion.values()) {
+      if (typeof value === 'string') {
+        values.push();
+      }
+    }
+    return values;
   };
 
   public execute = async (): Promise<boolean> => {
     const migrationsTable = new MigrationsTable(this._db);
 
-    console.log('here');
     await this.session.execute(Create.table(migrationsTable).build());
-    console.log(Create.table(migrationsTable).build());
 
     const migrations: Array<ExtractModel<MigrationsTable>> = await migrationsTable.select().all();
     const latestMigration: ExtractModel<MigrationsTable> | null = this.getLastOrNull(migrations);
-    let queriesToExecute: Map<number,
-    (session: Session) => Promise<void>> = this.migrationsPerVersion;
+    let queriesToExecute: Map<number, MigrationType> = this.migrationsPerVersion;
 
     if (latestMigration != null) {
-      const queriesToExecuteTest: Map<number,
-      (session: Session) => Promise<void>> = new Map();
+      const queriesToExecuteTest: Map<number, MigrationType> = new Map();
 
       // eslint-disable-next-line no-restricted-syntax
       for (const [key, value] of this.migrationsPerVersion) {
@@ -59,9 +85,20 @@ export default class Migrator {
     for await (const key of queriesToExecute.keys()) {
       try {
         const value = queriesToExecute.get(+key)!;
-        await value(this.session);
-        await migrationsTable
-          .insert({ version: +key, createdAt: new Date() }).all();
+        if (typeof value === 'string') {
+          const result = await this._db.session().execute(value);
+          if (result.isLeft()) {
+            const { reason } = result.value;
+            throw new Error(`Error while executing migration version ${key}. Error: ${reason}`);
+          } else {
+            await migrationsTable
+              .insert({ version: +key, createdAt: new Date() }).all();
+          }
+        } else {
+          await value(this.session);
+          await migrationsTable
+            .insert({ version: +key, createdAt: new Date() }).all();
+        }
       } catch (e) {
         await transaction.rollback();
         throw new Error(`Migration chain ${key} was not migrated sucessfully.\nMessage: ${e.message}`);

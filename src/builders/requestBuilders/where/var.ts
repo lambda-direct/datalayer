@@ -3,10 +3,10 @@ import ColumnType from '../../../columns/types/columnType';
 import { ecranate } from '../../../utils/ecranate';
 import Expr from './where';
 
-export default class Var<T extends ColumnType> extends Expr {
-  private column: Column<T, boolean, boolean>;
+export default class Var<T extends Column<ColumnType<any>, boolean, boolean>> extends Expr {
+  private column: T;
 
-  public constructor(column: Column<T, boolean, boolean>) {
+  public constructor(column: T) {
     super();
     this.column = column;
   }
