@@ -49,7 +49,7 @@ export default class Create<SERVICE> {
         this.columnsBuilder.push(column.isAutoIncrement() ? 'SERIAL' : column.getColumnType().getDbName());
         this.columnsBuilder.push(' ');
         this.columnsBuilder.push(column.getDefaultValue() != null ? `DEFAULT ${column.getColumnType().insertStrategy(column.getDefaultValue())}` : '');
-        this.columnsBuilder.push(column.getIsNullable() ? '' : ' NOT NULL');
+        this.columnsBuilder.push(column.isNullableFlag ? '' : ' NOT NULL');
 
         const referenced = column.getReferenced();
         this.columnsBuilder.push(referenced != null ? ` REFERENCES ${referenced.getParent()} (${referenced.getColumnName()})` : '');
