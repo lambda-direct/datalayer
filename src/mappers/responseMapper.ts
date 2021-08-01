@@ -4,17 +4,18 @@ import ColumnType from '../columns/types/columnType';
 import { ExtractModel } from '../tables/inferTypes';
 
 export default class QueryResponseMapper {
-  public static map = <RES>(mappedServiceToDb: { [name in keyof ExtractModel<RES>]
+  public static map = <IColumn>(mappedServiceToDb: { [name in keyof ExtractModel<IColumn>]
     : Column<ColumnType>; },
     queryResult: QueryResult<any>) => {
-    const response: Array<ExtractModel<RES>> = [];
+    const response: Array<ExtractModel<IColumn>> = [];
 
     queryResult.rows.forEach((row) => {
-      const mappedRow: ExtractModel<RES> = {} as ExtractModel<RES>;
+      const mappedRow: ExtractModel<IColumn> = {} as ExtractModel<IColumn>;
 
       Object.keys(mappedServiceToDb).forEach((key) => {
-        const column = mappedServiceToDb[key as keyof ExtractModel<RES>];
-        mappedRow[key as keyof ExtractModel<RES>] = row[column.getAlias()];
+        const column = mappedServiceToDb[key as keyof ExtractModel<IColumn>];
+        // eslint-disable-next-line max-len
+        mappedRow[key as keyof ExtractModel<IColumn>] = column.columnType.selectStrategy(row[column.getAlias()]) as any;
       });
       response.push(mappedRow);
     });

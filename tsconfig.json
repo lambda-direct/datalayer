@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2018",                                
     "module": "commonjs",                           
-    // "lib": ["es2018","es2017", "es7", "es6"],
+    "lib": ["es2018","es2017", "es7", "es6","es5"],
     // "baseUrl": "src",
     // "paths": {
       // "@/*": ["*"]
@@ -10,7 +10,7 @@
     "outDir": "./dist",                                
     "declaration": true,                       
     "strict": true, 
-    "esModuleInterop": true,                         
+    // "esModuleInterop": true,                         
     // "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "strictPropertyInitialization": false,
@@ -24,6 +24,6 @@
     // "sourceMap": true,
     // "noFallthroughCasesInSwitch": true, 
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/test.ts"],
   // "exclude": ["node_modules", "dist"]
 }

@@ -1,5 +1,5 @@
 import Expr from '../builders/requestBuilders/where/where';
-import { Column } from '../columns';
+import Column from '../columns/column';
 import ColumnType from '../columns/types/columnType';
 
 export enum BuilderType{

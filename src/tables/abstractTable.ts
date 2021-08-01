@@ -16,9 +16,9 @@ import SelectTRB from '../builders/highLvlBuilders/selectRequestBuilder';
 import PgBigInt from '../columns/types/pgBigInt';
 import Session from '../db/session';
 import BaseLogger from '../logger/abstractLogger';
-import { DB } from '../db';
 import PgEnum from '../columns/types/pgEnum';
 import { ExtractModel } from './inferTypes';
+import DB from '../db/db';
 
 type Stub = {};
 

@@ -12,4 +12,8 @@ export default class PgJsonb<TCodeType> extends ColumnType<TCodeType> {
   public getDbName = (): string => this.dbName;
 
   public insertStrategy = (value: TCodeType): string => `'${JSON.stringify(value)}'::jsonb`;
+
+  public selectStrategy(value: any): TCodeType {
+    return value;
+  }
 }

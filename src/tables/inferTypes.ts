@@ -1,4 +1,4 @@
-import { Column } from '../columns';
+import Column from '../columns/column';
 import ColumnType from '../columns/types/columnType';
 import TestEnum from '../examples/testEnum';
 

@@ -11,4 +11,8 @@ export default class PgTime extends ColumnType<Date> {
   public getDbName = (): string => this.dbName;
 
   public insertStrategy = (value: Date): string => value.toISOString();
+
+  public selectStrategy(value: any): Date {
+    return value;
+  }
 }

@@ -11,4 +11,8 @@ export default class PgBoolean extends ColumnType<boolean> {
   public getDbName = (): string => this.dbName;
 
   public insertStrategy = (value: boolean): string => `${value}`;
+
+  public selectStrategy(value: boolean): boolean {
+    return value;
+  }
 }

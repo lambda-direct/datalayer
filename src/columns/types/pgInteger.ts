@@ -11,4 +11,8 @@ export default class PgInteger extends ColumnType<number> {
   public getDbName = (): string => this.dbName;
 
   public insertStrategy = (value: number): string => `${value}`;
+
+  public selectStrategy(value: string): number {
+    return parseInt(value, 10);
+  }
 }

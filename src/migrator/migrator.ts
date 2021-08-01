@@ -4,10 +4,10 @@ import Create from '../builders/lowLvlBuilders/create';
 import Transaction from '../builders/transaction/transaction';
 import Db from '../db/db';
 import Session from '../db/session';
-import { MigrationsTable } from '../tables';
 import {
   ExtractModel,
 } from '../tables/inferTypes';
+import MigrationsTable from '../tables/migrationsTable';
 
 export class MigrationSession {
   private finalQuery = '';
