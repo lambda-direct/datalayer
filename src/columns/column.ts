@@ -1,3 +1,5 @@
+import { IDB, StubDB } from '../db/db';
+import { AbstractTable } from '../tables';
 import ColumnType from './types/columnType';
 
 export default class Column<T extends ColumnType, TNullable extends boolean = true,
@@ -26,9 +28,17 @@ TAutoIncrement extends boolean = false> {
 
   public getParent = (): string => this.parentTableName;
 
-  public foreignKey = (column: Column<T, boolean, boolean>)
+  // public foreignKey = (column: Column<T, boolean, boolean>)
+  // : Column<T, TNullable, TAutoIncrement> => {
+  //   this.referenced = column;
+  //   return this;
+  // };
+
+  public foreignKey = <ITable extends AbstractTable<ITable>>(table: { new(db: IDB): ITable ;},
+    callback: (table: ITable) => Column<T, boolean, boolean>)
   : Column<T, TNullable, TAutoIncrement> => {
-    this.referenced = column;
+    // eslint-disable-next-line new-cap
+    this.referenced = callback(new table(new StubDB()));
     return this;
   };
 

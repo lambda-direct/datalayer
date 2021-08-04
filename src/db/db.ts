@@ -1,8 +1,17 @@
+/* eslint-disable max-classes-per-file */
 import { Pool } from 'pg';
 import BaseLogger from '../logger/abstractLogger';
 import Session from './session';
 
-export default class DB {
+export interface IDB {
+
+}
+
+export class StubDB implements IDB {
+
+}
+
+export default class DB implements IDB {
   private _session: Session;
   private _logger: BaseLogger;
 

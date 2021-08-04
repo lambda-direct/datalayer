@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import PgVarChar from '../columns/types/pgVarChar';
 import PgTimestamp from '../columns/types/pgTimestamp';
 import PgInteger from '../columns/types/pgInteger';
@@ -18,21 +19,16 @@ import Session from '../db/session';
 import BaseLogger from '../logger/abstractLogger';
 import PgEnum from '../columns/types/pgEnum';
 import { ExtractModel } from './inferTypes';
-import DB from '../db/db';
-
-type Stub = {};
+import DB, { IDB } from '../db/db';
 
 export default abstract class AbstractTable<TTable> {
   private _session: Session;
   private _logger: BaseLogger;
 
-  public constructor(db: DB | Stub) {
+  public constructor(db: IDB) {
     if (db instanceof DB) {
       this._session = db.session();
       this._logger = db.logger();
-    } else {
-      // eslint-disable-next-line no-console
-      console.log(`\n--------\nWARNING: If you are not using static instance of ${this.constructor.name} class, make sure you have provided db in constructor\n--------\n`);
     }
   }
 

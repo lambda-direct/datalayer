@@ -1,8 +1,6 @@
 import AbstractTable from '../tables/abstractTable';
 
 export default class UsersTable extends AbstractTable<UsersTable> {
-  public static INSTANCE: UsersTable = new UsersTable({});
-
   public id = this.int('id').autoIncrement().primaryKey();
   public phone = this.varchar('phone', { size: 256, notNull: true });
   public fullName = this.varchar('full_name', { size: 256 });
