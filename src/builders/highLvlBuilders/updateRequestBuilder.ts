@@ -35,7 +35,7 @@ export default class UpdateTRB<TTable> extends TableRequestBuilder<TTable> {
   };
 
   public execute = async () => {
-    this._execute();
+    await this._execute();
   };
 
   protected _execute = async (): Promise<ExtractModel<TTable>[]> => {

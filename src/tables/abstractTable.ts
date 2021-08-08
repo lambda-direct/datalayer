@@ -39,13 +39,16 @@ export default abstract class AbstractTable<TTable> {
     this._logger = logger;
   };
 
-  public select = (): SelectTRB<TTable> => {
+  public select = ({ limit, offset }:{
+    limit?: number,
+    offset?: number }
+  = {}): SelectTRB<TTable> => {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
 
     return new SelectTRB(this.tableName(),
-      this._session, this.mapServiceToDb(), this._logger);
+      this._session, this.mapServiceToDb(), this._logger, { limit, offset }, this);
   };
 
   public update = (): UpdateTRB<TTable> => {
@@ -81,81 +84,6 @@ export default abstract class AbstractTable<TTable> {
       this.mapServiceToDb(), this._logger);
   };
 
-  public varchar(name: string, params?: {size?: number, notNull: false}): Column<PgVarChar, true>;
-  public varchar(name: string, params: {size?: number, notNull: true}): Column<PgVarChar, false>;
-  public varchar(name: string, params?: {size?: number, notNull?: false}): Column<PgVarChar, true>;
-  public varchar(name: string, params: {size?: number, notNull?: true}): Column<PgVarChar, false>;
-  public varchar(name: string, params: {size?: number, notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgVarChar(params.size), params?.notNull ?? false);
-  }
-
-  public int(name: string, params?: {notNull: false}): Column<PgInteger, true>;
-  public int(name: string, params: {notNull: true}): Column<PgInteger, false>;
-  public int(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgInteger(), params?.notNull ?? false);
-  }
-
-  public timestamp(name: string, params?: {notNull: false}): Column<PgTimestamp, true>;
-  public timestamp(name: string, params: {notNull: true}): Column<PgTimestamp, false>;
-  public timestamp(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgTimestamp(), params?.notNull ?? false);
-  }
-
-  public bigint(name: string, params?: {notNull: false}): Column<PgBigInt, true>;
-  public bigint(name: string, params: {notNull: true}): Column<PgBigInt, false>;
-  public bigint(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgBigInt(), params?.notNull ?? false);
-  }
-
-  public enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
-    name: string, dbName:string, params?: {notNull: false})
-  : Column<PgEnum<TSubType>, true>;
-  public enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
-    name: string, dbName:string, params: {notNull: true})
-  : Column<PgEnum<TSubType>, false>;
-  public enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
-    name: string, dbName:string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name,
-      new PgEnum<TSubType>(name, dbName, from as TSubType), params?.notNull ?? false);
-  }
-
-  public decimal(name: string, params?: {notNull: false, precision: number, scale: number})
-  : Column<PgBigDecimal, true>;
-  public decimal(name: string, params: {notNull: true, precision: number, scale: number})
-  : Column<PgBigDecimal, false>;
-  public decimal(name: string, params: {notNull?: boolean,
-    precision?: number, scale?: number} = {}) {
-    return new Column(this.tableName(), name,
-      new PgBigDecimal(params.precision, params.scale), params?.notNull ?? false);
-  }
-
-  public time(name: string, params?: {notNull: false}): Column<PgTime, true>;
-  public time(name: string, params: {notNull: true}): Column<PgTime, false>;
-  public time(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgTime(), params?.notNull ?? false);
-  }
-
-  public bool(name: string, params?: {notNull: false}): Column<PgBoolean, true>;
-  public bool(name: string, params: {notNull: true}): Column<PgBoolean, false>;
-  public bool(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgBoolean(), params?.notNull ?? false);
-  }
-
-  public text(name: string, params?: {notNull: false}): Column<PgText, true>;
-  public text(name: string, params: {notNull: true}): Column<PgText, false>;
-  public text(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgText(), params?.notNull ?? false);
-  }
-
-  public jsonb<TSubType>(name: string, params?: {notNull: false})
-  : Column<PgJsonb<TSubType>, true>;
-  public jsonb<TSubType>(name: string, params: {notNull: true})
-  : Column<PgJsonb<TSubType>, false>;
-  public jsonb<TSubType>(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name,
-      new PgJsonb<TSubType>(), params?.notNull ?? false);
-  }
-
   public mapServiceToDb(): {[name in keyof ExtractModel<TTable>]: Column<ColumnType>} {
     return Object.getOwnPropertyNames(this)
       .reduce<{[name in keyof ExtractModel<TTable>]: Column<ColumnType>}>((res, fieldName) => {
@@ -165,5 +93,84 @@ export default abstract class AbstractTable<TTable> {
       }
       return res;
     }, {} as {[name in keyof ExtractModel<TTable>]: Column<ColumnType>});
+  }
+
+  protected varchar(name: string, params?: {size?: number, notNull: false})
+  : Column<PgVarChar, true>;
+  protected varchar(name: string, params: {size?: number, notNull: true})
+  : Column<PgVarChar, false>;
+  protected varchar(name: string, params?: {size?: number, notNull?: false})
+  : Column<PgVarChar, true>;
+  protected varchar(name: string, params: {size?: number, notNull?: true})
+  : Column<PgVarChar, false>;
+  protected varchar(name: string, params: {size?: number, notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgVarChar(params.size), params?.notNull ?? false);
+  }
+
+  protected int(name: string, params?: {notNull: false}): Column<PgInteger, true>;
+  protected int(name: string, params: {notNull: true}): Column<PgInteger, false>;
+  protected int(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgInteger(), params?.notNull ?? false);
+  }
+
+  protected timestamp(name: string, params?: {notNull: false}): Column<PgTimestamp, true>;
+  protected timestamp(name: string, params: {notNull: true}): Column<PgTimestamp, false>;
+  protected timestamp(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgTimestamp(), params?.notNull ?? false);
+  }
+
+  protected bigint(name: string, params?: {notNull: false}): Column<PgBigInt, true>;
+  protected bigint(name: string, params: {notNull: true}): Column<PgBigInt, false>;
+  protected bigint(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgBigInt(), params?.notNull ?? false);
+  }
+
+  protected enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
+    name: string, dbName:string, params?: {notNull: false})
+  : Column<PgEnum<TSubType>, true>;
+  protected enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
+    name: string, dbName:string, params: {notNull: true})
+  : Column<PgEnum<TSubType>, false>;
+  protected enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
+    name: string, dbName:string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name,
+      new PgEnum<TSubType>(name, dbName, from as TSubType), params?.notNull ?? false);
+  }
+
+  protected decimal(name: string, params?: {notNull: false, precision: number, scale: number})
+  : Column<PgBigDecimal, true>;
+  protected decimal(name: string, params: {notNull: true, precision: number, scale: number})
+  : Column<PgBigDecimal, false>;
+  protected decimal(name: string, params: {notNull?: boolean,
+    precision?: number, scale?: number} = {}) {
+    return new Column(this.tableName(), name,
+      new PgBigDecimal(params.precision, params.scale), params?.notNull ?? false);
+  }
+
+  protected time(name: string, params?: {notNull: false}): Column<PgTime, true>;
+  protected time(name: string, params: {notNull: true}): Column<PgTime, false>;
+  protected time(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgTime(), params?.notNull ?? false);
+  }
+
+  protected bool(name: string, params?: {notNull: false}): Column<PgBoolean, true>;
+  protected bool(name: string, params: {notNull: true}): Column<PgBoolean, false>;
+  protected bool(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgBoolean(), params?.notNull ?? false);
+  }
+
+  protected text(name: string, params?: {notNull: false}): Column<PgText, true>;
+  protected text(name: string, params: {notNull: true}): Column<PgText, false>;
+  protected text(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name, new PgText(), params?.notNull ?? false);
+  }
+
+  protected jsonb<TSubType>(name: string, params?: {notNull: false})
+  : Column<PgJsonb<TSubType>, true>;
+  protected jsonb<TSubType>(name: string, params: {notNull: true})
+  : Column<PgJsonb<TSubType>, false>;
+  protected jsonb<TSubType>(name: string, params: {notNull?: boolean} = {}) {
+    return new Column(this.tableName(), name,
+      new PgJsonb<TSubType>(), params?.notNull ?? false);
   }
 }

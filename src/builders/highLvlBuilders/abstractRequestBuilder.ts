@@ -22,7 +22,10 @@ export default abstract class TableRequestBuilder<TTable> {
     this._logger = logger;
   }
 
-  public all = async (): Promise<ExtractModel<TTable>[]> => this._execute();
+  public all = async (): Promise<ExtractModel<TTable>[]> => {
+    const res = await this._execute();
+    return res;
+  };
 
   public first = async (): Promise<ExtractModel<TTable>> => {
     const executionRes = await this._execute();
