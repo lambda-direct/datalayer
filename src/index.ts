@@ -10,6 +10,10 @@ export * from './columns';
 export * from './tables';
 
 export const anotherMinor = {
+  async connect(config: ClientConfig): Promise<DB> {
+    const dbConnector: DbConnector = new DbConnector().params(config);
+    return dbConnector.connect();
+  },
   builders: {
     createTable<IService>(table: AbstractTable<IService>): Create<IService> {
       return Create.table(table);
@@ -17,11 +21,6 @@ export const anotherMinor = {
   },
   migrator(db:DB): Migrator {
     return new Migrator(db);
-  },
-
-  async connect(config: ClientConfig): Promise<DB> {
-    const dbConnector: DbConnector = new DbConnector().params(config);
-    return dbConnector.connect();
   },
 };
 
