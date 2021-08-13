@@ -4,10 +4,10 @@ import { DB, DbConnector } from './db';
 import Migrator from './migrator/migrator';
 import AbstractTable from './tables/abstractTable';
 
-// export * from './db';
-// export * from './builders';
-// export * from './columns';
-// export * from './tables';
+export * from './db';
+export * from './builders';
+export * from './columns';
+export * from './tables';
 
 export const anotherMinor = {
   builders: {
