@@ -35,7 +35,7 @@ ColumnType, T1, T2, T3, T4, MODEL> extends AbstractJoined<MODEL> {
       queryBuilder.filteredBy(this._filter);
     }
 
-    queryBuilder.joined([this._join1, this._join2]);
+    queryBuilder.joined([this._join1, this._join2, this._join3, this._join4]);
 
     let query = '';
     try {
