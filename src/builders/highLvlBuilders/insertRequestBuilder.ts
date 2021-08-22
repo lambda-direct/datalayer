@@ -5,12 +5,17 @@ import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseInsertError } from '../../errors/dbErrors';
 import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
+import { AbstractTable } from '../../tables';
 import { ExtractModel } from '../../tables/inferTypes';
 import Insert from '../lowLvlBuilders/inserts/insert';
+import UpdateExpr from '../requestBuilders/updates/updates';
 import TableRequestBuilder from './abstractRequestBuilder';
 
 export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
   private _values: ExtractModel<TTable>[];
+  private _onConflict: UpdateExpr;
+  private _onConflictField: Column<ColumnType, boolean, boolean>;
+  private _table: TTable;
 
   public constructor(
     values: ExtractModel<TTable>[],
@@ -18,13 +23,22 @@ export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
     session: Session,
     mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
     logger: BaseLogger,
+    table: AbstractTable<TTable>,
   ) {
     super(tableName, session, mappedServiceToDb, logger);
     this._values = values;
+    this._table = table as unknown as TTable;
   }
 
   public execute = async () => {
     await this._execute();
+  };
+
+  public onConflict = (callback: (table: TTable) => Column<ColumnType, boolean, boolean>,
+    expr: UpdateExpr): InsertTRB<TTable> => {
+    this._onConflictField = callback(this._table);
+    this._onConflict = expr;
+    return this;
   };
 
   protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
@@ -42,6 +56,11 @@ export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
       });
       mappedRows.push(mappedValue);
     });
+
+    const valuesQueryBiulder = queryBuilder.values(mappedRows, mapper);
+    if (this._onConflict) {
+      valuesQueryBiulder.onConflict(this._onConflict, this._onConflictField);
+    }
 
     // @TODO refactor values() part!!
     let query = '';

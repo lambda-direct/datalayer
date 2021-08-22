@@ -1,4 +1,4 @@
-import AbstractTable from '../tables/abstractTable';
+import AbstractTable from '../../tables/abstractTable';
 import UsersTable from './usersTable';
 
 export default class AuthOtpTable extends AbstractTable<AuthOtpTable> {

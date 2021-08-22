@@ -20,6 +20,7 @@ import BaseLogger from '../logger/abstractLogger';
 import PgEnum from '../columns/types/pgEnum';
 import { ExtractModel } from './inferTypes';
 import DB, { IDB } from '../db/db';
+import TableIndex from '../indexes/tableIndex';
 
 export default abstract class AbstractTable<TTable> {
   private _session: Session;
@@ -64,7 +65,7 @@ export default abstract class AbstractTable<TTable> {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
     return new InsertTRB([value], this.tableName(), this._session,
-      this.mapServiceToDb(), this._logger);
+      this.mapServiceToDb(), this._logger, this);
   };
 
   public insertMany = (values: ExtractModel<TTable>[]):
@@ -73,7 +74,7 @@ export default abstract class AbstractTable<TTable> {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
     return new InsertTRB(values, this.tableName(), this._session,
-      this.mapServiceToDb(), this._logger);
+      this.mapServiceToDb(), this._logger, this);
   };
 
   public delete = (): DeleteTRB<TTable> => {
@@ -93,6 +94,12 @@ export default abstract class AbstractTable<TTable> {
       }
       return res;
     }, {} as {[name in keyof ExtractModel<TTable>]: Column<ColumnType>});
+  }
+
+  protected index(columns: Array<Column<ColumnType, boolean, boolean>>): TableIndex
+  protected index(column: Column<ColumnType, boolean, boolean>): TableIndex
+  protected index(columns: any) {
+    return new TableIndex([columns]);
   }
 
   protected varchar(name: string, params?: {size?: number, notNull: false})

@@ -20,11 +20,9 @@ export class MigrationSession {
   public getQuery = (): string => this.finalQuery;
 }
 
-type MigrationType = string | ((session: Session) => Promise<void>);
-
 export default class Migrator {
   private _db: Db;
-  private migrationsPerVersion: Map<number, MigrationType> = new Map();
+  private migrationsPerVersion: Map<number, string> = new Map();
   private session: Session;
 
   public constructor(db: Db) {
@@ -32,17 +30,11 @@ export default class Migrator {
     this.session = db.session();
   }
 
-  public chain = (version: number,
+  public chain = (tag: number,
     migration: (dbSession: MigrationSession) => void): Migrator => {
     const migrationSession = new MigrationSession();
     migration(migrationSession);
-    this.migrationsPerVersion.set(version, migrationSession.getQuery());
-    return this;
-  };
-
-  public scriptChain = (version: number,
-    migration: (dbSession: Session) => Promise<void>): Migrator => {
-    this.migrationsPerVersion.set(version, migration);
+    this.migrationsPerVersion.set(+tag, migrationSession.getQuery());
     return this;
   };
 
@@ -50,9 +42,7 @@ export default class Migrator {
     const values: string[] = [];
     // eslint-disable-next-line no-restricted-syntax
     for (const value of this.migrationsPerVersion.values()) {
-      if (typeof value === 'string') {
-        values.push();
-      }
+      values.push(value);
     }
     return values;
   };
@@ -63,45 +53,36 @@ export default class Migrator {
     await this.session.execute(Create.table(migrationsTable).build());
 
     const migrations: Array<ExtractModel<MigrationsTable>> = await migrationsTable.select().all();
-    const latestMigration: ExtractModel<MigrationsTable> | null = this.getLastOrNull(migrations);
-    let queriesToExecute: Map<number, MigrationType> = this.migrationsPerVersion;
-
-    if (latestMigration != null) {
-      const queriesToExecuteTest: Map<number, MigrationType> = new Map();
-
-      // eslint-disable-next-line no-restricted-syntax
-      for (const [key, value] of this.migrationsPerVersion) {
-        if (key > latestMigration.version) {
-          queriesToExecuteTest.set(key, value);
-        }
-      }
-
-      queriesToExecute = queriesToExecuteTest;
-    }
 
     const transaction = new Transaction(this.session);
     await transaction.begin();
     // eslint-disable-next-line no-restricted-syntax
-    for await (const key of queriesToExecute.keys()) {
-      try {
-        const value = queriesToExecute.get(+key)!;
-        if (typeof value === 'string') {
+    for await (const [key, value] of this.migrationsPerVersion) {
+      const dbMigrationByTag = migrations.find((it) => it.version === key);
+      if (dbMigrationByTag && dbMigrationByTag.hash) {
+        const isHashSameAsInDb = this.generateHash(value).toString() === dbMigrationByTag.hash;
+
+        if (!isHashSameAsInDb) {
+          throw Error(`Migration script was changed for version ${key}`);
+        }
+      } else {
+        try {
           const result = await this._db.session().execute(value);
           if (result.isLeft()) {
             const { reason } = result.value;
-            throw new Error(`Error while executing migration version ${key}. Error: ${reason}`);
+            throw new Error(`Error while executing migration tag ${key}. Error: ${reason}`);
           } else {
             await migrationsTable
-              .insert({ version: +key, createdAt: new Date() }).all();
+              .insert({
+                version: key,
+                createdAt: new Date(),
+                hash: this.generateHash(value).toString(),
+              }).all();
           }
-        } else {
-          await value(this.session);
-          await migrationsTable
-            .insert({ version: +key, createdAt: new Date() }).all();
+        } catch (e) {
+          await transaction.rollback();
+          throw new Error(`Migration chain ${key} was not migrated sucessfully.\nMessage: ${e.message}`);
         }
-      } catch (e) {
-        await transaction.rollback();
-        throw new Error(`Migration chain ${key} was not migrated sucessfully.\nMessage: ${e.message}`);
       }
     }
 
@@ -110,12 +91,18 @@ export default class Migrator {
     return true;
   };
 
-  public getLastOrNull = (list: Array<ExtractModel<MigrationsTable>>)
-  : ExtractModel<MigrationsTable> | null => {
-    let latestMigration: ExtractModel<MigrationsTable> | null = null;
-    if (list.length !== 0) {
-      latestMigration = list[list.length - 1];
+  private generateHash(value: string): number {
+    let hash = 0;
+    let i;
+    let chr;
+    if (value.length === 0) return hash;
+    for (i = 0; i < value.length; i += 1) {
+      chr = value.charCodeAt(i);
+      // eslint-disable-next-line no-bitwise
+      hash = ((hash << 5) - hash) + chr;
+      // eslint-disable-next-line no-bitwise
+      hash |= 0;
     }
-    return latestMigration;
-  };
+    return hash;
+  }
 }

@@ -1,0 +1,140 @@
+[
+    {
+      "auth_otp": {
+        "name": "auth_otp",
+        "columns": {
+          "id": {
+            "name": "id",
+            "type": "INT",
+            "primaryKey": true,
+            "autoincrement": true
+          },
+          "phone": {
+            "name": "phone",
+            "type": "character varying(256)",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "otp": {
+            "name": "otp",
+            "type": "character varying(256)",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "issuedAt": {
+            "name": "issued_at",
+            "type": "timestamp without time zone",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "createdAt": {
+            "name": "created_at",
+            "type": "timestamp without time zone",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "updatedAt": {
+            "name": "updated_at",
+            "type": "timestamp without time zone",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "userId": {
+            "name": "user_id",
+            "type": "INT",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "test": {
+            "name": "test",
+            "type": "JSONB",
+            "primaryKey": false,
+            "autoincrement": false
+          }
+        },
+        "indexes": {}
+      }
+    },
+    {
+      "users": {
+        "name": "users",
+        "columns": {
+          "id": {
+            "name": "id",
+            "type": "INT",
+            "primaryKey": true,
+            "autoincrement": true
+          },
+          "phone": {
+            "name": "phone",
+            "type": "character varying(256)",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "fullName": {
+            "name": "full_name",
+            "type": "character varying(512)",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "test": {
+            "name": "test",
+            "type": "numeric(100,2)",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "test1": {
+            "name": "test1",
+            "type": "BIGINT",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "createdAt": {
+            "name": "created_at",
+            "type": "timestamp without time zone",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "updatedAt": {
+            "name": "updated_at",
+            "type": "timestamp without time zone",
+            "primaryKey": false,
+            "autoincrement": false
+          }
+        },
+        "indexes": {}
+      }
+    },
+    {
+      "citiess": {
+        "name": "citiess",
+        "columns": {
+          "name": {
+            "name": "name",
+            "type": "timestamp without time zone",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "page": {
+            "name": "page",
+            "type": "character varying(256)",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "userId1": {
+            "name": "user_id",
+            "type": "INT",
+            "primaryKey": false,
+            "autoincrement": false
+          },
+          "data": {
+            "name": "data",
+            "type": "JSONB",
+            "primaryKey": false,
+            "autoincrement": false
+          }
+        },
+        "indexes": {}
+      }
+    }
+  ]

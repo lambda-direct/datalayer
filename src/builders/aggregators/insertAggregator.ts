@@ -1,5 +1,6 @@
 import Column from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import UpdateExpr from '../requestBuilders/updates/updates';
 import Aggregator from './abstractAggregator';
 
 export default class InsertAggregator extends Aggregator {
@@ -73,7 +74,17 @@ export default class InsertAggregator extends Aggregator {
     }
   };
 
-  // public appendOnConflict = (updates: UpdateExpr) => this;
+  public appendOnConflict = (column: Column<ColumnType, boolean, boolean>,
+    updates?: UpdateExpr) => {
+    this._onConflict.push(`ON CONFLICT ON CONSTRAINT ${column.columnName}\n`);
+    if (updates) {
+      this._onConflict.push('DO UPDATE\n');
+      this._onConflict.push(`SET ${updates.toQuery()}`);
+    } else {
+      this._onConflict.push('DO NOTHING\n');
+    }
+    return this;
+  };
 
   public buildQuery = () => {
     this._insert.push(this._from.join(''));
@@ -87,7 +98,8 @@ export default class InsertAggregator extends Aggregator {
     this._insert.push('RETURNING');
     this._insert.push('\n');
     this._insert.push(this._fields.join(''));
-    // @TODO onConflict. Research better ways to handle several primary or unique fields
+    this._insert.push('\n');
+    this._insert.push(this._onConflict.join(''));
     // this._insert.push("ON CONFLICT ON CONSTRAINT \"");
     // this._insert.push(this._table.tableName());
     // this._insert.push("_");

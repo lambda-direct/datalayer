@@ -1,5 +1,4 @@
-import AbstractTable from '../tables/abstractTable';
-// import TestEnum from './testEnum';
+import AbstractTable from '../../tables/abstractTable';
 import UsersTable from './usersTable';
 
 export default class CitiesTable extends AbstractTable<CitiesTable> {

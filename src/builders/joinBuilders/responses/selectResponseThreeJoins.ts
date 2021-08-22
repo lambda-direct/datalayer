@@ -17,7 +17,7 @@ export default class SelectResponseThreeJoins<T1, T2, T3, T4> {
   }
 
   public mapByRow = <M>(imac: (t1: ExtractModel<T1>,
-    t2:ExtractModel<T2>,
+    t2: ExtractModel<T2>,
     t3: ExtractModel<T3>,
     t4: ExtractModel<T4>) => M): Array<M> => {
     const objects = new Array<M>();

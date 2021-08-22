@@ -1,7 +1,7 @@
 import ColumnType from './columnType';
 
 export default class PgVarChar extends ColumnType<string> {
-  protected size?: number;
+  public size?: number;
   protected dbName: string;
 
   public constructor(size?: number) {
