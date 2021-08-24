@@ -1,5 +1,4 @@
-import Column from '../../../columns/column';
-import ColumnType from '../../../columns/types/columnType';
+import { Indexing } from '../../../tables/inferTypes';
 import InsertAggregator from '../../aggregators/insertAggregator';
 import UpdateExpr from '../../requestBuilders/updates/updates';
 
@@ -11,7 +10,7 @@ export default class OnConflictInsert {
   }
 
   public apply = (updates: UpdateExpr,
-    column: Column<ColumnType, boolean, boolean>): OnConflictInsert => {
+    column: Indexing): OnConflictInsert => {
     this._aggregator.appendOnConflict(column, updates);
     return this;
   };

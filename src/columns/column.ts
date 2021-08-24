@@ -1,8 +1,14 @@
+/* eslint-disable max-classes-per-file */
 import { IDB, StubDB } from '../db/db';
 import { AbstractTable } from '../tables';
 import ColumnType from './types/columnType';
 
-export default class Column<T extends ColumnType, TNullable extends boolean = true,
+type ExtractColumnType<T extends ColumnType> =
+ T extends ColumnType<infer TCodeType> ?
+   TCodeType
+   : never;
+
+export class Column<T extends ColumnType, TNullable extends boolean = true,
 TAutoIncrement extends boolean = false> {
   public columnType: T;
   public columnName: string;
@@ -28,12 +34,6 @@ TAutoIncrement extends boolean = false> {
 
   public getParent = (): string => this.parentTableName;
 
-  // public foreignKey = (column: Column<T, boolean, boolean>)
-  // : Column<T, TNullable, TAutoIncrement> => {
-  //   this.referenced = column;
-  //   return this;
-  // };
-
   public foreignKey = <ITable extends AbstractTable<ITable>>(table: { new(db: IDB): ITable ;},
     callback: (table: ITable) => Column<T, boolean, boolean>)
   : Column<T, TNullable, TAutoIncrement> => {
@@ -42,7 +42,7 @@ TAutoIncrement extends boolean = false> {
     return this;
   };
 
-  public defaultValue = (value: any) => {
+  public defaultValue = (value: ExtractColumnType<T>) => {
     this.defaultParam = value;
     return this;
   };
@@ -54,7 +54,13 @@ TAutoIncrement extends boolean = false> {
 
   public primaryKey() {
     this.primaryKeyName = `${this.parentTableName}_${this.columnName}`;
-    return this as unknown as Column<T, TAutoIncrement extends true ? true : false, TAutoIncrement>;
+    return this as unknown as
+     IndexedColumn<T, TAutoIncrement extends true ? true : false, TAutoIncrement>;
+  }
+
+  public serial() {
+    this.autoIncrementFlag = true;
+    return this as unknown as Column<T, false, true>;
   }
 
   public unique = () => {
@@ -71,4 +77,10 @@ TAutoIncrement extends boolean = false> {
   public getColumnType = (): T => this.columnType;
 
   public getDefaultValue = (): any => this.defaultParam;
+}
+
+export class IndexedColumn<T extends ColumnType, TNullable extends boolean = true,
+TAutoIncrement extends boolean = false>
+  extends Column<T, TNullable, TAutoIncrement> {
+
 }

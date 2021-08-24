@@ -1,5 +1,6 @@
-import Column from '../../columns/column';
+import { Column } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import { Indexing } from '../../tables/inferTypes';
 import UpdateExpr from '../requestBuilders/updates/updates';
 import Aggregator from './abstractAggregator';
 
@@ -74,15 +75,18 @@ export default class InsertAggregator extends Aggregator {
     }
   };
 
-  public appendOnConflict = (column: Column<ColumnType, boolean, boolean>,
+  public appendOnConflict = (column: Indexing,
     updates?: UpdateExpr) => {
-    this._onConflict.push(`ON CONFLICT ON CONSTRAINT ${column.columnName}\n`);
+    const indexName = column instanceof Column ? column.columnName : column.indexName();
+
+    this._onConflict.push(`ON CONFLICT ON CONSTRAINT ${indexName}\n`);
     if (updates) {
       this._onConflict.push('DO UPDATE\n');
       this._onConflict.push(`SET ${updates.toQuery()}`);
     } else {
       this._onConflict.push('DO NOTHING\n');
     }
+
     return this;
   };
 

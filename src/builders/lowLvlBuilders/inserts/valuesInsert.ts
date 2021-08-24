@@ -1,6 +1,6 @@
-import Column from '../../../columns/column';
+import { Column } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
-import { ExtractModel } from '../../../tables/inferTypes';
+import { ExtractModel, Indexing } from '../../../tables/inferTypes';
 import InsertAggregator from '../../aggregators/insertAggregator';
 import UpdateExpr from '../../requestBuilders/updates/updates';
 import OnConflictInsert from './onConflictInsert';
@@ -22,7 +22,7 @@ export default class ValuesInsert {
   };
 
   public onConflict = (updates: UpdateExpr,
-    column: Column<ColumnType, boolean, boolean>) => new OnConflictInsert(
+    column: Indexing) => new OnConflictInsert(
     this._aggregator,
   ).apply(updates, column);
 

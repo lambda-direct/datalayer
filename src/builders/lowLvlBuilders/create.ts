@@ -1,4 +1,4 @@
-import Column from '../../columns/column';
+import { Column } from '../../columns/column';
 import PgEnum from '../../columns/types/pgEnum';
 import AbstractTable from '../../tables/abstractTable';
 import { ecranate } from '../../utils/ecranate';

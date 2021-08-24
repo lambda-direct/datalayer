@@ -1,4 +1,4 @@
-export { default as Column } from './column';
+export { Column } from './column';
 export { default as PgBigDecimal } from './types/pgBigDecimal';
 export { default as PgBigInt } from './types/pgBigInt';
 export { default as PgBoolean } from './types/pgBoolean';

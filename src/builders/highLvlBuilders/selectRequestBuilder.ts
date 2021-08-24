@@ -1,5 +1,5 @@
 import { Select } from '..';
-import Column from '../../columns/column';
+import { Column } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';

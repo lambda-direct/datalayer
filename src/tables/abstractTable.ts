@@ -8,8 +8,6 @@ import PgBoolean from '../columns/types/pgBoolean';
 import PgText from '../columns/types/pgText';
 import PgJsonb from '../columns/types/pgJsonb';
 import ColumnType from '../columns/types/columnType';
-import Column from '../columns/column';
-
 import InsertTRB from '../builders/highLvlBuilders/insertRequestBuilder';
 import DeleteTRB from '../builders/highLvlBuilders/deleteRequestBuilder';
 import UpdateTRB from '../builders/highLvlBuilders/updateRequestBuilder';
@@ -20,6 +18,7 @@ import BaseLogger from '../logger/abstractLogger';
 import PgEnum from '../columns/types/pgEnum';
 import { ExtractModel } from './inferTypes';
 import DB, { IDB } from '../db/db';
+import { Column } from '../columns/column';
 import TableIndex from '../indexes/tableIndex';
 
 export default abstract class AbstractTable<TTable> {
@@ -99,7 +98,7 @@ export default abstract class AbstractTable<TTable> {
   protected index(columns: Array<Column<ColumnType, boolean, boolean>>): TableIndex
   protected index(column: Column<ColumnType, boolean, boolean>): TableIndex
   protected index(columns: any) {
-    return new TableIndex([columns]);
+    return new TableIndex(this.tableName(), [columns]);
   }
 
   protected varchar(name: string, params?: {size?: number, notNull: false})
@@ -111,25 +110,26 @@ export default abstract class AbstractTable<TTable> {
   protected varchar(name: string, params: {size?: number, notNull?: true})
   : Column<PgVarChar, false>;
   protected varchar(name: string, params: {size?: number, notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgVarChar(params.size), params?.notNull ?? false);
+    return new Column(this.tableName(), name, new PgVarChar(params.size),
+      !params?.notNull ?? false);
   }
 
   protected int(name: string, params?: {notNull: false}): Column<PgInteger, true>;
   protected int(name: string, params: {notNull: true}): Column<PgInteger, false>;
   protected int(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgInteger(), params?.notNull ?? false);
+    return new Column(this.tableName(), name, new PgInteger(), !params?.notNull ?? false);
   }
 
-  protected timestamp(name: string, params?: {notNull: false}): Column<PgTimestamp, true>;
-  protected timestamp(name: string, params: {notNull: true}): Column<PgTimestamp, false>;
-  protected timestamp(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgTimestamp(), params?.notNull ?? false);
+  protected timestamp(name: string, params?: { notNull: false }): Column<PgTimestamp, true>;
+  protected timestamp(name: string, params: { notNull: true }): Column<PgTimestamp, false>;
+  protected timestamp(name: string, params: { notNull?: boolean } = {}) {
+    return new Column(this.tableName(), name, new PgTimestamp(), !params?.notNull ?? false);
   }
 
   protected bigint(name: string, params?: {notNull: false}): Column<PgBigInt, true>;
   protected bigint(name: string, params: {notNull: true}): Column<PgBigInt, false>;
   protected bigint(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgBigInt(), params?.notNull ?? false);
+    return new Column(this.tableName(), name, new PgBigInt(), !params?.notNull ?? false);
   }
 
   protected enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
@@ -141,7 +141,7 @@ export default abstract class AbstractTable<TTable> {
   protected enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
     name: string, dbName:string, params: {notNull?: boolean} = {}) {
     return new Column(this.tableName(), name,
-      new PgEnum<TSubType>(name, dbName, from as TSubType), params?.notNull ?? false);
+      new PgEnum<TSubType>(name, dbName, from as TSubType), !params?.notNull ?? false);
   }
 
   protected decimal(name: string, params?: {notNull: false, precision: number, scale: number})
@@ -151,25 +151,25 @@ export default abstract class AbstractTable<TTable> {
   protected decimal(name: string, params: {notNull?: boolean,
     precision?: number, scale?: number} = {}) {
     return new Column(this.tableName(), name,
-      new PgBigDecimal(params.precision, params.scale), params?.notNull ?? false);
+      new PgBigDecimal(params.precision, params.scale), !params?.notNull ?? false);
   }
 
   protected time(name: string, params?: {notNull: false}): Column<PgTime, true>;
   protected time(name: string, params: {notNull: true}): Column<PgTime, false>;
   protected time(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgTime(), params?.notNull ?? false);
+    return new Column(this.tableName(), name, new PgTime(), !params?.notNull ?? false);
   }
 
   protected bool(name: string, params?: {notNull: false}): Column<PgBoolean, true>;
   protected bool(name: string, params: {notNull: true}): Column<PgBoolean, false>;
   protected bool(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgBoolean(), params?.notNull ?? false);
+    return new Column(this.tableName(), name, new PgBoolean(), !params?.notNull ?? false);
   }
 
   protected text(name: string, params?: {notNull: false}): Column<PgText, true>;
   protected text(name: string, params: {notNull: true}): Column<PgText, false>;
   protected text(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgText(), params?.notNull ?? false);
+    return new Column(this.tableName(), name, new PgText(), !params?.notNull ?? false);
   }
 
   protected jsonb<TSubType>(name: string, params?: {notNull: false})
@@ -178,6 +178,6 @@ export default abstract class AbstractTable<TTable> {
   : Column<PgJsonb<TSubType>, false>;
   protected jsonb<TSubType>(name: string, params: {notNull?: boolean} = {}) {
     return new Column(this.tableName(), name,
-      new PgJsonb<TSubType>(), params?.notNull ?? false);
+      new PgJsonb<TSubType>(), !params?.notNull ?? false);
   }
 }

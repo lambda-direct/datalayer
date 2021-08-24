@@ -1,4 +1,4 @@
-import Column from '../../columns/column';
+import { Column } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
@@ -6,7 +6,7 @@ import { DatabaseInsertError } from '../../errors/dbErrors';
 import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import { AbstractTable } from '../../tables';
-import { ExtractModel } from '../../tables/inferTypes';
+import { ExtractModel, Indexing } from '../../tables/inferTypes';
 import Insert from '../lowLvlBuilders/inserts/insert';
 import UpdateExpr from '../requestBuilders/updates/updates';
 import TableRequestBuilder from './abstractRequestBuilder';
@@ -14,7 +14,7 @@ import TableRequestBuilder from './abstractRequestBuilder';
 export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
   private _values: ExtractModel<TTable>[];
   private _onConflict: UpdateExpr;
-  private _onConflictField: Column<ColumnType, boolean, boolean>;
+  private _onConflictField: Indexing;
   private _table: TTable;
 
   public constructor(
@@ -34,8 +34,10 @@ export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
     await this._execute();
   };
 
-  public onConflict = (callback: (table: TTable) => Column<ColumnType, boolean, boolean>,
-    expr: UpdateExpr): InsertTRB<TTable> => {
+  public onConflict = (
+    callback: (table: TTable) => Indexing,
+    expr: UpdateExpr,
+  ): InsertTRB<TTable> => {
     this._onConflictField = callback(this._table);
     this._onConflict = expr;
     return this;

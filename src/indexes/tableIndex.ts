@@ -1,12 +1,19 @@
-import { Column } from '../columns';
+import { Column } from '../columns/column';
 import ColumnType from '../columns/types/columnType';
 
 export default class TableIndex {
-  private __columns: Column<ColumnType, boolean, boolean>[];
+  private _columns: Column<ColumnType<any>, boolean, boolean>[] = [];
+  private _tableName: string;
 
-  public constructor(columns: Column<ColumnType, boolean, boolean>[]) {
-    this.__columns = columns;
+  public constructor(tableName:string, columns: Column<ColumnType<any>, boolean, boolean>[]) {
+    this._columns = columns;
+    this._tableName = tableName;
   }
 
-  public getColumns = () => this.__columns;
+  public getColumns = (): Column<ColumnType<any>, boolean, boolean>[] => this._columns;
+
+  public indexName = (): string => {
+    const columnNames = this._columns.map((column) => column.columnName);
+    return `${this._tableName}_${columnNames.join('_')}_index`;
+  };
 }

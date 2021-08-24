@@ -1,4 +1,4 @@
-import Column from '../../../columns/column';
+import { Column } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import { ExtractCodeType } from '../../../tables/inferTypes';
 import And from './and';

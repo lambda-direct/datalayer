@@ -1,4 +1,4 @@
-import Column from '../../../columns/column';
+import { Column } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import SelectAggregator from '../../aggregators/selectAggregator';
 import SelectFrom from './selectFrom';

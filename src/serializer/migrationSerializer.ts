@@ -3,7 +3,7 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
 import * as fs from 'fs';
-import Column from '../columns/column';
+import { Column } from '../columns/column';
 import ColumnType from '../columns/types/columnType';
 import { AbstractTable } from '../tables';
 

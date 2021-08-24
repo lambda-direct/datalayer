@@ -1,5 +1,5 @@
 import { QueryResult } from 'pg';
-import Column from '../columns/column';
+import { Column } from '../columns/column';
 import ColumnType from '../columns/types/columnType';
 import { ExtractModel } from '../tables/inferTypes';
 

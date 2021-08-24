@@ -1,4 +1,4 @@
-import Column from '../../../columns/column';
+import { Column } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import Session from '../../../db/session';
 import { ExtractModel } from '../../../tables/inferTypes';

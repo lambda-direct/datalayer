@@ -1,4 +1,4 @@
-import Column from '../../../columns/column';
+import { Column } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import UpdateAggregator from '../../aggregators/updateAggregator';
 import UpdateExpr from '../../requestBuilders/updates/updates';
