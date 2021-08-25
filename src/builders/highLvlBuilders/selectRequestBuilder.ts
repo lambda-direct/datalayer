@@ -1,15 +1,17 @@
-import { Select } from '..';
+/* eslint-disable max-classes-per-file */
+import { JoinWith, Select } from '..';
 import { Column } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import { IDB, StubDB } from '../../db/db';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseSelectError } from '../../errors/dbErrors';
 import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import { AbstractTable } from '../../tables';
-import { ExtractModel } from '../../tables/inferTypes';
+import { AnyColumn, ExtractModel } from '../../tables/inferTypes';
 import SelectTRBWithJoin from '../joinBuilders/builders/selectWithJoin';
-import Join from '../joinBuilders/join';
+import { JoinStrategy } from '../joinBuilders/join';
 import Expr from '../requestBuilders/where/where';
 import TableRequestBuilder from './abstractRequestBuilder';
 import Order from './order';
@@ -45,7 +47,6 @@ export default class SelectTRB<TTable>
     : SelectTRB<TTable> {
     this.__orderBy = callback(this.__table);
     this.__order = order;
-    console.log(this.__orderBy, this.__order);
     return this;
   }
 
@@ -55,9 +56,73 @@ export default class SelectTRB<TTable>
   //   return this;
   // }
 
-  public join = <COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1>):
-  SelectTRBWithJoin<COLUMN, T1, TTable> => new SelectTRBWithJoin(this._tableName, this._session,
-    this._filter, join, this._mappedServiceToDb);
+  public innerJoin<IToTable extends AbstractTable<IToTable>>(
+    table: { new(db: IDB): IToTable ;},
+    from: (table: TTable) => AnyColumn,
+    to: (table: IToTable) => AnyColumn,
+  ) {
+    const fromColumn = from(this.__table);
+    // eslint-disable-next-line new-cap
+    const toColumn = to(new table(new StubDB()));
+
+    const join = new JoinWith(this._tableName, this._mappedServiceToDb)
+      .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.INNER_JOIN);
+
+    return new SelectTRBWithJoin(this._tableName, this._session,
+      this._filter, join, this._mappedServiceToDb);
+  }
+
+  public leftJoin<IToTable extends AbstractTable<IToTable>>(
+    table: { new(db: IDB): IToTable ;},
+    from: (table: TTable) => AnyColumn,
+    to: (table: IToTable) => AnyColumn,
+  ) {
+    const fromColumn = from(this.__table);
+    // eslint-disable-next-line new-cap
+    const toColumn = to(new table(new StubDB()));
+
+    const join = new JoinWith(this._tableName, this._mappedServiceToDb)
+      .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.LEFT_JOIN);
+
+    return new SelectTRBWithJoin(this._tableName, this._session,
+      this._filter, join, this._mappedServiceToDb);
+  }
+
+  public rightJoin<IToTable extends AbstractTable<IToTable>>(
+    table: { new(db: IDB): IToTable ;},
+    from: (table: TTable) => AnyColumn,
+    to: (table: IToTable) => AnyColumn,
+  ) {
+    const fromColumn = from(this.__table);
+    // eslint-disable-next-line new-cap
+    const toColumn = to(new table(new StubDB()));
+
+    const join = new JoinWith(this._tableName, this._mappedServiceToDb)
+      .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.RIGHT_JOIN);
+
+    return new SelectTRBWithJoin(this._tableName, this._session,
+      this._filter, join, this._mappedServiceToDb);
+  }
+
+  public fullJoin<IToTable extends AbstractTable<IToTable>>(
+    table: { new(db: IDB): IToTable ;},
+    from: (table: TTable) => AnyColumn,
+    to: (table: IToTable) => AnyColumn,
+  ) {
+    const fromColumn = from(this.__table);
+    // eslint-disable-next-line new-cap
+    const toColumn = to(new table(new StubDB()));
+
+    const join = new JoinWith(this._tableName, this._mappedServiceToDb)
+      .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.FULL_JOIN);
+
+    return new SelectTRBWithJoin(this._tableName, this._session,
+      this._filter, join, this._mappedServiceToDb);
+  }
+
+  // public join = <COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1>):
+  // SelectTRBWithJoin<COLUMN, T1, TTable> => new SelectTRBWithJoin(this._tableName, this._session,
+  //   this._filter, join, this._mappedServiceToDb);
 
   public execute = async () => {
     const res = await this._execute();
