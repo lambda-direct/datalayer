@@ -68,6 +68,7 @@ export default class Migrator {
         // }
       } else {
         try {
+          this._db.logger().info(`Executing migration with tag ${key} with query:\n${value}`);
           const result = await this._db.session().execute(value);
           if (result.isLeft()) {
             const { reason } = result.value;
