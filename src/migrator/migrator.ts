@@ -60,11 +60,12 @@ export default class Migrator {
     for await (const [key, value] of this.migrationsPerVersion) {
       const dbMigrationByTag = migrations.find((it) => it.version === key);
       if (dbMigrationByTag && dbMigrationByTag.hash) {
-        const isHashSameAsInDb = this.generateHash(value).toString() === dbMigrationByTag.hash;
+        // const isHashSameAsInDb =
+        // Buffer.from(dbMigrationByTag.hash, 'base64').toString('ascii') === value;
 
-        if (!isHashSameAsInDb) {
-          throw Error(`Migration script was changed for version ${key}`);
-        }
+        // if (!isHashSameAsInDb) {
+        //   throw Error(`Migration script was changed for version ${key}`);
+        // }
       } else {
         try {
           const result = await this._db.session().execute(value);
@@ -76,8 +77,8 @@ export default class Migrator {
               .insert({
                 version: key,
                 createdAt: new Date(),
-                hash: this.generateHash(value).toString(),
-              }).all();
+                hash: Buffer.from(value).toString('base64'),
+              }).execute();
           }
         } catch (e) {
           await transaction.rollback();
