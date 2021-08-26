@@ -1,18 +1,19 @@
-import Column from '../../columns/column';
+import { Column } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import { ExtractModel } from '../../tables/inferTypes';
 import Join from './join';
 
 export default class JoinWith<T extends ColumnType, K> {
   public joinTableName: string;
-  public mappedServiceToDb: { [name in keyof K]: Column<ColumnType, {}>; };
+  public mappedServiceToDb: { [name in keyof ExtractModel<K>]: Column<ColumnType>; };
 
   public constructor(joinTableName: string,
-    mappedServiceToDb: { [name in keyof K]: Column<ColumnType, {}>; }) {
+    mappedServiceToDb: { [name in keyof ExtractModel<K>]: Column<ColumnType>; }) {
     this.joinTableName = joinTableName;
     this.mappedServiceToDb = mappedServiceToDb;
   }
 
-  public columns = (fromColumn:Column<T>,
-    toColumn:Column<T>): Join<T, K> => new Join(this.joinTableName,
+  public columns = (fromColumn:Column<T, boolean, boolean>,
+    toColumn:Column<T, boolean, boolean>): Join<T, K> => new Join(this.joinTableName,
     fromColumn, toColumn, this.mappedServiceToDb);
 }

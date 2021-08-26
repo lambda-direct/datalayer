@@ -1,27 +1,49 @@
-import { Pool } from 'pg';
-import Column from '../../columns/column';
+import { Column } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import Session from '../../db/session';
+import BuilderError, { BuilderType } from '../../errors/builderError';
+import { DatabaseInsertError } from '../../errors/dbErrors';
+import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
+import { AbstractTable } from '../../tables';
+import { ExtractModel, Indexing } from '../../tables/inferTypes';
 import Insert from '../lowLvlBuilders/inserts/insert';
+import UpdateExpr from '../requestBuilders/updates/updates';
 import TableRequestBuilder from './abstractRequestBuilder';
 
-export default class InsertTRB<T> extends TableRequestBuilder<T> {
-  private _values: Partial<T>[];
+export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
+  private _values: ExtractModel<TTable>[];
+  private _onConflict: UpdateExpr;
+  private _onConflictField: Indexing;
+  private _table: TTable;
 
   public constructor(
-    values: Partial<T>[],
+    values: ExtractModel<TTable>[],
     tableName: string,
-    pool: Pool,
-    mappedServiceToDb: { [name in keyof T]: Column<ColumnType, {}>; },
-    columns: Column<ColumnType, {}>[],
+    session: Session,
+    mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
+    logger: BaseLogger,
+    table: AbstractTable<TTable>,
   ) {
-    super(tableName, pool, mappedServiceToDb, columns);
+    super(tableName, session, mappedServiceToDb, logger);
     this._values = values;
+    this._table = table as unknown as TTable;
   }
 
-  public returningAll = async () => this.execute();
+  public execute = async () => {
+    await this._execute();
+  };
 
-  protected execute = async (): Promise<T[]> => {
+  public onConflict = (
+    callback: (table: TTable) => Indexing,
+    expr: UpdateExpr,
+  ): InsertTRB<TTable> => {
+    this._onConflictField = callback(this._table);
+    this._onConflict = expr;
+    return this;
+  };
+
+  protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
     const queryBuilder = Insert.into(this._tableName, this._columns);
     if (!this._values) throw Error('Values should be provided firestly\nExample: table.values().execute()');
 
@@ -31,15 +53,35 @@ export default class InsertTRB<T> extends TableRequestBuilder<T> {
     this._values.forEach((valueToInsert) => {
       const mappedValue: {[name: string]: any} = {};
       Object.entries(valueToInsert).forEach(([key, value]) => {
-        const column = mapper[key as keyof T];
+        const column = mapper[key as keyof ExtractModel<TTable>];
         mappedValue[column.columnName] = value;
       });
       mappedRows.push(mappedValue);
     });
 
-    // @TODO refactor!!
-    const query = queryBuilder.values(mappedRows, mapper).build();
-    const result = await this._pool!.query(query);
-    return QueryResponseMapper.map(this._mappedServiceToDb, result);
+    const valuesQueryBiulder = queryBuilder.values(mappedRows, mapper);
+    if (this._onConflict) {
+      valuesQueryBiulder.onConflict(this._onConflict, this._onConflictField);
+    }
+
+    // @TODO refactor values() part!!
+    let query = '';
+    try {
+      query = queryBuilder.build();
+    } catch (e) {
+      throw new BuilderError(BuilderType.INSERT, this._tableName, this._columns, e);
+    }
+
+    if (this._logger) {
+      this._logger.info(`Inserting to ${this._tableName} using query:\n ${query}`);
+    }
+
+    const result = await this._session.execute(query);
+    if (result.isLeft()) {
+      const { reason } = result.value;
+      throw new DatabaseInsertError(this._tableName, reason, query);
+    } else {
+      return QueryResponseMapper.map(this._mappedServiceToDb, result.value);
+    }
   };
 }

@@ -1,4 +1,4 @@
-import Column from '../../../columns/column';
+import { Column } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import UpdateAggregator from '../../aggregators/updateAggregator';
 import UpdateExpr from '../../requestBuilders/updates/updates';
@@ -11,7 +11,7 @@ export default class UpdateIn {
     this._aggregator = aggregator;
   }
 
-  public columns = (columns: Column<ColumnType, {}>[]) => {
+  public columns = (columns: Column<ColumnType>[]) => {
     this._aggregator.appendFields(columns);
     return new UpdateIn(this._aggregator);
   };

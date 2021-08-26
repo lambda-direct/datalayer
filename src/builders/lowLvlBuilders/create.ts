@@ -1,9 +1,11 @@
-import Column from '../../columns/column';
+import { Column } from '../../columns/column';
+import PgEnum from '../../columns/types/pgEnum';
 import AbstractTable from '../../tables/abstractTable';
 import { ecranate } from '../../utils/ecranate';
 
 export default class Create<SERVICE> {
   private tableBuilder: Array<string> = [];
+  private enumBuilder: Array<string> = [];
   private columnsBuilder: Array<string> = [];
   private primaryKey: Array<string> = [];
   private uniqueKey: Array<string> = [];
@@ -23,19 +25,35 @@ export default class Create<SERVICE> {
 
     const tableValues = Object.values(this.tableClass);
     const columns = tableValues.filter((value) => value instanceof Column);
-
     for (let i = 0; i < columns.length; i += 1) {
       const column = columns[i];
 
       if (column instanceof Column) {
+        if (column.columnType instanceof PgEnum) {
+          // eslint-disable-next-line new-cap
+          const enumValues = Object.values(column.columnType.codeType) as string[];
+
+          let resValue = '';
+          for (let j = 0; j < enumValues.length; j += 1) {
+            resValue += `'${enumValues[j]}'`;
+            if (j !== enumValues.length - 1) {
+              resValue += ',';
+            }
+          }
+          this.enumBuilder.push(`DO $$ BEGIN
+          CREATE TYPE ${column.columnType.dbName} AS ENUM (${resValue});
+      EXCEPTION
+          WHEN duplicate_object THEN null;
+      END $$;`);
+        }
         this.columnsBuilder.push(ecranate(column.getColumnName()));
         this.columnsBuilder.push(' ');
         this.columnsBuilder.push(column.isAutoIncrement() ? 'SERIAL' : column.getColumnType().getDbName());
         this.columnsBuilder.push(' ');
         this.columnsBuilder.push(column.getDefaultValue() != null ? `DEFAULT ${column.getColumnType().insertStrategy(column.getDefaultValue())}` : '');
-        this.columnsBuilder.push(column.getIsNullable() ? '' : ' NOT NULL');
+        this.columnsBuilder.push(column.isNullableFlag ? '' : ' NOT NULL');
 
-        const referenced: Column<any> = column.getReferenced();
+        const referenced = column.getReferenced();
         this.columnsBuilder.push(referenced != null ? ` REFERENCES ${referenced.getParent()} (${referenced.getColumnName()})` : '');
 
         if (i !== columns.length - 1) {
@@ -91,6 +109,6 @@ export default class Create<SERVICE> {
       this.uniqueKey.push(')');
     }
 
-    return `${this.tableBuilder.join('') + this.columnsBuilder.join('') + this.primaryKey.join('') + this.uniqueKey.join('')});`;
+    return `${this.enumBuilder.join('')} ${this.tableBuilder.join('') + this.columnsBuilder.join('') + this.primaryKey.join('') + this.uniqueKey.join('')});`;
   };
 }

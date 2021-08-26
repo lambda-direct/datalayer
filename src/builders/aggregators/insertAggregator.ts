@@ -1,5 +1,7 @@
-import Column from '../../columns/column';
+import { Column } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import { Indexing } from '../../tables/inferTypes';
+import UpdateExpr from '../requestBuilders/updates/updates';
 import Aggregator from './abstractAggregator';
 
 export default class InsertAggregator extends Aggregator {
@@ -39,7 +41,7 @@ export default class InsertAggregator extends Aggregator {
   };
 
   // @TODO refactor!!
-  public appendValues = <T>(mapper: {[name in keyof T]: Column<ColumnType, {}>},
+  public appendValues = <T>(mapper: {[name in keyof T]: Column<ColumnType>},
     values: {[name: string]: any}[]) => {
     // @TODO Check if values not empty
     for (let i = 0; i < values.length; i += 1) {
@@ -55,8 +57,7 @@ export default class InsertAggregator extends Aggregator {
         const columnKey = Object.keys(mapper)
           .find((it) => mapper[it as keyof T].columnName === insertKey)!;
         const column = mapper[columnKey as keyof T];
-
-        if (insertValue) {
+        if (insertValue !== undefined && insertValue !== null) {
           this._values.push(column.columnType.insertStrategy(insertValue));
         } else {
           this._values.push('null');
@@ -74,7 +75,20 @@ export default class InsertAggregator extends Aggregator {
     }
   };
 
-  // public appendOnConflict = (updates: UpdateExpr) => this;
+  public appendOnConflict = (column: Indexing,
+    updates?: UpdateExpr) => {
+    const indexName = column instanceof Column ? column.columnName : column.indexName();
+
+    this._onConflict.push(`ON CONFLICT ON CONSTRAINT ${indexName}\n`);
+    if (updates) {
+      this._onConflict.push('DO UPDATE\n');
+      this._onConflict.push(`SET ${updates.toQuery()}`);
+    } else {
+      this._onConflict.push('DO NOTHING\n');
+    }
+
+    return this;
+  };
 
   public buildQuery = () => {
     this._insert.push(this._from.join(''));
@@ -88,7 +102,8 @@ export default class InsertAggregator extends Aggregator {
     this._insert.push('RETURNING');
     this._insert.push('\n');
     this._insert.push(this._fields.join(''));
-    // @TODO onConflict. Research better ways to handle several primary or unique fields
+    this._insert.push('\n');
+    this._insert.push(this._onConflict.join(''));
     // this._insert.push("ON CONFLICT ON CONSTRAINT \"");
     // this._insert.push(this._table.tableName());
     // this._insert.push("_");

@@ -1,4 +1,6 @@
+import { Column } from '../../columns';
 import ColumnType from '../../columns/types/columnType';
+import Order from '../highLvlBuilders/order';
 import Join from '../joinBuilders/join';
 import Expr from '../requestBuilders/where/where';
 import Aggregator from './abstractAggregator';
@@ -8,6 +10,10 @@ export default class SelectAggregator extends Aggregator {
   private _filters: Array<string> = [];
   private _select: Array<string> = ['SELECT'];
   private _join: Array<string> = [];
+  private _limit: Array<string> = [];
+  private _offset: Array<string> = [];
+  // private _groupBy: Array<string> = [];
+  private _orderBy: Array<string> = [];
 
   public constructor(tableName: string) {
     super(tableName);
@@ -19,8 +25,28 @@ export default class SelectAggregator extends Aggregator {
     return this;
   };
 
+  public limit = (limit: number): SelectAggregator => {
+    this._limit.push('LIMIT ');
+    this._limit.push(limit.toString());
+    return this;
+  };
+
+  public offset = (limit: number): SelectAggregator => {
+    this._offset.push('OFFSET ');
+    this._offset.push(limit.toString());
+    return this;
+  };
+
+  public orderBy = (column: Column<ColumnType, boolean, boolean>, order: Order)
+  : SelectAggregator => {
+    this._orderBy.push('ORDER BY ');
+    this._orderBy.push(`${column.columnName} `);
+    this._orderBy.push(Order[order]);
+    return this;
+  };
+
   public appendFrom = (tableName: string): SelectAggregator => {
-    this._from.push(' FROM ');
+    this._from.push('FROM ');
     this._from.push(tableName);
     return this;
   };
@@ -60,8 +86,16 @@ export default class SelectAggregator extends Aggregator {
     this._select.push(this._from.join(''));
     this._select.push('\n');
     this._select.push(this._join.join(''));
-    this._select.push('\n');
+    if (this._join.length > 0) {
+      this._select.push('\n');
+    }
     this._select.push(this._filters.join(''));
+    this._select.push('\n');
+    this._select.push(this._orderBy.join(''));
+    this._select.push('\n');
+    this._select.push(this._limit.join(''));
+    this._select.push('\n');
+    this._select.push(this._offset.join(''));
 
     return this._select.join('');
   };

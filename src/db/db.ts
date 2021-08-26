@@ -1,14 +1,29 @@
+/* eslint-disable max-classes-per-file */
 import { Pool } from 'pg';
-import AbstractTable from '../tables/abstractTable';
+import BaseLogger from '../logger/abstractLogger';
+import Session from './session';
 
-export default class Db {
-  public _pool: Pool;
+export interface IDB {
+
+}
+
+export class StubDB implements IDB {
+
+}
+
+export default class DB implements IDB {
+  private _session: Session;
+  private _logger: BaseLogger;
 
   public constructor(pool: Pool) {
-    this._pool = pool;
+    this._session = new Session(pool);
   }
 
-  public use = <T extends AbstractTable<{}>>(table: T): void => {
-    table.withConnection(this._pool);
+  public useLogger = (logger: BaseLogger): void => {
+    this._logger = logger;
   };
+
+  public logger = (): BaseLogger => this._logger;
+
+  public session = (): Session => this._session;
 }
