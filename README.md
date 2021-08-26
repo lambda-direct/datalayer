@@ -17,153 +17,128 @@ Minor ORM is highly influenced by [Exposed](https://github.com/JetBrains/Exposed
 
 In Progress
 
-## Examples
+## Installing
 
-### Table View
-
-```typescript
-export class CitiesTable extends AbstractTable<CitiesModel, DbCity> {
-    name = this.varchar({name: "name", size: 256});
-    page = this.varchar({name: "page", size: 256});
-    userId = this.int({name: "user_id"})
-
-    tableName(): string {
-        return "citiess";
-    }
-
-    toServiceModel(response: RowMapper): CitiesModel {
-        return {
-            name: response.getVarchar(this.name),
-            page: response.getVarchar(this.page),
-            userId: response.getInt(this.userId)
-        };
-    }
-
-    toDbModel(citiesModel: CitiesModel): DbCity {
-        return {
-            name: citiesModel.name,
-            page: citiesModel.page,
-            user_id: citiesModel.userId
-        };
-    }
-}
-
-interface DbCity {
-    name: string;
-    page: string;
-    user_id: number
-}
-
-export interface CitiesModel {
-    name: string;
-    page: string;
-    userId: number
-}
+```bash
+npm install @lambda-team/ltdl
+yarn add @lambda-team/ltdl
+bower install @lambda-team/ltdl
 ```
 
-```typescript
-export class UsersTable extends AbstractTable<UsersModel, DbUser> {
-    id = this.int({name: "id"}).autoIncrement().primaryKey()
-    name = this.varchar({name: "name", size: 256});
-    city = this.varchar({name: "city", size: 256});
-    country = this.varchar({name: "country", size: 256});
+## Connecting to database
 
-    tableName(): string {
-        return "users";
-    }
+```tsx
+import { DbConnector } from "@lambda-team/ltdl";
 
-    toServiceModel(response: RowMapper): UsersModel {
-        return {
-            name: response.getVarchar(this.name),
-            city: response.getVarchar(this.city),
-            country: response.getVarchar(this.country),
-        };
-    }
+// connect via postgresql connection url
+const db = await new DbConnector()
+	.connectionString("postgres://user:password@host:port/db")
+	.connect();
 
-    toDbModel(response: UsersModel): DbUser {
-        return response;
-    }
-
-    map(response: RowMapper): UsersModel {
-        return {
-            name: response.getVarchar(this.name),
-            city: response.getVarchar(this.city),
-            country: response.getVarchar(this.country),
-        };
-    }
-}
-
-interface DbUser {
-    name: string;
-    city: string;
-    country: string;
-}
-
-export interface UsersModel {
-    name: string;
-    city: string;
-    country: string;
-}
+// or by params
+const db = await new DbConnector()
+	.params({
+		host: '0.0.0.0',
+		port: 5432,
+		user: 'user',
+		password: 'password',
+		db: 'optional_db_name'
+	}).connect();
 ```
 
-```typescript
-(async () => {
-    const usersTable = new UsersTable();
-    const citiesTable = new CitiesTable();
-    const testTable = new TestTable();
+## Creating your first table and first migration
 
-    const dbConnector: DbConnector = new DbConnector().host("localhost").user("postgres").port(5432).db("minor");
-    const db: Db = await dbConnector.connect();
-    // db.use(testTable);
-    const migrator = new Migrator(db);
+```tsx
+class UsersTable extends AbstractTable<UsersTable> {
+  public id = this.int("id").primaryKey().autoIncrement();
+  public name = this.varchar("name", { size: 512 });
+  public email = this.varchar("email", { size: 512 }).unique();
 
-    await migrator.chain(3, (dbSession: SessionWrapper) => {
-      dbSession.execute(Create.table(usersTable).build());
-      dbSession.execute(Create.table(citiesTable).build());
-      dbSession.execute(Create.table(testTable).build());
-    }).execute();
-  
-    db.use(usersTable);
-    db.use(citiesTable);
-    
-    const usersToInsert: UsersModel[] = [{
-      city:'city',
-      country:'country',
-      name: 'name'
-    },{
-      city:'to_delete',
-      country:'country',
-      name: 'name'
-    }];
+  public tableName(): string {
+    return "users";
+  }
+}
 
-    const insertedUsers = await usersTable.insert(usersToInsert).returningAll();
-    const insertedCities = await citiesTable.insert([{page: 'page', name:'city_name', userId: 1}]).returningAll();
+// lets create your first SQL migration to create initial schema
+// > npx minor migrate
 
-    const selectedUsers = await usersTable.select()
-        .where(Where.eq(usersTable.city, 'city'))
-        .first();
+const migrator = new Migrator(db);
+await migrator.runMigrations('./minor_orm/migrations')
+// That's it!! No metaprogramming, no black magic, everything's imperative
+```
 
-    const updatedUsers = await usersTable.update()
-        .where(Where.eq(usersTable.city, 'city'))
-        .set(Updates.set(usersTable.name, 'new_name'))
-        .all();
+## Inserting into tables
+Returned entity is of type ExtractModel<UsersTable> which does have a set of typed fields
 
-    const deletedUsers = await usersTable.delete()
-        .where(Where.eq(usersTable.city, 'to_delete'))
-        .returningAll();
+```tsx
+const email = 'email@example.com'
+const name = 'Full Name'
 
-    const join = Join.with(usersTable).columns(citiesTable.userId, usersTable.id).joinStrategy(JoinStrategy.INNER_JOIN)
+// returns inserted user
+const user = await table.insert({ email, name }).first()
+```
 
-    const citiesWithUsers = await citiesTable.select()
-        .join(join)
-        .execute()
-    
-    const mappedJoinResponse = citiesWithUsers.mapByRow((city, user) => {
-      return {
-        userName: user.name,
-        cityPage: city.page
-      }
-    })
-    console.log(mappedJoinResponse);
-  })().catch(err => console.log(err.stack))
+## Simple querying with/without filters
+__For more complex filtering - see `advanced querying`__
+
+```tsx
+const email = 'email@example.com'
+
+const allUsers = await table.select().all()
+const firstUser = await table.select().first()
+
+const userWithEmail = await table.select(eq(table.email, email)).first()
+
+// If you need to declare type explicitely
+type User = ExtractModel<UsersTable>
+
+const user: User = await table.select().first()
+user.email
+user.id
+
+// Works perfectly!
+```
+
+## Joins
+
+```tsx
+class ItemsTable extends AbstractTable<ItemsTable>{
+  id = this.int("id").primaryKey().autoIncrement();
+  name = this.varchar("name");
+	
+  // many to one relation
+  ownerId = this.int("owner_id").foreignKey(UsersTable, (t) => t.id); 
+}
+
+const query = usersTable.select().leftJoin(
+	ItemsTable, 
+	(ut) => ut.id,     // user id
+	(it) => it.ownerId // item owner id
+); 
+
+const result = (await query.execute()).map((user, item) => {
+	return { user, item };
+});
+
+// result would be
+[{
+    user: { id: 10, ... },
+    item: { id: 1, ... }
+},
+{
+    user: { id: 10, ... },
+    item: { id: 2, ... }
+},
+{
+    user: { id: 10, ... },
+    item: { id: 3, ... }
+},
+{
+    user: { id: 11, ... },
+    item: { id: 4, ... }
+},
+{
+    user: { id: 11, ... },
+    item: { id: 5, ... }
+}]
 ```
