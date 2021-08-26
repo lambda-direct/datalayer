@@ -44,7 +44,7 @@ export default class Create<SERVICE> {
           CREATE TYPE ${column.columnType.dbName} AS ENUM (${resValue});
       EXCEPTION
           WHEN duplicate_object THEN null;
-      END $$`);
+      END $$;`);
         }
         this.columnsBuilder.push(ecranate(column.getColumnName()));
         this.columnsBuilder.push(' ');
