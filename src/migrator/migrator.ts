@@ -59,7 +59,7 @@ export default class Migrator {
     // eslint-disable-next-line no-restricted-syntax
     for await (const [key, value] of this.migrationsPerVersion) {
       const dbMigrationByTag = migrations.find((it) => it.version === key);
-      if (dbMigrationByTag && dbMigrationByTag.hash) {
+      if (dbMigrationByTag) {
         // const isHashSameAsInDb =
         // Buffer.from(dbMigrationByTag.hash, 'base64').toString('ascii') === value;
 
