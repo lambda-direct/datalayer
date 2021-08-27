@@ -9,12 +9,12 @@ export default abstract class TableRequestBuilder<TTable> {
   protected _session: Session;
   protected _mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; };
   protected _columns: Column<ColumnType>[];
-  protected _logger: BaseLogger;
+  protected _logger?: BaseLogger;
 
   public constructor(tableName: string,
     session: Session,
     mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
-    logger: BaseLogger) {
+    logger?: BaseLogger) {
     this._mappedServiceToDb = mappedServiceToDb;
     this._tableName = tableName;
     this._session = session;

@@ -17,7 +17,7 @@ export default class DeleteTRB<TTable> extends TableRequestBuilder<TTable> {
     tableName: string,
     session: Session,
     mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
-    logger: BaseLogger,
+    logger?: BaseLogger,
   ) {
     super(tableName, session, mappedServiceToDb, logger);
   }

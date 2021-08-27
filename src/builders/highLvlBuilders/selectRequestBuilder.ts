@@ -27,9 +27,9 @@ export default class SelectTRB<TTable>
     tableName: string,
     session: Session,
     mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
-    logger: BaseLogger,
     props: {limit?:number, offset?:number},
     table: AbstractTable<TTable>,
+    logger?: BaseLogger,
   ) {
     super(tableName, session, mappedServiceToDb, logger);
     this.props = props;
@@ -45,7 +45,6 @@ export default class SelectTRB<TTable>
     : SelectTRB<TTable> {
     this.__orderBy = callback(this.__table);
     this.__order = order;
-    console.log(this.__orderBy, this.__order);
     return this;
   }
 

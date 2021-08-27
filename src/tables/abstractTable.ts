@@ -23,7 +23,7 @@ import TableIndex from '../indexes/tableIndex';
 
 export default abstract class AbstractTable<TTable> {
   private _session: Session;
-  private _logger: BaseLogger;
+  private _logger: BaseLogger | undefined;
 
   public constructor(db: IDB) {
     if (db instanceof DB) {
@@ -48,7 +48,7 @@ export default abstract class AbstractTable<TTable> {
     }
 
     return new SelectTRB(this.tableName(),
-      this._session, this.mapServiceToDb(), this._logger, { limit, offset }, this);
+      this._session, this.mapServiceToDb(), { limit, offset }, this, this._logger);
   };
 
   public update = (): UpdateTRB<TTable> => {
@@ -64,7 +64,7 @@ export default abstract class AbstractTable<TTable> {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
     return new InsertTRB([value], this.tableName(), this._session,
-      this.mapServiceToDb(), this._logger, this);
+      this.mapServiceToDb(), this, this._logger);
   };
 
   public insertMany = (values: ExtractModel<TTable>[]):
@@ -73,7 +73,7 @@ export default abstract class AbstractTable<TTable> {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
     return new InsertTRB(values, this.tableName(), this._session,
-      this.mapServiceToDb(), this._logger, this);
+      this.mapServiceToDb(), this, this._logger);
   };
 
   public delete = (): DeleteTRB<TTable> => {

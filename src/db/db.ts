@@ -13,7 +13,7 @@ export class StubDB implements IDB {
 
 export default class DB implements IDB {
   private _session: Session;
-  private _logger: BaseLogger;
+  private _logger?: BaseLogger;
 
   public constructor(pool: Pool) {
     this._session = new Session(pool);
@@ -23,7 +23,7 @@ export default class DB implements IDB {
     this._logger = logger;
   };
 
-  public logger = (): BaseLogger => this._logger;
+  public logger = (): BaseLogger | undefined => this._logger;
 
   public session = (): Session => this._session;
 }
