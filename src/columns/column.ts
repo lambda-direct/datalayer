@@ -19,9 +19,9 @@ export abstract class AbstractColumn<T extends ColumnType, TNullable extends boo
   public primaryKeyName: string | undefined = undefined;
   public uniqueKeyName: string | undefined = undefined;
   public defaultParam: any = null;
-  public referenced: Column<T, boolean, boolean>;
+  public referenced: AbstractColumn<T, boolean, boolean>;
 
-  private parentTableName: string;
+  protected parentTableName: string;
 
   public constructor(parentTableName: string, columnName: string,
     columnType: T, nullable: TNullable) {
@@ -36,12 +36,8 @@ export abstract class AbstractColumn<T extends ColumnType, TNullable extends boo
   public getParent = (): string => this.parentTableName;
 
   public abstract foreignKey <ITable extends AbstractTable<ITable>>(table: { new(db: IDB): ITable ;},
-    callback: (table: ITable) => Column<T, boolean, boolean>)
+    callback: (table: ITable) => AbstractColumn<T, boolean, boolean>)
   : AbstractColumn<T, TNullable, TAutoIncrement>;
-  //   // eslint-disable-next-line new-cap
-  //   this.referenced = callback(new table(new StubDB()));
-  //   return this;
-  // };
 
   public defaultValue = (value: ExtractColumnType<T>) => {
     this.defaultParam = value;
@@ -49,20 +45,10 @@ export abstract class AbstractColumn<T extends ColumnType, TNullable extends boo
   };
 
   public abstract autoIncrement(): AbstractColumn<T, boolean, boolean>;
-  //   this.autoIncrementFlag = true;
-  //   return this;
-  // }
 
-  public primaryKey(): IndexedColumn<T, boolean, boolean> {
-    this.primaryKeyName = `${this.parentTableName}_${this.columnName}`;
-    // eslint-disable-next-line max-len
-    return this as unknown as IndexedColumn<T, TAutoIncrement extends true ? true : false, TAutoIncrement>;
-  }
+  public abstract primaryKey(): AbstractColumn<T, boolean, boolean>;
 
-  public serial() {
-    this.autoIncrementFlag = true;
-    return this as unknown as Column<T, false, true>;
-  }
+  public abstract serial(): AbstractColumn<T, boolean, boolean>;
 
   public unique = () => {
     this.uniqueKeyName = this.columnName;
@@ -73,7 +59,7 @@ export abstract class AbstractColumn<T extends ColumnType, TNullable extends boo
 
   public getColumnName = (): string => this.columnName;
 
-  public getReferenced = (): Column<T, boolean, boolean> => this.referenced;
+  public getReferenced = (): AbstractColumn<T, boolean, boolean> => this.referenced;
 
   public getColumnType = (): T => this.columnType;
 
@@ -88,15 +74,26 @@ export class Column<T extends ColumnType, TNullable extends boolean = true, TAut
     super(parentTableName, columnName, columnType, nullable);
   }
 
+  public serial() {
+    this.autoIncrementFlag = true;
+    return this as unknown as Column<T, false, true>;
+  }
+
+  public primaryKey() {
+    this.primaryKeyName = `${this.parentTableName}_${this.columnName}`;
+    // eslint-disable-next-line max-len
+    return this as unknown as Column<T, TAutoIncrement extends true ? true : false, TAutoIncrement>;
+  }
+
   public foreignKey<ITable extends AbstractTable<ITable>>(table: new (db: IDB) => ITable, callback: (table: ITable) => Column<T, boolean, boolean>): Column<T, TNullable, TAutoIncrement> {
     // eslint-disable-next-line new-cap
     this.referenced = callback(new table(new StubDB()));
     return this;
   }
 
-  public autoIncrement(): Column<T, boolean, boolean> {
+  public autoIncrement() {
     this.autoIncrementFlag = true;
-    return this;
+    return this as unknown as IndexedColumn<T, true, true>;
   }
 }
 
@@ -107,14 +104,25 @@ export class IndexedColumn<T extends ColumnType, TNullable extends boolean = tru
     super(parentTableName, columnName, columnType, nullable);
   }
 
-  public foreignKey<ITable extends AbstractTable<ITable>>(table: new (db: IDB) => ITable, callback: (table: ITable) => Column<T, boolean, boolean>): Column<T, TNullable, TAutoIncrement> {
+  public serial() {
+    this.autoIncrementFlag = true;
+    return this as unknown as IndexedColumn<T, false, true>;
+  }
+
+  public primaryKey() {
+    this.primaryKeyName = `${this.parentTableName}_${this.columnName}`;
+    // eslint-disable-next-line max-len
+    return this as unknown as IndexedColumn<T, TAutoIncrement extends true ? true : false, TAutoIncrement>;
+  }
+
+  public foreignKey<ITable extends AbstractTable<ITable>>(table: new (db: IDB) => ITable, callback: (table: ITable) => IndexedColumn<T, boolean, boolean>): IndexedColumn<T, TNullable, TAutoIncrement> {
     // eslint-disable-next-line new-cap
     this.referenced = callback(new table(new StubDB()));
     return this;
   }
 
-  public autoIncrement(): Column<T, boolean, boolean> {
+  public autoIncrement() {
     this.autoIncrementFlag = true;
-    return this;
+    return this as unknown as IndexedColumn<T, true, true>;
   }
 }

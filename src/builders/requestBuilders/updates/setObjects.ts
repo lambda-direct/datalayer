@@ -1,8 +1,8 @@
-import { Column } from '../../../columns/column';
+import { AbstractColumn } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import UpdateExpr from './updates';
 
-export default class SetObject<T extends Column<ColumnType<any>, boolean, boolean>>
+export default class SetObject<T extends AbstractColumn<ColumnType<any>, boolean, boolean>>
   extends UpdateExpr {
   private _column: T;
   private _value: any;
