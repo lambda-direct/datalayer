@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable max-classes-per-file */
 import { IDB, StubDB } from '../db/db';
 import { AbstractTable } from '../tables';
@@ -8,8 +9,8 @@ type ExtractColumnType<T extends ColumnType> =
    TCodeType
    : never;
 
-export class Column<T extends ColumnType, TNullable extends boolean = true,
-TAutoIncrement extends boolean = false> {
+// eslint-disable-next-line max-len
+export abstract class AbstractColumn<T extends ColumnType, TNullable extends boolean = true, TAutoIncrement extends boolean = false> {
   public columnType: T;
   public columnName: string;
   public isNullableFlag: TNullable;
@@ -34,28 +35,28 @@ TAutoIncrement extends boolean = false> {
 
   public getParent = (): string => this.parentTableName;
 
-  public foreignKey = <ITable extends AbstractTable<ITable>>(table: { new(db: IDB): ITable ;},
+  public abstract foreignKey <ITable extends AbstractTable<ITable>>(table: { new(db: IDB): ITable ;},
     callback: (table: ITable) => Column<T, boolean, boolean>)
-  : Column<T, TNullable, TAutoIncrement> => {
-    // eslint-disable-next-line new-cap
-    this.referenced = callback(new table(new StubDB()));
-    return this;
-  };
+  : AbstractColumn<T, TNullable, TAutoIncrement>;
+  //   // eslint-disable-next-line new-cap
+  //   this.referenced = callback(new table(new StubDB()));
+  //   return this;
+  // };
 
   public defaultValue = (value: ExtractColumnType<T>) => {
     this.defaultParam = value;
     return this;
   };
 
-  public autoIncrement() {
-    this.autoIncrementFlag = true;
-    return this as unknown as Column<T, true, true>;
-  }
+  public abstract autoIncrement(): AbstractColumn<T, boolean, boolean>;
+  //   this.autoIncrementFlag = true;
+  //   return this;
+  // }
 
-  public primaryKey() {
+  public primaryKey(): IndexedColumn<T, boolean, boolean> {
     this.primaryKeyName = `${this.parentTableName}_${this.columnName}`;
-    return this as unknown as
-     IndexedColumn<T, TAutoIncrement extends true ? true : false, TAutoIncrement>;
+    // eslint-disable-next-line max-len
+    return this as unknown as IndexedColumn<T, TAutoIncrement extends true ? true : false, TAutoIncrement>;
   }
 
   public serial() {
@@ -79,8 +80,41 @@ TAutoIncrement extends boolean = false> {
   public getDefaultValue = (): any => this.defaultParam;
 }
 
-export class IndexedColumn<T extends ColumnType, TNullable extends boolean = true,
-TAutoIncrement extends boolean = false>
-  extends Column<T, TNullable, TAutoIncrement> {
+// eslint-disable-next-line max-len
+export class Column<T extends ColumnType, TNullable extends boolean = true, TAutoIncrement extends boolean = false>
+  extends AbstractColumn<T, TNullable, TAutoIncrement> {
+  public constructor(parentTableName: string, columnName: string,
+    columnType: T, nullable: TNullable) {
+    super(parentTableName, columnName, columnType, nullable);
+  }
 
+  public foreignKey<ITable extends AbstractTable<ITable>>(table: new (db: IDB) => ITable, callback: (table: ITable) => Column<T, boolean, boolean>): Column<T, TNullable, TAutoIncrement> {
+    // eslint-disable-next-line new-cap
+    this.referenced = callback(new table(new StubDB()));
+    return this;
+  }
+
+  public autoIncrement(): Column<T, boolean, boolean> {
+    this.autoIncrementFlag = true;
+    return this;
+  }
+}
+
+// eslint-disable-next-line max-len
+export class IndexedColumn<T extends ColumnType, TNullable extends boolean = true, TAutoIncrement extends boolean = false> extends AbstractColumn<T, TNullable, TAutoIncrement> {
+  public constructor(parentTableName: string, columnName: string,
+    columnType: T, nullable: TNullable) {
+    super(parentTableName, columnName, columnType, nullable);
+  }
+
+  public foreignKey<ITable extends AbstractTable<ITable>>(table: new (db: IDB) => ITable, callback: (table: ITable) => Column<T, boolean, boolean>): Column<T, TNullable, TAutoIncrement> {
+    // eslint-disable-next-line new-cap
+    this.referenced = callback(new table(new StubDB()));
+    return this;
+  }
+
+  public autoIncrement(): Column<T, boolean, boolean> {
+    this.autoIncrementFlag = true;
+    return this;
+  }
 }

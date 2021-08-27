@@ -1,4 +1,4 @@
-import { Column } from '../../columns/column';
+import { Column, IndexedColumn } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import { Indexing } from '../../tables/inferTypes';
 import UpdateExpr from '../requestBuilders/updates/updates';
@@ -77,7 +77,7 @@ export default class InsertAggregator extends Aggregator {
 
   public appendOnConflict = (column: Indexing,
     updates?: UpdateExpr) => {
-    const indexName = column instanceof Column ? column.columnName : column.indexName();
+    const indexName = column instanceof IndexedColumn ? column.columnName : column.indexName();
 
     this._onConflict.push(`ON CONFLICT ON CONSTRAINT ${indexName}\n`);
     if (updates) {
