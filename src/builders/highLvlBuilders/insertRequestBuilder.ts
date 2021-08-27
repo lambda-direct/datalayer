@@ -22,8 +22,8 @@ export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
     tableName: string,
     session: Session,
     mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
-    logger: BaseLogger,
     table: AbstractTable<TTable>,
+    logger?: BaseLogger,
   ) {
     super(tableName, session, mappedServiceToDb, logger);
     this._values = values;
@@ -67,7 +67,7 @@ export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
     // @TODO refactor values() part!!
     let query = '';
     try {
-      query = queryBuilder.values(mappedRows, mapper).build();
+      query = queryBuilder.build();
     } catch (e) {
       throw new BuilderError(BuilderType.INSERT, this._tableName, this._columns, e);
     }

@@ -29,9 +29,9 @@ export default class SelectTRB<TTable>
     tableName: string,
     session: Session,
     mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
-    logger: BaseLogger,
     props: {limit?:number, offset?:number},
     table: AbstractTable<TTable>,
+    logger?: BaseLogger,
   ) {
     super(tableName, session, mappedServiceToDb, logger);
     this.props = props;

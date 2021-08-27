@@ -30,8 +30,6 @@ export default class Create<SERVICE> {
 
       if (column instanceof Column) {
         if (column.columnType instanceof PgEnum) {
-          console.log('codeType:', column.columnType);
-
           // eslint-disable-next-line new-cap
           const enumValues = Object.values(column.columnType.codeType) as string[];
 
@@ -42,7 +40,11 @@ export default class Create<SERVICE> {
               resValue += ',';
             }
           }
-          this.enumBuilder.push(`CREATE TYPE ${column.columnType.dbName} AS ENUM (${resValue});`);
+          this.enumBuilder.push(`DO $$ BEGIN
+          CREATE TYPE ${column.columnType.dbName} AS ENUM (${resValue});
+      EXCEPTION
+          WHEN duplicate_object THEN null;
+      END $$;`);
         }
         this.columnsBuilder.push(ecranate(column.getColumnName()));
         this.columnsBuilder.push(' ');

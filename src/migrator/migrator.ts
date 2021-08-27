@@ -59,14 +59,19 @@ export default class Migrator {
     // eslint-disable-next-line no-restricted-syntax
     for await (const [key, value] of this.migrationsPerVersion) {
       const dbMigrationByTag = migrations.find((it) => it.version === key);
-      if (dbMigrationByTag && dbMigrationByTag.hash) {
-        const isHashSameAsInDb = this.generateHash(value).toString() === dbMigrationByTag.hash;
+      if (dbMigrationByTag) {
+        // const isHashSameAsInDb =
+        // Buffer.from(dbMigrationByTag.hash, 'base64').toString('ascii') === value;
 
-        if (!isHashSameAsInDb) {
-          throw Error(`Migration script was changed for version ${key}`);
-        }
+        // if (!isHashSameAsInDb) {
+        //   throw Error(`Migration script was changed for version ${key}`);
+        // }
       } else {
         try {
+          const logger = this._db.logger();
+          if (logger) {
+            logger.info(`Executing migration with tag ${key} with query:\n${value}`);
+          }
           const result = await this._db.session().execute(value);
           if (result.isLeft()) {
             const { reason } = result.value;
@@ -76,8 +81,8 @@ export default class Migrator {
               .insert({
                 version: key,
                 createdAt: new Date(),
-                hash: this.generateHash(value).toString(),
-              }).all();
+                hash: Buffer.from(value).toString('base64'),
+              }).execute();
           }
         } catch (e) {
           await transaction.rollback();
