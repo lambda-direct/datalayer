@@ -1,6 +1,6 @@
-/* eslint-disable max-classes-per-file */
+/* eslint-disable import/no-cycle */
 import { JoinWith, Select } from '..';
-import { Column } from '../../columns/column';
+import { AbstractColumn, Column } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import { IDB, StubDB } from '../../db/db';
 import Session from '../../db/session';
@@ -9,7 +9,7 @@ import { DatabaseSelectError } from '../../errors/dbErrors';
 import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
 import { AbstractTable } from '../../tables';
-import { AnyColumn, ExtractModel } from '../../tables/inferTypes';
+import { ExtractModel } from '../../tables/inferTypes';
 import SelectTRBWithJoin from '../joinBuilders/builders/selectWithJoin';
 import { JoinStrategy } from '../joinBuilders/join';
 import Expr from '../requestBuilders/where/where';
@@ -19,9 +19,9 @@ import Order from './order';
 export default class SelectTRB<TTable>
   extends TableRequestBuilder<TTable> {
   protected _filter: Expr;
-  private props: {limit?:number, offset?:number};
-  private __orderBy?: Column<ColumnType, boolean, boolean>;
-  private __groupBy?: Column<ColumnType, boolean, boolean>;
+  private props: { limit?: number, offset?: number};
+  private __orderBy?: AbstractColumn<ColumnType, boolean, boolean>;
+  private __groupBy?: AbstractColumn<ColumnType, boolean, boolean>;
   private __order?: Order;
   private __table: TTable;
 
@@ -43,7 +43,10 @@ export default class SelectTRB<TTable>
     return this;
   };
 
-  public orderBy(callback: (table: TTable) => Column<ColumnType, boolean, boolean>, order: Order)
+  public orderBy<TColumnType extends ColumnType>(
+    callback: (table: TTable) => AbstractColumn<TColumnType, boolean, boolean>,
+    order: Order,
+  )
     : SelectTRB<TTable> {
     this.__orderBy = callback(this.__table);
     this.__order = order;
@@ -56,73 +59,77 @@ export default class SelectTRB<TTable>
   //   return this;
   // }
 
-  public innerJoin<IToTable extends AbstractTable<IToTable>>(
+  public innerJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
     table: { new(db: IDB): IToTable ;},
-    from: (table: TTable) => AnyColumn,
-    to: (table: IToTable) => AnyColumn,
-  ) {
-    const fromColumn = from(this.__table);
+    from: (table: TTable) => AbstractColumn<TColumn, boolean, boolean>,
+    to: (table: IToTable) => AbstractColumn<TColumn, boolean, boolean>,
+  ): SelectTRBWithJoin<TTable, IToTable> {
     // eslint-disable-next-line new-cap
-    const toColumn = to(new table(new StubDB()));
+    const toTable = new table(new StubDB());
 
-    const join = new JoinWith(this._tableName, this._mappedServiceToDb)
+    const fromColumn = from(this.__table);
+    const toColumn = to(toTable);
+
+    const join = new JoinWith(toTable.tableName(), toTable.mapServiceToDb())
       .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.INNER_JOIN);
 
     return new SelectTRBWithJoin(this._tableName, this._session,
-      this._filter, join, this._mappedServiceToDb);
+      this._filter, join, this._mappedServiceToDb, this.__table);
   }
 
-  public leftJoin<IToTable extends AbstractTable<IToTable>>(
+  public leftJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
     table: { new(db: IDB): IToTable ;},
-    from: (table: TTable) => AnyColumn,
-    to: (table: IToTable) => AnyColumn,
-  ) {
-    const fromColumn = from(this.__table);
+    from: (table: TTable) => AbstractColumn<TColumn, boolean, boolean>,
+    to: (table: IToTable) => AbstractColumn<TColumn, boolean, boolean>,
+  ): SelectTRBWithJoin<TTable, IToTable> {
     // eslint-disable-next-line new-cap
-    const toColumn = to(new table(new StubDB()));
+    const toTable = new table(new StubDB());
 
-    const join = new JoinWith(this._tableName, this._mappedServiceToDb)
+    const fromColumn = from(this.__table);
+    const toColumn = to(toTable);
+
+    const join = new JoinWith(toTable.tableName(), toTable.mapServiceToDb())
       .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.LEFT_JOIN);
 
     return new SelectTRBWithJoin(this._tableName, this._session,
-      this._filter, join, this._mappedServiceToDb);
+      this._filter, join, this._mappedServiceToDb, this.__table);
   }
 
-  public rightJoin<IToTable extends AbstractTable<IToTable>>(
+  public rightJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
     table: { new(db: IDB): IToTable ;},
-    from: (table: TTable) => AnyColumn,
-    to: (table: IToTable) => AnyColumn,
-  ) {
-    const fromColumn = from(this.__table);
+    from: (table: TTable) => AbstractColumn<TColumn, boolean, boolean>,
+    to: (table: IToTable) => AbstractColumn<TColumn, boolean, boolean>,
+  ): SelectTRBWithJoin<TTable, IToTable> {
     // eslint-disable-next-line new-cap
-    const toColumn = to(new table(new StubDB()));
+    const toTable = new table(new StubDB());
 
-    const join = new JoinWith(this._tableName, this._mappedServiceToDb)
+    const fromColumn = from(this.__table);
+    const toColumn = to(toTable);
+
+    const join = new JoinWith(toTable.tableName(), toTable.mapServiceToDb())
       .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.RIGHT_JOIN);
 
     return new SelectTRBWithJoin(this._tableName, this._session,
-      this._filter, join, this._mappedServiceToDb);
+      this._filter, join, this._mappedServiceToDb, this.__table);
   }
 
-  public fullJoin<IToTable extends AbstractTable<IToTable>>(
+  public fullJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
     table: { new(db: IDB): IToTable ;},
-    from: (table: TTable) => AnyColumn,
-    to: (table: IToTable) => AnyColumn,
-  ) {
-    const fromColumn = from(this.__table);
+    from: (table: TTable) => AbstractColumn<TColumn, boolean, boolean>,
+    to: (table: IToTable) => AbstractColumn<TColumn, boolean, boolean>,
+  ): SelectTRBWithJoin<TTable, IToTable> {
     // eslint-disable-next-line new-cap
-    const toColumn = to(new table(new StubDB()));
+    const toTable = new table(new StubDB());
 
-    const join = new JoinWith(this._tableName, this._mappedServiceToDb)
+    const fromColumn = from(this.__table);
+    const toColumn = to(toTable);
+
+    const join = new JoinWith(toTable.tableName(), toTable.mapServiceToDb())
       .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.FULL_JOIN);
 
     return new SelectTRBWithJoin(this._tableName, this._session,
-      this._filter, join, this._mappedServiceToDb);
+      this._filter, join, this._mappedServiceToDb, this.__table);
   }
-
-  // public join = <COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1>):
-  // SelectTRBWithJoin<COLUMN, T1, TTable> => new SelectTRBWithJoin(this._tableName, this._session,
-  //   this._filter, join, this._mappedServiceToDb);
 
   public execute = async () => {
     const res = await this._execute();

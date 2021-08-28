@@ -1,21 +1,21 @@
 import { QueryResult } from 'pg';
-import { Column } from '../columns/column';
+import { AbstractColumn } from '../columns/column';
 import ColumnType from '../columns/types/columnType';
 import { ExtractModel } from '../tables/inferTypes';
 
 export default class QueryResponseMapper {
-  public static map = <IColumn>(mappedServiceToDb: { [name in keyof ExtractModel<IColumn>]
-    : Column<ColumnType>; },
+  public static map = <ITable>(mappedServiceToDb: { [name in keyof ExtractModel<ITable>]
+    : AbstractColumn<ColumnType>; },
     queryResult: QueryResult<any>) => {
-    const response: Array<ExtractModel<IColumn>> = [];
+    const response: Array<ExtractModel<ITable>> = [];
 
     queryResult.rows.forEach((row) => {
-      const mappedRow: ExtractModel<IColumn> = {} as ExtractModel<IColumn>;
+      const mappedRow: ExtractModel<ITable> = {} as ExtractModel<ITable>;
 
       Object.keys(mappedServiceToDb).forEach((key) => {
-        const column = mappedServiceToDb[key as keyof ExtractModel<IColumn>];
+        const column = mappedServiceToDb[key as keyof ExtractModel<ITable>];
         // eslint-disable-next-line max-len
-        mappedRow[key as keyof ExtractModel<IColumn>] = column.columnType.selectStrategy(row[column.getAlias()]) as any;
+        mappedRow[key as keyof ExtractModel<ITable>] = column.columnType.selectStrategy(row[column.getAlias()]) as any;
       });
       response.push(mappedRow);
     });

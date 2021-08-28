@@ -11,7 +11,7 @@ export default class SelectResponseTwoJoins<T1, T2, T3> {
     this._t3 = t3;
   }
 
-  public mapByRow = <M>(imac: (t1: ExtractModel<T1>, t2:
+  public map = <M>(imac: (t1: ExtractModel<T1>, t2:
   ExtractModel<T2>, t3: ExtractModel<T3>) => M): Array<M> => {
     const objects = new Array<M>();
     for (let i = 0; i < this._t1.length; i += 1) {

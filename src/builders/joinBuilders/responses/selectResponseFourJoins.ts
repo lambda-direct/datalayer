@@ -19,7 +19,7 @@ export default class SelectResponseFourJoins<T1, T2, T3, T4, T5> {
     this._t5 = t5;
   }
 
-  public mapByRow = <M>(imac: (t1: ExtractModel<T1>,
+  public map = <M>(imac: (t1: ExtractModel<T1>,
     t2:ExtractModel<T2>,
     t3: ExtractModel<T3>,
     t4: ExtractModel<T4>,

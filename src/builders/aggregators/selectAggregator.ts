@@ -1,4 +1,4 @@
-import { Column } from '../../columns';
+import { AbstractColumn } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import Order from '../highLvlBuilders/order';
 import Join from '../joinBuilders/join';
@@ -37,7 +37,7 @@ export default class SelectAggregator extends Aggregator {
     return this;
   };
 
-  public orderBy = (column: Column<ColumnType, boolean, boolean>, order: Order)
+  public orderBy = (column: AbstractColumn<ColumnType, boolean, boolean>, order: Order)
   : SelectAggregator => {
     this._orderBy.push('ORDER BY ');
     this._orderBy.push(`${column.columnName} `);
@@ -52,9 +52,8 @@ export default class SelectAggregator extends Aggregator {
   };
 
   // Add select generator for second table also
-  public join = <COLUMN extends ColumnType>(joins: Array<Join<COLUMN,
-  {}>>): SelectAggregator => {
-    joins.forEach((join: Join<COLUMN, {}>) => {
+  public join = (joins: Array<Join<{}>>): SelectAggregator => {
+    joins.forEach((join: Join<{}>) => {
       const tableFrom = join.fromColumn.getParent();
       const tableTo = join.toColumn.getParent();
       const { type } = join;
