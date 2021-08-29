@@ -15,7 +15,7 @@ export default class QueryResponseMapper {
       Object.keys(mappedServiceToDb).forEach((key) => {
         const column = mappedServiceToDb[key as keyof ExtractModel<ITable>];
         // eslint-disable-next-line max-len
-        mappedRow[key as keyof ExtractModel<ITable>] = column.columnType.selectStrategy(row[column.getAlias()]) as any;
+        mappedRow[key as keyof ExtractModel<ITable>] = column.getColumnType().selectStrategy(row[column.getAlias()]) as any;
       });
       response.push(mappedRow);
     });

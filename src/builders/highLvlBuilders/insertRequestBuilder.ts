@@ -54,7 +54,7 @@ export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
       const mappedValue: {[name: string]: any} = {};
       Object.entries(valueToInsert).forEach(([key, value]) => {
         const column = mapper[key as keyof ExtractModel<TTable>];
-        mappedValue[column.columnName] = value;
+        mappedValue[column.getColumnName()] = value;
       });
       mappedRows.push(mappedValue);
     });

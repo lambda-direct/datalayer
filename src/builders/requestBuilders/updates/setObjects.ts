@@ -13,6 +13,6 @@ export default class SetObject<T extends AbstractColumn<ColumnType<any>, boolean
     this._value = value;
   }
 
-  public toQuery = (): string => `"${this._column.columnName}"=${this._column.columnType.insertStrategy(this._value)}`
+  public toQuery = (): string => `"${this._column.getColumnName()}"=${this._column.getColumnType().insertStrategy(this._value)}`
   ;
 }

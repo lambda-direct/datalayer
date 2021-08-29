@@ -29,9 +29,10 @@ export default class Create<SERVICE> {
       const column = columns[i];
 
       if (column instanceof Column) {
-        if (column.columnType instanceof PgEnum) {
+        const columnType = column.getColumnType();
+        if (columnType instanceof PgEnum) {
           // eslint-disable-next-line new-cap
-          const enumValues = Object.values(column.columnType.codeType) as string[];
+          const enumValues = Object.values(columnType.codeType) as string[];
 
           let resValue = '';
           for (let j = 0; j < enumValues.length; j += 1) {
@@ -41,7 +42,7 @@ export default class Create<SERVICE> {
             }
           }
           this.enumBuilder.push(`DO $$ BEGIN
-          CREATE TYPE ${column.columnType.dbName} AS ENUM (${resValue});
+          CREATE TYPE ${columnType.dbName} AS ENUM (${resValue});
       EXCEPTION
           WHEN duplicate_object THEN null;
       END $$;`);

@@ -24,9 +24,9 @@ export default class Aggregator {
         selectFields.push(' ');
         selectFields.push(table);
         selectFields.push('.');
-        selectFields.push(ecranate(field.columnName));
+        selectFields.push(ecranate(field.getColumnName()));
         selectFields.push(' AS ');
-        selectFields.push(ecranate(`${table.replace('.', '_')}_${field.columnName}`));
+        selectFields.push(ecranate(`${table.replace('.', '_')}_${field.getColumnName()}`));
         selectFields.push(',');
       }
     });

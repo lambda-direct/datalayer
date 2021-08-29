@@ -40,7 +40,7 @@ export default class SelectAggregator extends Aggregator {
   public orderBy = (column: AbstractColumn<ColumnType, boolean, boolean>, order: Order)
   : SelectAggregator => {
     this._orderBy.push('ORDER BY ');
-    this._orderBy.push(`${column.columnName} `);
+    this._orderBy.push(`${column.getColumnName()} `);
     this._orderBy.push(Order[order]);
     return this;
   };
@@ -69,11 +69,11 @@ export default class SelectAggregator extends Aggregator {
       this._join.push('ON ');
       this._join.push(tableFrom);
       this._join.push('.');
-      this._join.push(join.fromColumn.columnName);
+      this._join.push(join.fromColumn.getColumnName());
       this._join.push(' = ');
       this._join.push(tableTo);
       this._join.push('.');
-      this._join.push(join.toColumn.columnName);
+      this._join.push(join.toColumn.getColumnName());
     });
 
     return this;

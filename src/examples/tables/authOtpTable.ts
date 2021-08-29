@@ -1,3 +1,4 @@
+import { OnDelete } from '../../columns/column';
 import AbstractTable from '../../tables/abstractTable';
 import UsersTable from './usersTable';
 
@@ -8,7 +9,9 @@ export default class AuthOtpTable extends AbstractTable<AuthOtpTable> {
   public issuedAt = this.timestamp('issued_at', { notNull: true });
   public createdAt = this.timestamp('created_at', { notNull: true });
   public updatedAt = this.timestamp('updated_at', { notNull: true });
-  public userId = this.int('user_id').foreignKey(UsersTable, (table) => table.id);
+
+  public userId = this.int('user_id').foreignKey(UsersTable, (table) => table.id, OnDelete.CASCADE);
+
   public test = this.jsonb<string[]>('test');
 
   public tableName(): string {
