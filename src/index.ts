@@ -15,7 +15,8 @@ export const anotherMinor = {
     return dbConnector.connect();
   },
   builders: {
-    createTable<IService>(table: AbstractTable<IService>): Create<IService> {
+    createTable<TTable extends AbstractTable<TTable>>(table: AbstractTable<TTable>)
+      : Create<TTable> {
       return Create.table(table);
     },
   },
@@ -25,7 +26,7 @@ export const anotherMinor = {
 };
 
 export const minor = {
-  prepareCreateTable<IService>(table: AbstractTable<IService>): string {
+  prepareCreateTable<TTable extends AbstractTable<TTable>>(table: AbstractTable<TTable>): string {
     return Create.table(table).build();
   },
   migrator(db:DB): Migrator {

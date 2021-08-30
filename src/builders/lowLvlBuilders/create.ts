@@ -3,20 +3,20 @@ import PgEnum from '../../columns/types/pgEnum';
 import AbstractTable from '../../tables/abstractTable';
 import { ecranate } from '../../utils/ecranate';
 
-export default class Create<SERVICE> {
+export default class Create<TTable extends AbstractTable<TTable>> {
   private tableBuilder: Array<string> = [];
   private enumBuilder: Array<string> = [];
   private columnsBuilder: Array<string> = [];
   private primaryKey: Array<string> = [];
   private uniqueKey: Array<string> = [];
-  private tableClass: AbstractTable<SERVICE>;
+  private tableClass: AbstractTable<TTable>;
 
-  private constructor(tableClass: AbstractTable<SERVICE>) {
+  private constructor(tableClass: AbstractTable<TTable>) {
     this.tableClass = tableClass;
   }
 
-  public static table = <SSERVICE>(tableClass:
-  AbstractTable<SSERVICE>): Create<SSERVICE> => new Create(tableClass);
+  public static table = <StaticTTable extends AbstractTable<StaticTTable>>(tableClass:
+  AbstractTable<StaticTTable>): Create<StaticTTable> => new Create(tableClass);
 
   public build = (): string => {
     this.tableBuilder.push('CREATE TABLE IF NOT EXISTS ');

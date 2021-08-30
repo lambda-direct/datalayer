@@ -54,8 +54,8 @@ export default class SelectAggregator extends Aggregator {
   // Add select generator for second table also
   public join = (joins: Array<Join<{}>>): SelectAggregator => {
     joins.forEach((join: Join<{}>) => {
-      const tableFrom = join.fromColumn.getParent();
-      const tableTo = join.toColumn.getParent();
+      const tableFrom = join.fromColumn.getParentName();
+      const tableTo = join.toColumn.getParentName();
       const { type } = join;
 
       const selectString = this.generateSelectArray(tableTo, Object.values(join.mappedServiceToDb)).join('');

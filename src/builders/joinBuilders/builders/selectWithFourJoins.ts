@@ -4,6 +4,7 @@ import Session from '../../../db/session';
 import BuilderError, { BuilderType } from '../../../errors/builderError';
 import { DatabaseSelectError } from '../../../errors/dbErrors';
 import QueryResponseMapper from '../../../mappers/responseMapper';
+import { AbstractTable } from '../../../tables';
 import { ExtractModel } from '../../../tables/inferTypes';
 import Select from '../../lowLvlBuilders/selects/select';
 import Expr from '../../requestBuilders/where/where';
@@ -11,7 +12,8 @@ import Join from '../join';
 import SelectResponseFourJoins from '../responses/selectResponseFourJoins';
 import AbstractJoined from './abstractJoinBuilder';
 
-export default class SelectTRBWithFourJoins<TTable, TTable1, TTable2, TTable3, TTable4>
+export default class SelectTRBWithFourJoins<TTable extends AbstractTable<TTable>,
+ TTable1, TTable2, TTable3, TTable4>
   extends AbstractJoined<TTable> {
   private _join1: Join<TTable1>;
   private _join2: Join<TTable2>;

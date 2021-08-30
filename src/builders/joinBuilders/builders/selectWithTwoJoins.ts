@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 import { AbstractColumn } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
-import { IDB, StubDB } from '../../../db/db';
+import DB from '../../../db/db';
 import Session from '../../../db/session';
 import BuilderError, { BuilderType } from '../../../errors/builderError';
 import { DatabaseSelectError } from '../../../errors/dbErrors';
@@ -18,7 +18,8 @@ import SelectTRBWithThreeJoins from './selectWithThreeJoins';
 // import SelectTRBWithThreeJoins from './selectWithThreeJoins';
 
 // eslint-disable-next-line max-len
-export default class SelectTRBWithTwoJoins<TTable, TTable1, TTable2> extends AbstractJoined<TTable> {
+export default class SelectTRBWithTwoJoins<TTable extends AbstractTable<TTable>, TTable1, TTable2>
+  extends AbstractJoined<TTable> {
   private _join1: Join<TTable1>;
   private _join2: Join<TTable2>;
 
@@ -32,12 +33,11 @@ export default class SelectTRBWithTwoJoins<TTable, TTable1, TTable2> extends Abs
   }
 
   public innerJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
-    table: { new(db: IDB): IToTable ;},
+    table: { new(db: DB): IToTable ;},
     from: (table: TTable) => AbstractColumn<TColumn, boolean, boolean>,
     to: (table: IToTable) => AbstractColumn<TColumn, boolean, boolean>,
   ): SelectTRBWithThreeJoins<TTable, TTable1, TTable2, IToTable> {
-    // eslint-disable-next-line new-cap
-    const toTable = new table(new StubDB());
+    const toTable = this._table.db.create(table);
 
     const fromColumn = from(this._table);
     const toColumn = to(toTable);
@@ -58,12 +58,11 @@ export default class SelectTRBWithTwoJoins<TTable, TTable1, TTable2> extends Abs
   }
 
   public leftJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
-    table: { new(db: IDB): IToTable ;},
+    table: { new(db: DB): IToTable ;},
     from: (table: TTable) => AbstractColumn<TColumn, boolean, boolean>,
     to: (table: IToTable) => AbstractColumn<TColumn, boolean, boolean>,
   ): SelectTRBWithThreeJoins<TTable, TTable1, TTable2, IToTable> {
-    // eslint-disable-next-line new-cap
-    const toTable = new table(new StubDB());
+    const toTable = this._table.db.create(table);
 
     const fromColumn = from(this._table);
     const toColumn = to(toTable);
@@ -84,12 +83,11 @@ export default class SelectTRBWithTwoJoins<TTable, TTable1, TTable2> extends Abs
   }
 
   public rightJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
-    table: { new(db: IDB): IToTable ;},
+    table: { new(db: DB): IToTable ;},
     from: (table: TTable) => AbstractColumn<TColumn, boolean, boolean>,
     to: (table: IToTable) => AbstractColumn<TColumn, boolean, boolean>,
   ): SelectTRBWithThreeJoins<TTable, TTable1, TTable2, IToTable> {
-    // eslint-disable-next-line new-cap
-    const toTable = new table(new StubDB());
+    const toTable = this._table.db.create(table);
 
     const fromColumn = from(this._table);
     const toColumn = to(toTable);
@@ -110,12 +108,11 @@ export default class SelectTRBWithTwoJoins<TTable, TTable1, TTable2> extends Abs
   }
 
   public fullJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
-    table: { new(db: IDB): IToTable ;},
+    table: { new(db: DB): IToTable ;},
     from: (table: TTable) => AbstractColumn<TColumn>,
     to: (table: IToTable) => AbstractColumn<TColumn>,
   ): SelectTRBWithThreeJoins<TTable, TTable1, TTable2, IToTable> {
-    // eslint-disable-next-line new-cap
-    const toTable = new table(new StubDB());
+    const toTable = this._table.db.create(table);
 
     const fromColumn = from(this._table);
     const toColumn = to(toTable);
