@@ -1,10 +1,11 @@
 import { AbstractColumn } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import Session from '../../../db/session';
+import { AbstractTable } from '../../../tables';
 import { ExtractModel } from '../../../tables/inferTypes';
 import Expr from '../../requestBuilders/where/where';
 
-export default abstract class AbstractJoined<TTable> {
+export default abstract class AbstractJoined<TTable extends AbstractTable<TTable>> {
   protected _tableName: string;
   protected _session: Session;
   protected _filter: Expr;

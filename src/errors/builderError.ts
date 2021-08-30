@@ -1,5 +1,5 @@
 import Expr from '../builders/requestBuilders/where/where';
-import { Column } from '../columns/column';
+import { AbstractColumn } from '../columns/column';
 import ColumnType from '../columns/types/columnType';
 
 export enum BuilderType{
@@ -15,7 +15,7 @@ export default class BuilderError extends Error {
   public constructor(
     builderType: BuilderType,
     tableName: string,
-    columns: Column<ColumnType>[],
+    columns: AbstractColumn<ColumnType>[],
     reason: Error,
     filter?: Expr,
   ) {
