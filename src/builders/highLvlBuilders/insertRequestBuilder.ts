@@ -1,4 +1,4 @@
-import { Column } from '../../columns/column';
+import { AbstractColumn } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
@@ -11,7 +11,8 @@ import Insert from '../lowLvlBuilders/inserts/insert';
 import UpdateExpr from '../requestBuilders/updates/updates';
 import TableRequestBuilder from './abstractRequestBuilder';
 
-export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
+export default class InsertTRB<TTable extends AbstractTable<TTable>>
+  extends TableRequestBuilder<TTable> {
   private _values: ExtractModel<TTable>[];
   private _onConflict: UpdateExpr;
   private _onConflictField: Indexing;
@@ -21,7 +22,7 @@ export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
     values: ExtractModel<TTable>[],
     tableName: string,
     session: Session,
-    mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
+    mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: AbstractColumn<ColumnType>; },
     table: AbstractTable<TTable>,
     logger?: BaseLogger,
   ) {
@@ -54,7 +55,7 @@ export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
       const mappedValue: {[name: string]: any} = {};
       Object.entries(valueToInsert).forEach(([key, value]) => {
         const column = mapper[key as keyof ExtractModel<TTable>];
-        mappedValue[column.columnName] = value;
+        mappedValue[column.getColumnName()] = value;
       });
       mappedRows.push(mappedValue);
     });

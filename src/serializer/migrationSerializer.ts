@@ -44,8 +44,8 @@ export default class MigrationSerializer {
         const value = properties[1];
         if (value instanceof Column) {
           columnToReturn[key] = {
-            name: value.columnName,
-            type: (value.columnType as ColumnType).getDbName(),
+            name: value.getColumnName(),
+            type: (value.getColumnType() as ColumnType).getDbName(),
             primaryKey: !!value.primaryKeyName,
             autoincrement: value.isAutoIncrement(),
           };

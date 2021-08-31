@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable max-classes-per-file */
 import PgVarChar from '../columns/types/pgVarChar';
 import PgTimestamp from '../columns/types/pgTimestamp';
@@ -17,19 +18,21 @@ import Session from '../db/session';
 import BaseLogger from '../logger/abstractLogger';
 import PgEnum from '../columns/types/pgEnum';
 import { ExtractModel } from './inferTypes';
-import DB, { IDB } from '../db/db';
+import DB from '../db/db';
 import { Column } from '../columns/column';
 import TableIndex from '../indexes/tableIndex';
 
-export default abstract class AbstractTable<TTable> {
+// eslint-disable-next-line max-len
+export default abstract class AbstractTable<TTable extends AbstractTable<TTable>> {
+  public db: DB;
+
   private _session: Session;
   private _logger: BaseLogger | undefined;
 
-  public constructor(db: IDB) {
-    if (db instanceof DB) {
-      this._session = db.session();
-      this._logger = db.logger();
-    }
+  public constructor(db: DB) {
+    this._session = db.session();
+    this._logger = db.logger();
+    this.db = db;
   }
 
   // @TODO document, that you should not use arrow functions for abstract classes
@@ -39,17 +42,19 @@ export default abstract class AbstractTable<TTable> {
     this._logger = logger;
   };
 
-  public select = ({ limit, offset }:{
+  public select({ limit, offset }: {
     limit?: number,
     offset?: number }
-  = {}): SelectTRB<TTable> => {
+  = {}): SelectTRB<TTable> {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
 
     return new SelectTRB(this.tableName(),
-      this._session, this.mapServiceToDb(), { limit, offset }, this, this._logger);
-  };
+      this._session, this.mapServiceToDb(), { limit, offset },
+      this as unknown as TTable,
+      this._logger);
+  }
 
   public update = (): UpdateTRB<TTable> => {
     if (!this._session) {
@@ -110,26 +115,26 @@ export default abstract class AbstractTable<TTable> {
   protected varchar(name: string, params: {size?: number, notNull?: true})
   : Column<PgVarChar, false>;
   protected varchar(name: string, params: {size?: number, notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgVarChar(params.size),
+    return new Column(this, name, new PgVarChar(params.size),
       !params?.notNull ?? false);
   }
 
   protected int(name: string, params?: {notNull: false}): Column<PgInteger, true>;
   protected int(name: string, params: {notNull: true}): Column<PgInteger, false>;
   protected int(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgInteger(), !params?.notNull ?? false);
+    return new Column(this, name, new PgInteger(), !params?.notNull ?? false);
   }
 
   protected timestamp(name: string, params?: { notNull: false }): Column<PgTimestamp, true>;
   protected timestamp(name: string, params: { notNull: true }): Column<PgTimestamp, false>;
   protected timestamp(name: string, params: { notNull?: boolean } = {}) {
-    return new Column(this.tableName(), name, new PgTimestamp(), !params?.notNull ?? false);
+    return new Column(this, name, new PgTimestamp(), !params?.notNull ?? false);
   }
 
   protected bigint(name: string, params?: {notNull: false}): Column<PgBigInt, true>;
   protected bigint(name: string, params: {notNull: true}): Column<PgBigInt, false>;
   protected bigint(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgBigInt(), !params?.notNull ?? false);
+    return new Column(this, name, new PgBigInt(), !params?.notNull ?? false);
   }
 
   protected enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
@@ -140,7 +145,7 @@ export default abstract class AbstractTable<TTable> {
   : Column<PgEnum<TSubType>, false>;
   protected enum<TSubType extends { [s: number]: string }>(from: { [s: number]: string },
     name: string, dbName:string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name,
+    return new Column(this, name,
       new PgEnum<TSubType>(name, dbName, from as TSubType), !params?.notNull ?? false);
   }
 
@@ -150,26 +155,26 @@ export default abstract class AbstractTable<TTable> {
   : Column<PgBigDecimal, false>;
   protected decimal(name: string, params: {notNull?: boolean,
     precision?: number, scale?: number} = {}) {
-    return new Column(this.tableName(), name,
+    return new Column(this, name,
       new PgBigDecimal(params.precision, params.scale), !params?.notNull ?? false);
   }
 
   protected time(name: string, params?: {notNull: false}): Column<PgTime, true>;
   protected time(name: string, params: {notNull: true}): Column<PgTime, false>;
   protected time(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgTime(), !params?.notNull ?? false);
+    return new Column(this, name, new PgTime(), !params?.notNull ?? false);
   }
 
   protected bool(name: string, params?: {notNull: false}): Column<PgBoolean, true>;
   protected bool(name: string, params: {notNull: true}): Column<PgBoolean, false>;
   protected bool(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgBoolean(), !params?.notNull ?? false);
+    return new Column(this, name, new PgBoolean(), !params?.notNull ?? false);
   }
 
   protected text(name: string, params?: {notNull: false}): Column<PgText, true>;
   protected text(name: string, params: {notNull: true}): Column<PgText, false>;
   protected text(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name, new PgText(), !params?.notNull ?? false);
+    return new Column(this, name, new PgText(), !params?.notNull ?? false);
   }
 
   protected jsonb<TSubType>(name: string, params?: {notNull: false})
@@ -177,7 +182,7 @@ export default abstract class AbstractTable<TTable> {
   protected jsonb<TSubType>(name: string, params: {notNull: true})
   : Column<PgJsonb<TSubType>, false>;
   protected jsonb<TSubType>(name: string, params: {notNull?: boolean} = {}) {
-    return new Column(this.tableName(), name,
+    return new Column(this, name,
       new PgJsonb<TSubType>(), !params?.notNull ?? false);
   }
 }

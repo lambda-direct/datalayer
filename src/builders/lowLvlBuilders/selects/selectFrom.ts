@@ -1,4 +1,4 @@
-import { Column } from '../../../columns';
+import { AbstractColumn } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import SelectAggregator from '../../aggregators/selectAggregator';
 import Order from '../../highLvlBuilders/order';
@@ -14,8 +14,7 @@ export default class SelectFrom {
     this._aggregator = aggregator;
   }
 
-  public joined = <COLUMN extends ColumnType>(joins:
-  Array<Join<COLUMN, any>>) => new SelectJoined(this._aggregator).apply(joins);
+  public joined =(joins: Array<Join<any>>) => new SelectJoined(this._aggregator).apply(joins);
 
   public limit = (limit: number): SelectFrom => {
     this._aggregator.limit(limit);
@@ -27,7 +26,8 @@ export default class SelectFrom {
     return this;
   };
 
-  public orderBy = (orderBy: Column<ColumnType, boolean, boolean>, order: Order): SelectFrom => {
+  public orderBy = (orderBy: AbstractColumn<ColumnType, boolean, boolean>,
+    order: Order): SelectFrom => {
     this._aggregator.orderBy(orderBy, order);
     return this;
   };

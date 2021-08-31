@@ -1,6 +1,8 @@
-import { Select } from '..';
-import { Column } from '../../columns/column';
+/* eslint-disable import/no-cycle */
+import { JoinWith, Select } from '..';
+import { AbstractColumn, Column } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import DB from '../../db/db';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseSelectError } from '../../errors/dbErrors';
@@ -9,17 +11,17 @@ import QueryResponseMapper from '../../mappers/responseMapper';
 import { AbstractTable } from '../../tables';
 import { ExtractModel } from '../../tables/inferTypes';
 import SelectTRBWithJoin from '../joinBuilders/builders/selectWithJoin';
-import Join from '../joinBuilders/join';
+import { JoinStrategy } from '../joinBuilders/join';
 import Expr from '../requestBuilders/where/where';
 import TableRequestBuilder from './abstractRequestBuilder';
 import Order from './order';
 
-export default class SelectTRB<TTable>
+export default class SelectTRB<TTable extends AbstractTable<TTable>>
   extends TableRequestBuilder<TTable> {
   protected _filter: Expr;
-  private props: {limit?:number, offset?:number};
-  private __orderBy?: Column<ColumnType, boolean, boolean>;
-  private __groupBy?: Column<ColumnType, boolean, boolean>;
+  private props: { limit?: number, offset?: number};
+  private __orderBy?: AbstractColumn<ColumnType, boolean, boolean>;
+  private __groupBy?: AbstractColumn<ColumnType, boolean, boolean>;
   private __order?: Order;
   private __table: TTable;
 
@@ -41,7 +43,10 @@ export default class SelectTRB<TTable>
     return this;
   };
 
-  public orderBy(callback: (table: TTable) => Column<ColumnType, boolean, boolean>, order: Order)
+  public orderBy<TColumnType extends ColumnType>(
+    callback: (table: TTable) => AbstractColumn<TColumnType, boolean, boolean>,
+    order: Order,
+  )
     : SelectTRB<TTable> {
     this.__orderBy = callback(this.__table);
     this.__order = order;
@@ -54,9 +59,73 @@ export default class SelectTRB<TTable>
   //   return this;
   // }
 
-  public join = <COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1>):
-  SelectTRBWithJoin<COLUMN, T1, TTable> => new SelectTRBWithJoin(this._tableName, this._session,
-    this._filter, join, this._mappedServiceToDb);
+  public innerJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
+    table: { new(db: DB): IToTable ;},
+    from: (table: TTable) => AbstractColumn<TColumn, boolean, boolean>,
+    to: (table: IToTable) => AbstractColumn<TColumn, boolean, boolean>,
+  ): SelectTRBWithJoin<TTable, IToTable> {
+    const toTable = this.__table.db.create(table);
+
+    const fromColumn = from(this.__table);
+    const toColumn = to(toTable);
+
+    const join = new JoinWith(toTable.tableName(), toTable.mapServiceToDb())
+      .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.INNER_JOIN);
+
+    return new SelectTRBWithJoin(this._tableName, this._session,
+      this._filter, join, this._mappedServiceToDb, this.__table);
+  }
+
+  public leftJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
+    table: { new(db: DB): IToTable ;},
+    from: (table: TTable) => AbstractColumn<TColumn, boolean, boolean>,
+    to: (table: IToTable) => AbstractColumn<TColumn, boolean, boolean>,
+  ): SelectTRBWithJoin<TTable, IToTable> {
+    const toTable = this.__table.db.create(table);
+
+    const fromColumn = from(this.__table);
+    const toColumn = to(toTable);
+
+    const join = new JoinWith(toTable.tableName(), toTable.mapServiceToDb())
+      .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.LEFT_JOIN);
+
+    return new SelectTRBWithJoin(this._tableName, this._session,
+      this._filter, join, this._mappedServiceToDb, this.__table);
+  }
+
+  public rightJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
+    table: { new(db: DB): IToTable ;},
+    from: (table: TTable) => AbstractColumn<TColumn, boolean, boolean>,
+    to: (table: IToTable) => AbstractColumn<TColumn, boolean, boolean>,
+  ): SelectTRBWithJoin<TTable, IToTable> {
+    const toTable = this.__table.db.create(table);
+
+    const fromColumn = from(this.__table);
+    const toColumn = to(toTable);
+
+    const join = new JoinWith(toTable.tableName(), toTable.mapServiceToDb())
+      .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.RIGHT_JOIN);
+
+    return new SelectTRBWithJoin(this._tableName, this._session,
+      this._filter, join, this._mappedServiceToDb, this.__table);
+  }
+
+  public fullJoin<TColumn extends ColumnType, IToTable extends AbstractTable<IToTable>>(
+    table: { new(db: DB): IToTable ;},
+    from: (table: TTable) => AbstractColumn<TColumn, boolean, boolean>,
+    to: (table: IToTable) => AbstractColumn<TColumn, boolean, boolean>,
+  ): SelectTRBWithJoin<TTable, IToTable> {
+    const toTable = this.__table.db.create(table);
+
+    const fromColumn = from(this.__table);
+    const toColumn = to(toTable);
+
+    const join = new JoinWith(toTable.tableName(), toTable.mapServiceToDb())
+      .columns(fromColumn, toColumn).joinStrategy(JoinStrategy.FULL_JOIN);
+
+    return new SelectTRBWithJoin(this._tableName, this._session,
+      this._filter, join, this._mappedServiceToDb, this.__table);
+  }
 
   public execute = async () => {
     const res = await this._execute();

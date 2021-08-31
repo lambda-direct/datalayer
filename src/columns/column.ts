@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable max-classes-per-file */
-import { IDB, StubDB } from '../db/db';
+import DB from '../db/db';
 import { AbstractTable } from '../tables';
 import ColumnType from './types/columnType';
 
@@ -9,34 +9,53 @@ type ExtractColumnType<T extends ColumnType> =
    TCodeType
    : never;
 
+type OnConstraint = OnDelete | OnUpdate;
+
+export enum OnDelete {
+  RESTRICT,
+  CASCADE,
+}
+
+export enum OnUpdate {
+  RESTRICT,
+  CASCADE,
+}
+
 // eslint-disable-next-line max-len
 export abstract class AbstractColumn<T extends ColumnType, TNullable extends boolean = true, TAutoIncrement extends boolean = false> {
-  public columnType: T;
-  public columnName: string;
   public isNullableFlag: TNullable;
   public autoIncrementType: TAutoIncrement;
-  public autoIncrementFlag: boolean = false;
-  public primaryKeyName: string | undefined = undefined;
-  public uniqueKeyName: string | undefined = undefined;
-  public defaultParam: any = null;
-  public referenced: AbstractColumn<T, boolean, boolean>;
+  public primaryKeyName?: string;
+  public uniqueKeyName?: string;
+
+  protected onConstraint?: OnConstraint;
+  protected parent: AbstractTable<any>;
 
   protected parentTableName: string;
+  protected columnType: T;
+  protected columnName: string;
+  protected autoIncrementFlag: boolean = false;
+  protected defaultParam: any = null;
+  protected referenced: AbstractColumn<T, boolean, boolean>;
 
-  public constructor(parentTableName: string, columnName: string,
+  public constructor(parent: AbstractTable<any>, columnName: string,
     columnType: T, nullable: TNullable) {
     this.columnType = columnType;
     this.columnName = columnName;
-    this.parentTableName = parentTableName;
+    this.parentTableName = parent.tableName();
+    this.parent = parent;
     this.isNullableFlag = nullable;
   }
 
   public getAlias = (): string => `${this.parentTableName.replace('.', '_')}_${this.columnName}`;
 
-  public getParent = (): string => this.parentTableName;
+  public getParent = (): AbstractTable<any> => this.parent;
 
-  public abstract foreignKey <ITable extends AbstractTable<ITable>>(table: { new(db: IDB): ITable ;},
-    callback: (table: ITable) => AbstractColumn<T, boolean, boolean>)
+  public getParentName = (): string => this.parentTableName;
+
+  public abstract foreignKey <ITable extends AbstractTable<ITable>>(table: { new(db: DB): ITable ;},
+    callback: (table: ITable) => AbstractColumn<T, boolean, boolean>,
+    onConstraint?: OnConstraint)
   : AbstractColumn<T, TNullable, TAutoIncrement>;
 
   public defaultValue = (value: ExtractColumnType<T>) => {
@@ -69,9 +88,9 @@ export abstract class AbstractColumn<T extends ColumnType, TNullable extends boo
 // eslint-disable-next-line max-len
 export class Column<T extends ColumnType, TNullable extends boolean = true, TAutoIncrement extends boolean = false>
   extends AbstractColumn<T, TNullable, TAutoIncrement> {
-  public constructor(parentTableName: string, columnName: string,
+  public constructor(parent: AbstractTable<any>, columnName: string,
     columnType: T, nullable: TNullable) {
-    super(parentTableName, columnName, columnType, nullable);
+    super(parent, columnName, columnType, nullable);
   }
 
   public serial() {
@@ -85,9 +104,14 @@ export class Column<T extends ColumnType, TNullable extends boolean = true, TAut
     return this as unknown as Column<T, TAutoIncrement extends true ? true : false, TAutoIncrement>;
   }
 
-  public foreignKey<ITable extends AbstractTable<ITable>>(table: new (db: IDB) => ITable, callback: (table: ITable) => Column<T, boolean, boolean>): Column<T, TNullable, TAutoIncrement> {
+  public foreignKey<ITable extends AbstractTable<ITable>>(
+    table: new (db: DB) => ITable,
+    callback: (table: ITable) => Column<T, boolean, boolean>,
+    onConstraint?: OnConstraint,
+  ): Column<T, TNullable, TAutoIncrement> {
     // eslint-disable-next-line new-cap
-    this.referenced = callback(new table(new StubDB()));
+    this.referenced = callback(this.getParent().db.create(table));
+    this.onConstraint = onConstraint;
     return this;
   }
 
@@ -99,9 +123,9 @@ export class Column<T extends ColumnType, TNullable extends boolean = true, TAut
 
 // eslint-disable-next-line max-len
 export class IndexedColumn<T extends ColumnType, TNullable extends boolean = true, TAutoIncrement extends boolean = false> extends AbstractColumn<T, TNullable, TAutoIncrement> {
-  public constructor(parentTableName: string, columnName: string,
+  public constructor(parent: AbstractTable<any>, columnName: string,
     columnType: T, nullable: TNullable) {
-    super(parentTableName, columnName, columnType, nullable);
+    super(parent, columnName, columnType, nullable);
   }
 
   public serial() {
@@ -115,9 +139,14 @@ export class IndexedColumn<T extends ColumnType, TNullable extends boolean = tru
     return this as unknown as IndexedColumn<T, TAutoIncrement extends true ? true : false, TAutoIncrement>;
   }
 
-  public foreignKey<ITable extends AbstractTable<ITable>>(table: new (db: IDB) => ITable, callback: (table: ITable) => IndexedColumn<T, boolean, boolean>): IndexedColumn<T, TNullable, TAutoIncrement> {
+  public foreignKey<ITable extends AbstractTable<ITable>>(
+    table: new (db: DB) => ITable,
+    callback: (table: ITable) => IndexedColumn<T, boolean, boolean>,
+    onConstraint?: OnConstraint,
+  ): IndexedColumn<T, TNullable, TAutoIncrement> {
     // eslint-disable-next-line new-cap
-    this.referenced = callback(new table(new StubDB()));
+    this.referenced = callback(this.getParent().db.create(table));
+    this.onConstraint = onConstraint;
     return this;
   }
 

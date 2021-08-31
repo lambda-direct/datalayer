@@ -36,3 +36,6 @@ export type ExtractCodeType<T extends AbstractColumn<ColumnType<any>, boolean, b
 export type ExtractEnumValues<TEnum> = {[Key in ExtractFieldNames<TEnum>]: TestEnum[Key]};
 
 export type Indexing = IndexedColumn<ColumnType, boolean, boolean> | TableIndex;
+
+export type AnyColumn = Column<ColumnType, boolean, boolean>
+| IndexedColumn<ColumnType, boolean, boolean>;

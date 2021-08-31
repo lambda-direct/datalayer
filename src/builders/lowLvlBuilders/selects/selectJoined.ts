@@ -13,8 +13,7 @@ export default class SelectJoined {
     this._aggregator = aggregator;
   }
 
-  public apply = <COLUMN extends ColumnType>(joins: Array<Join<COLUMN,
-  {}>>): SelectJoined => {
+  public apply = (joins: Array<Join<{}>>): SelectJoined => {
     this._aggregator.join(joins);
     return this;
   };
