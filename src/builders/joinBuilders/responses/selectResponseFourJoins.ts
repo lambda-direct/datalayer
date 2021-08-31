@@ -1,11 +1,11 @@
 import { ExtractModel } from '../../../tables/inferTypes';
 
 export default class SelectResponseFourJoins<T1, T2, T3, T4, T5> {
-  private _t1: ExtractModel<T1>[];
-  private _t2: ExtractModel<T2>[];
-  private _t3: ExtractModel<T3>[];
-  private _t4: ExtractModel<T4>[];
-  private _t5: ExtractModel<T5>[];
+  public _t1: ExtractModel<T1>[];
+  public _t2: ExtractModel<T2>[];
+  public _t3: ExtractModel<T3>[];
+  public _t4: ExtractModel<T4>[];
+  public _t5: ExtractModel<T5>[];
 
   public constructor(t1: ExtractModel<T1>[],
     t2: ExtractModel<T2>[],
