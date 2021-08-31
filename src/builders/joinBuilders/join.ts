@@ -1,17 +1,17 @@
-import { Column } from '../../columns/column';
+import { AbstractColumn } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import { ExtractModel } from '../../tables/inferTypes';
 
 export default class Join<T extends ColumnType, K> {
-  public fromColumn: Column<T, boolean, boolean>;
-  public toColumn: Column<T, boolean, boolean>;
+  public fromColumn: AbstractColumn<T, boolean, boolean>;
+  public toColumn: AbstractColumn<T, boolean, boolean>;
   public joinTableName: string;
-  public mappedServiceToDb: { [name in keyof ExtractModel<K>]: Column<ColumnType>; };
+  public mappedServiceToDb: { [name in keyof ExtractModel<K>]: AbstractColumn<ColumnType>; };
   public type: JoinStrategy;
 
-  public constructor(joinTableName: string, fromColumn: Column<T, boolean, boolean>,
-    toColumn: Column<T, boolean, boolean>,
-    mappedServiceToDb: { [name in keyof ExtractModel<K>]: Column<ColumnType>; }) {
+  public constructor(joinTableName: string, fromColumn: AbstractColumn<T, boolean, boolean>,
+    toColumn: AbstractColumn<T, boolean, boolean>,
+    mappedServiceToDb: { [name in keyof ExtractModel<K>]: AbstractColumn<ColumnType>; }) {
     this.joinTableName = joinTableName;
     this.toColumn = toColumn;
     this.fromColumn = fromColumn;
@@ -23,7 +23,7 @@ export default class Join<T extends ColumnType, K> {
     return this;
   };
 
-  public columns = (fromColumn:Column<T>, toColumn:Column<T>): Join<T, K> => {
+  public columns = (fromColumn: AbstractColumn<T>, toColumn:AbstractColumn<T>): Join<T, K> => {
     this.toColumn = toColumn;
     this.fromColumn = fromColumn;
     return this;

@@ -1,11 +1,11 @@
 import { QueryResult } from 'pg';
-import { Column } from '../columns/column';
+import { AbstractColumn } from '../columns/column';
 import ColumnType from '../columns/types/columnType';
 import { ExtractModel } from '../tables/inferTypes';
 
 export default class QueryResponseMapper {
   public static map = <IColumn>(mappedServiceToDb: { [name in keyof ExtractModel<IColumn>]
-    : Column<ColumnType>; },
+    : AbstractColumn<ColumnType>; },
     queryResult: QueryResult<any>) => {
     const response: Array<ExtractModel<IColumn>> = [];
 

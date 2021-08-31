@@ -1,4 +1,4 @@
-import { Column } from '../../../columns/column';
+import { AbstractColumn, Column } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import Session from '../../../db/session';
 import BuilderError, { BuilderType } from '../../../errors/builderError';
@@ -51,7 +51,8 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
     }
 
     const parent:
-    { [name in keyof ExtractModel<T1>]: Column<ColumnType>; } = this._join.mappedServiceToDb;
+    { [name in keyof ExtractModel<T1>]:
+      AbstractColumn<ColumnType>; } = this._join.mappedServiceToDb;
 
     const result = await this._session.execute(query);
     if (result.isLeft()) {
