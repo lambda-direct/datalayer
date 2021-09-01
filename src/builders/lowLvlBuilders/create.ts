@@ -55,7 +55,7 @@ export default class Create<TTable extends AbstractTable<TTable>> {
         this.columnsBuilder.push(column.isNullableFlag ? '' : ' NOT NULL');
 
         const referenced = column.getReferenced();
-        this.columnsBuilder.push(referenced != null ? ` REFERENCES ${referenced.getParent()} (${referenced.getColumnName()})` : '');
+        this.columnsBuilder.push(referenced != null ? ` REFERENCES ${referenced.getParentName()} (${referenced.getColumnName()})` : '');
 
         if (i !== columns.length - 1) {
           this.columnsBuilder.push(',');

@@ -132,7 +132,7 @@ export default class SelectTRB<TTable extends AbstractTable<TTable>>
     return res;
   };
 
-  protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
+  protected _execute = async (): Promise<Array<ExtractModel<TTable> | undefined>> => {
     // Select.from().filteredBy().limit().offset().orderBy().groupBy().build()
     const queryBuilder = Select.from(this._tableName, this._columns);
     if (this._filter) {

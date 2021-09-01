@@ -44,7 +44,7 @@ export default class InsertTRB<TTable extends AbstractTable<TTable>>
     return this;
   };
 
-  protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
+  protected _execute = async (): Promise<Array<ExtractModel<TTable> | undefined>> => {
     const queryBuilder = Insert.into(this._tableName, this._columns);
     if (!this._values) throw Error('Values should be provided firestly\nExample: table.values().execute()');
 

@@ -120,6 +120,8 @@ export default class SelectTRBWithJoin<TTable extends AbstractTable<TTable>, TTa
         this._tableName, Object.values(this._columns), e, this._filter);
     }
 
+    console.log(query);
+
     const parent: {
       [name in keyof ExtractModel<TTable1>]: AbstractColumn<ColumnType>;
     } = this._join.mappedServiceToDb;

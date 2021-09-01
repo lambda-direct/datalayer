@@ -52,13 +52,14 @@ export default class Migrator {
 
     await this.session.execute(Create.table(migrationsTable).build());
 
-    const migrations: Array<ExtractModel<MigrationsTable>> = await migrationsTable.select().all();
+    const migrations
+    : Array<ExtractModel<MigrationsTable> | undefined> = await migrationsTable.select().all();
 
     const transaction = new Transaction(this.session);
     await transaction.begin();
     // eslint-disable-next-line no-restricted-syntax
     for await (const [key, value] of this.migrationsPerVersion) {
-      const dbMigrationByTag = migrations.find((it) => it.version === key);
+      const dbMigrationByTag = migrations.find((it) => it!.version === key);
       if (dbMigrationByTag) {
         // const isHashSameAsInDb =
         // Buffer.from(dbMigrationByTag.hash, 'base64').toString('ascii') === value;

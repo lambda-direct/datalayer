@@ -24,16 +24,16 @@ export default abstract class TableRequestBuilder<TTable> {
     this._logger = logger;
   }
 
-  public all = async (): Promise<ExtractModel<TTable>[]> => {
+  public all = async (): Promise<Array<ExtractModel<TTable> | undefined>> => {
     const res = await this._execute();
     return res;
   };
 
-  public first = async (): Promise<ExtractModel<TTable>> => {
+  public first = async (): Promise<ExtractModel<TTable> | undefined> => {
     const executionRes = await this._execute();
     // TODO add checks for undefined or null
     return executionRes[0];
   };
 
-  protected abstract _execute(): Promise<Array<ExtractModel<TTable>>>;
+  protected abstract _execute(): Promise<Array<ExtractModel<TTable> | undefined>>;
 }

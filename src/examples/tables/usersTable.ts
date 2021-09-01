@@ -5,7 +5,7 @@ export default class UsersTable extends AbstractTable<UsersTable> {
   public phone = this.varchar('phone', { size: 256 });
   public fullName = this.varchar('full_name', { size: 512 });
   public test = this.decimal('test', { notNull: true, precision: 100, scale: 2 });
-  public test1 = this.bigint('test1', { notNull: true });
+  public test1 = this.bigint('test1');
   public createdAt = this.timestamp('created_at', { notNull: true });
   public updatedAt = this.timestamp('updated_at', { notNull: true });
 

@@ -109,8 +109,8 @@ export class Column<T extends ColumnType, TNullable extends boolean = true, TAut
     callback: (table: ITable) => Column<T, boolean, boolean>,
     onConstraint?: OnConstraint,
   ): Column<T, TNullable, TAutoIncrement> {
-    // eslint-disable-next-line new-cap
-    this.referenced = callback(this.getParent().db.create(table));
+    const tableInstance = this.getParent().db.create(table);
+    this.referenced = callback(tableInstance);
     this.onConstraint = onConstraint;
     return this;
   }
