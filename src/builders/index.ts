@@ -1,6 +1,7 @@
+/* eslint-disable import/no-cycle */
 export { default as DeleteTRB } from './highLvlBuilders/deleteRequestBuilder';
 export { default as InsertTRB } from './highLvlBuilders/insertRequestBuilder';
-export { default as SelectTRBs } from './highLvlBuilders/selectRequestBuilder';
+export { default as SelectTRB } from './highLvlBuilders/selectRequestBuilder';
 export { default as UpdateTRB } from './highLvlBuilders/updateRequestBuilder';
 export { default as to } from './joinBuilders/static';
 export { default as JoinWith } from './joinBuilders/joinWith';
