@@ -1,8 +1,8 @@
-import { Column } from '../../../columns/column';
+import { AbstractColumn } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import UpdateExpr from './updates';
 
-export default class SetObject<T extends Column<ColumnType<any>, boolean, boolean>>
+export default class SetObject<T extends AbstractColumn<ColumnType<any>, boolean, boolean>>
   extends UpdateExpr {
   private _column: T;
   private _value: any;
@@ -13,6 +13,6 @@ export default class SetObject<T extends Column<ColumnType<any>, boolean, boolea
     this._value = value;
   }
 
-  public toQuery = (): string => `"${this._column.columnName}"=${this._column.columnType.insertStrategy(this._value)}`
+  public toQuery = (): string => `"${this._column.getColumnName()}"=${this._column.getColumnType().insertStrategy(this._value)}`
   ;
 }

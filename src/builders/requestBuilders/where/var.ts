@@ -1,9 +1,9 @@
-import { Column } from '../../../columns/column';
+import { AbstractColumn } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import { ecranate } from '../../../utils/ecranate';
 import Expr from './where';
 
-export default class Var<T extends Column<ColumnType<any>, boolean, boolean>> extends Expr {
+export default class Var<T extends AbstractColumn<ColumnType<any>, boolean, boolean>> extends Expr {
   private column: T;
 
   public constructor(column: T) {
@@ -11,5 +11,5 @@ export default class Var<T extends Column<ColumnType<any>, boolean, boolean>> ex
     this.column = column;
   }
 
-  public toQuery = (): string => `${this.column.getParent()}.${ecranate(this.column.columnName)}`;
+  public toQuery = (): string => `${this.column.getParentName()}.${ecranate(this.column.getColumnName())}`;
 }

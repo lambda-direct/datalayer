@@ -52,14 +52,15 @@ export default class Migrator {
 
     await this.session.execute(Create.table(migrationsTable).build());
 
-    const migrations: Array<ExtractModel<MigrationsTable>> = await migrationsTable.select().all();
+    const migrations
+    : Array<ExtractModel<MigrationsTable> | undefined> = await migrationsTable.select().all();
 
     const transaction = new Transaction(this.session);
     await transaction.begin();
     // eslint-disable-next-line no-restricted-syntax
     for await (const [key, value] of this.migrationsPerVersion) {
-      const dbMigrationByTag = migrations.find((it) => it.version === key);
-      if (dbMigrationByTag && dbMigrationByTag.hash) {
+      const dbMigrationByTag = migrations.find((it) => it!.version === key);
+      if (dbMigrationByTag) {
         // const isHashSameAsInDb =
         // Buffer.from(dbMigrationByTag.hash, 'base64').toString('ascii') === value;
 
@@ -68,7 +69,10 @@ export default class Migrator {
         // }
       } else {
         try {
-          this._db.logger().info(`Executing migration with tag ${key} with query:\n${value}`);
+          const logger = this._db.logger();
+          if (logger) {
+            logger.info(`Executing migration with tag ${key} with query:\n${value}`);
+          }
           const result = await this._db.session().execute(value);
           if (result.isLeft()) {
             const { reason } = result.value;

@@ -13,7 +13,7 @@ export default class TableIndex {
   public getColumns = (): Column<ColumnType<any>, boolean, boolean>[] => this._columns;
 
   public indexName = (): string => {
-    const columnNames = this._columns.map((column) => column.columnName);
+    const columnNames = this._columns.map((column) => column.getColumnName());
     return `${this._tableName}_${columnNames.join('_')}_index`;
   };
 }

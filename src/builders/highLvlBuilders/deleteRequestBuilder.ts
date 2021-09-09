@@ -17,7 +17,7 @@ export default class DeleteTRB<TTable> extends TableRequestBuilder<TTable> {
     tableName: string,
     session: Session,
     mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
-    logger: BaseLogger,
+    logger?: BaseLogger,
   ) {
     super(tableName, session, mappedServiceToDb, logger);
   }
@@ -31,7 +31,7 @@ export default class DeleteTRB<TTable> extends TableRequestBuilder<TTable> {
     await this._execute();
   };
 
-  protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
+  protected _execute = async (): Promise<Array<ExtractModel<TTable> | undefined>> => {
     const queryBuilder = Delete.from(this._tableName);
     if (this._filter) {
       queryBuilder.filteredBy(this._filter);
