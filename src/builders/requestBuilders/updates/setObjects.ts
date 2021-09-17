@@ -13,5 +13,10 @@ export default class SetObject<T extends AbstractColumn<ColumnType<any>, boolean
     this._value = value;
   }
 
-  public toQuery = (): string => `"${this._column.columnName}"=${this._column.columnType.insertStrategy(this._value)}`;
+  public toQuery = (): string => {
+    if (typeof this._value !== 'boolean') {
+      return `"${this._column.columnName}"=${this._value ? this._column.columnType.insertStrategy(this._value) : 'null'}`;
+    }
+    return `"${this._column.columnName}"=${this._column.columnType.insertStrategy(this._value)}`;
+  };
 }
