@@ -75,18 +75,19 @@ export default class InsertAggregator extends Aggregator {
     }
   };
 
-  public appendOnConflict = (column: Indexing,
+  public appendOnConflict = (column?: Indexing,
     updates?: UpdateExpr) => {
-    const indexName = column instanceof IndexedColumn ? column.columnName : column.indexName();
+    if (column) {
+      const indexName = column instanceof IndexedColumn ? column.columnName : column.indexName();
 
-    this._onConflict.push(`ON CONFLICT ON CONSTRAINT ${indexName}\n`);
-    if (updates) {
-      this._onConflict.push('DO UPDATE\n');
-      this._onConflict.push(`SET ${updates.toQuery()}`);
-    } else {
-      this._onConflict.push('DO NOTHING\n');
+      this._onConflict.push(`ON CONFLICT ON CONSTRAINT ${indexName}\n`);
+      if (updates) {
+        this._onConflict.push('DO UPDATE\n');
+        this._onConflict.push(`SET ${updates.toQuery()}`);
+      } else {
+        this._onConflict.push('DO NOTHING\n');
+      }
     }
-
     return this;
   };
 
