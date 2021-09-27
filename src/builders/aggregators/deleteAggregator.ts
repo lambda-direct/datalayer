@@ -11,8 +11,10 @@ export default class DeleteAggregator extends Aggregator {
   }
 
   public filters = (filters: Expr): DeleteAggregator => {
-    this._filters.push('WHERE ');
-    this._filters.push(filters.toQuery());
+    if (filters) {
+      this._filters.push('WHERE ');
+      this._filters.push(filters.toQuery());
+    }
     return this;
   };
 

@@ -13,8 +13,10 @@ export default class UpdateAggregator extends Aggregator {
   }
 
   public where = (filters: Expr): UpdateAggregator => {
-    this._filters.push('WHERE ');
-    this._filters.push(filters.toQuery());
+    if (filters) {
+      this._filters.push('WHERE ');
+      this._filters.push(filters.toQuery());
+    }
     return this;
   };
 

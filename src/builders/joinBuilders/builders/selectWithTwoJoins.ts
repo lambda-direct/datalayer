@@ -37,12 +37,10 @@ ColumnType, T1, T2, MODEL> extends AbstractJoined<MODEL> {
   );
 
   public execute = async (): Promise<SelectResponseTwoJoins<MODEL, T1, T2>> => {
-    const queryBuilder = Select.from(this._tableName, Object.values(this._columns));
-    if (this._filter) {
-      queryBuilder.filteredBy(this._filter);
-    }
-
-    queryBuilder.joined([this._join1, this._join2]);
+    const queryBuilder = Select
+      .from(this._tableName, Object.values(this._columns))
+      .joined([this._join1, this._join2])
+      .filteredBy(this._filter);
 
     let query = '';
     try {

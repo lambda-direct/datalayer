@@ -35,12 +35,10 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
   );
 
   public execute = async (): Promise<SelectResponseJoin<MODEL, T1>> => {
-    const queryBuilder = Select.from(this._tableName, Object.values(this._columns));
-    if (this._filter) {
-      queryBuilder.filteredBy(this._filter);
-    }
-
-    queryBuilder.joined([this._join]);
+    const queryBuilder = Select
+      .from(this._tableName, Object.values(this._columns))
+      .joined([this._join])
+      .filteredBy(this._filter);
 
     let query = '';
     try {

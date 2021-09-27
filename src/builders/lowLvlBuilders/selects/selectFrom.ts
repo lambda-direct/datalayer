@@ -17,22 +17,22 @@ export default class SelectFrom {
   public joined = <COLUMN extends ColumnType>(joins:
   Array<Join<COLUMN, any>>) => new SelectJoined(this._aggregator).apply(joins);
 
-  public limit = (limit: number): SelectFrom => {
+  public limit = (limit?: number): SelectFrom => {
     this._aggregator.limit(limit);
     return this;
   };
 
-  public offset = (offset: number): SelectFrom => {
+  public offset = (offset?: number): SelectFrom => {
     this._aggregator.offset(offset);
     return this;
   };
 
-  public orderBy = (orderBy: Column<ColumnType, boolean, boolean>, order: Order): SelectFrom => {
+  public orderBy = (orderBy?: Column<ColumnType, boolean, boolean>, order?: Order): SelectFrom => {
     this._aggregator.orderBy(orderBy, order);
     return this;
   };
 
-  public filteredBy = (filters: Expr) => new WhereSelect(this._aggregator).apply(filters);
+  public filteredBy = (filters?: Expr) => new WhereSelect(this._aggregator).apply(filters);
 
   public build = () => this._aggregator.buildQuery();
 }

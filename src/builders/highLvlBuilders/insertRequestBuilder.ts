@@ -44,7 +44,6 @@ export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
   };
 
   protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
-    const queryBuilder = Insert.into(this._tableName, this._columns);
     if (!this._values) throw Error('Values should be provided firestly\nExample: table.values().execute()');
 
     const mappedRows: {[name: string]: any}[] = [];
@@ -59,10 +58,10 @@ export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
       mappedRows.push(mappedValue);
     });
 
-    const valuesQueryBiulder = queryBuilder.values(mappedRows, mapper);
-    if (this._onConflict) {
-      valuesQueryBiulder.onConflict(this._onConflict, this._onConflictField);
-    }
+    const queryBuilder = Insert
+      .into(this._tableName, this._columns)
+      .values(mappedRows, mapper)
+      .onConflict(this._onConflict, this._onConflictField);
 
     // @TODO refactor values() part!!
     let query = '';

@@ -32,10 +32,9 @@ export default class DeleteTRB<TTable> extends TableRequestBuilder<TTable> {
   };
 
   protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
-    const queryBuilder = Delete.from(this._tableName);
-    if (this._filter) {
-      queryBuilder.filteredBy(this._filter);
-    }
+    const queryBuilder = Delete
+      .from(this._tableName)
+      .filteredBy(this._filter);
 
     let query = '';
     try {

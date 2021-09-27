@@ -30,12 +30,10 @@ ColumnType, T1, T2, T3, T4, MODEL> extends AbstractJoined<MODEL> {
   }
 
   public execute = async (): Promise<SelectResponseFourJoins<MODEL, T1, T2, T3, T4>> => {
-    const queryBuilder = Select.from(this._tableName, Object.values(this._columns));
-    if (this._filter) {
-      queryBuilder.filteredBy(this._filter);
-    }
-
-    queryBuilder.joined([this._join1, this._join2, this._join3, this._join4]);
+    const queryBuilder = Select
+      .from(this._tableName, Object.values(this._columns))
+      .joined([this._join1, this._join2, this._join3, this._join4])
+      .filteredBy(this._filter);
 
     let query = '';
     try {

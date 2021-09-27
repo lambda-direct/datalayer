@@ -19,29 +19,37 @@ export default class SelectAggregator extends Aggregator {
     super(tableName);
   }
 
-  public filters = (filters: Expr): SelectAggregator => {
-    this._filters.push('WHERE ');
-    this._filters.push(filters.toQuery());
+  public filters = (filters?: Expr): SelectAggregator => {
+    if (filters) {
+      this._filters.push('WHERE ');
+      this._filters.push(filters.toQuery());
+    }
     return this;
   };
 
-  public limit = (limit: number): SelectAggregator => {
-    this._limit.push('LIMIT ');
-    this._limit.push(limit.toString());
+  public limit = (limit?: number): SelectAggregator => {
+    if (limit) {
+      this._limit.push('LIMIT ');
+      this._limit.push(limit.toString());
+    }
     return this;
   };
 
-  public offset = (limit: number): SelectAggregator => {
-    this._offset.push('OFFSET ');
-    this._offset.push(limit.toString());
+  public offset = (offset?: number): SelectAggregator => {
+    if (offset) {
+      this._offset.push('OFFSET ');
+      this._offset.push(offset.toString());
+    }
     return this;
   };
 
-  public orderBy = (column: Column<ColumnType, boolean, boolean>, order: Order)
-  : SelectAggregator => {
-    this._orderBy.push('ORDER BY ');
-    this._orderBy.push(`${column.columnName} `);
-    this._orderBy.push(Order[order]);
+  public orderBy = (column?: Column<ColumnType, boolean, boolean>,
+    order?: Order) : SelectAggregator => {
+    if (column && order) {
+      this._orderBy.push('ORDER BY ');
+      this._orderBy.push(`${column.columnName} `);
+      this._orderBy.push(Order[order]);
+    }
     return this;
   };
 

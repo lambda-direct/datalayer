@@ -11,22 +11,22 @@ export default class WhereSelect {
     this._aggregator = aggregator;
   }
 
-  public limit = (limit: number): WhereSelect => {
+  public limit = (limit?: number): WhereSelect => {
     this._aggregator.limit(limit);
     return this;
   };
 
-  public offset = (offset: number): WhereSelect => {
+  public offset = (offset?: number): WhereSelect => {
     this._aggregator.offset(offset);
     return this;
   };
 
-  public orderBy = (orderBy: Column<ColumnType, boolean, boolean>, order: Order): WhereSelect => {
+  public orderBy = (orderBy?: Column<ColumnType, boolean, boolean>, order?: Order): WhereSelect => {
     this._aggregator.orderBy(orderBy, order);
     return this;
   };
 
-  public apply = (filters: Expr): WhereSelect => {
+  public apply = (filters?: Expr): WhereSelect => {
     this._aggregator.filters(filters);
     return this;
   };

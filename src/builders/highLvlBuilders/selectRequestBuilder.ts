@@ -65,19 +65,12 @@ export default class SelectTRB<TTable>
 
   protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
     // Select.from().filteredBy().limit().offset().orderBy().groupBy().build()
-    const queryBuilder = Select.from(this._tableName, this._columns);
-    if (this._filter) {
-      queryBuilder.filteredBy(this._filter);
-    }
-    if (this.props.limit) {
-      queryBuilder.limit(this.props.limit);
-    }
-    if (this.props.offset) {
-      queryBuilder.offset(this.props.offset);
-    }
-    if (this.__orderBy) {
-      queryBuilder.orderBy(this.__orderBy, this.__order!);
-    }
+    const queryBuilder = Select
+      .from(this._tableName, this._columns)
+      .filteredBy(this._filter)
+      .limit(this.props.limit)
+      .offset(this.props.offset)
+      .orderBy(this.__orderBy, this.__order);
 
     let query = '';
     try {
