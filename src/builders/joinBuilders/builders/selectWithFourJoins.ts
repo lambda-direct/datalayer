@@ -5,6 +5,7 @@ import BuilderError, { BuilderType } from '../../../errors/builderError';
 import { DatabaseSelectError } from '../../../errors/dbErrors';
 import QueryResponseMapper from '../../../mappers/responseMapper';
 import { ExtractModel } from '../../../tables/inferTypes';
+import Order from '../../highLvlBuilders/order';
 import Select from '../../lowLvlBuilders/selects/select';
 import Expr from '../../requestBuilders/where/where';
 import Join from '../join';
@@ -22,8 +23,10 @@ ColumnType, T1, T2, T3, T4, MODEL> extends AbstractJoined<MODEL> {
     filter: Expr, join1: Join<COLUMN, T1>, join2: Join<COLUMN, T2>, join3: Join<COLUMN, T3>,
     join4: Join<COLUMN, T4>,
     columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; },
-    props: {limit?:number, offset?:number}) {
-    super(filter, tableName, session, columns, props);
+    props: {limit?:number, offset?:number},
+    orderBy?: Column<ColumnType, boolean, boolean>,
+    order?: Order) {
+    super(filter, tableName, session, columns, props, orderBy, order);
     this._join1 = join1;
     this._join2 = join2;
     this._join3 = join3;
@@ -34,7 +37,8 @@ ColumnType, T1, T2, T3, T4, MODEL> extends AbstractJoined<MODEL> {
     const queryBuilder = Select
       .from(this._tableName, Object.values(this._columns))
       .joined([this._join1, this._join2, this._join3, this._join4])
-      .filteredBy(this._filter);
+      .filteredBy(this._filter)
+      .orderBy(this._orderBy, this._order);
 
     let query = '';
     try {

@@ -5,6 +5,7 @@ import BuilderError, { BuilderType } from '../../../errors/builderError';
 import { DatabaseSelectError } from '../../../errors/dbErrors';
 import QueryResponseMapper from '../../../mappers/responseMapper';
 import { ExtractModel } from '../../../tables/inferTypes';
+import Order from '../../highLvlBuilders/order';
 import Select from '../../lowLvlBuilders/selects/select';
 import Expr from '../../requestBuilders/where/where';
 import Join from '../join';
@@ -20,8 +21,10 @@ ColumnType, T1, T2, MODEL> extends AbstractJoined<MODEL> {
   public constructor(tableName: string, session: Session,
     filter: Expr, join1: Join<COLUMN, T1>, join2: Join<COLUMN, T2>,
     columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; },
-    props: {limit?:number, offset?:number}) {
-    super(filter, tableName, session, columns, props);
+    props: {limit?:number, offset?:number},
+    orderBy?: Column<ColumnType, boolean, boolean>,
+    order?: Order) {
+    super(filter, tableName, session, columns, props, orderBy, order);
     this._join1 = join1;
     this._join2 = join2;
   }
@@ -36,13 +39,16 @@ ColumnType, T1, T2, MODEL> extends AbstractJoined<MODEL> {
     join,
     this._columns,
     this._props,
+    this._orderBy,
+    this._order,
   );
 
   public execute = async (): Promise<SelectResponseTwoJoins<MODEL, T1, T2>> => {
     const queryBuilder = Select
       .from(this._tableName, Object.values(this._columns))
       .joined([this._join1, this._join2])
-      .filteredBy(this._filter);
+      .filteredBy(this._filter)
+      .orderBy(this._orderBy, this._order);
 
     let query = '';
     try {

@@ -5,6 +5,7 @@ import BuilderError, { BuilderType } from '../../../errors/builderError';
 import { DatabaseSelectError } from '../../../errors/dbErrors';
 import QueryResponseMapper from '../../../mappers/responseMapper';
 import { ExtractModel } from '../../../tables/inferTypes';
+import Order from '../../highLvlBuilders/order';
 import Select from '../../lowLvlBuilders/selects/select';
 import Expr from '../../requestBuilders/where/where';
 import Join from '../join';
@@ -20,8 +21,10 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
     filter: Expr,
     join: Join<COLUMN, T1>,
     columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; },
-    props: {limit?:number, offset?:number}) {
-    super(filter, tableName, session, columns, props);
+    props: {limit?:number, offset?:number},
+    orderBy?: Column<ColumnType, boolean, boolean>,
+    order?: Order) {
+    super(filter, tableName, session, columns, props, orderBy, order);
     this._join = join;
   }
 
@@ -34,6 +37,8 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
     join,
     this._columns,
     this._props,
+    this._orderBy,
+    this._order,
   );
 
   public execute = async (): Promise<SelectResponseJoin<MODEL, T1>> => {
@@ -42,7 +47,8 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
       .joined([this._join])
       .limit(this._props.limit)
       .offset(this._props.offset)
-      .filteredBy(this._filter);
+      .filteredBy(this._filter)
+      .orderBy(this._orderBy, this._order);
 
     let query = '';
     try {
