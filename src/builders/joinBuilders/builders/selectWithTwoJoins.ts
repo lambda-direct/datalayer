@@ -19,8 +19,9 @@ ColumnType, T1, T2, MODEL> extends AbstractJoined<MODEL> {
 
   public constructor(tableName: string, session: Session,
     filter: Expr, join1: Join<COLUMN, T1>, join2: Join<COLUMN, T2>,
-    columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; }) {
-    super(filter, tableName, session, columns);
+    columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; },
+    props: {limit?:number, offset?:number}) {
+    super(filter, tableName, session, columns, props);
     this._join1 = join1;
     this._join2 = join2;
   }
@@ -34,6 +35,7 @@ ColumnType, T1, T2, MODEL> extends AbstractJoined<MODEL> {
     this._join2,
     join,
     this._columns,
+    this._props,
   );
 
   public execute = async (): Promise<SelectResponseTwoJoins<MODEL, T1, T2>> => {

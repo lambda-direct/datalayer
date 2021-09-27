@@ -20,8 +20,9 @@ ColumnType, T1, T2, T3, MODEL> extends AbstractJoined<MODEL> {
 
   public constructor(tableName: string, session: Session,
     filter: Expr, join1: Join<COLUMN, T1>, join2: Join<COLUMN, T2>, join3: Join<COLUMN, T3>,
-    columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; }) {
-    super(filter, tableName, session, columns);
+    columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; },
+    props: {limit?:number, offset?:number}) {
+    super(filter, tableName, session, columns, props);
     this._join1 = join1;
     this._join2 = join2;
     this._join3 = join3;
@@ -37,6 +38,7 @@ ColumnType, T1, T2, T3, MODEL> extends AbstractJoined<MODEL> {
     this._join3,
     join,
     this._columns,
+    this._props,
   );
 
   public execute = async (): Promise<SelectResponseThreeJoins<MODEL, T1, T2, T3>> => {

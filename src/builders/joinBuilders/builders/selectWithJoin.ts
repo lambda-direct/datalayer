@@ -19,8 +19,9 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
   public constructor(tableName: string, session: Session,
     filter: Expr,
     join: Join<COLUMN, T1>,
-    columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; }) {
-    super(filter, tableName, session, columns);
+    columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; },
+    props: {limit?:number, offset?:number}) {
+    super(filter, tableName, session, columns, props);
     this._join = join;
   }
 
@@ -32,12 +33,15 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
     this._join,
     join,
     this._columns,
+    this._props,
   );
 
   public execute = async (): Promise<SelectResponseJoin<MODEL, T1>> => {
     const queryBuilder = Select
       .from(this._tableName, Object.values(this._columns))
       .joined([this._join])
+      .limit(this._props.limit)
+      .offset(this._props.offset)
       .filteredBy(this._filter);
 
     let query = '';

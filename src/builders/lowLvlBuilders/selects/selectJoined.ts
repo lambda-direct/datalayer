@@ -19,12 +19,12 @@ export default class SelectJoined {
     return this;
   };
 
-  public limit = (limit: number): SelectJoined => {
+  public limit = (limit?: number): SelectJoined => {
     this._aggregator.limit(limit);
     return this;
   };
 
-  public offset = (offset: number): SelectJoined => {
+  public offset = (offset?: number): SelectJoined => {
     this._aggregator.offset(offset);
     return this;
   };

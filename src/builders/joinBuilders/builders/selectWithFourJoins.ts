@@ -21,8 +21,9 @@ ColumnType, T1, T2, T3, T4, MODEL> extends AbstractJoined<MODEL> {
   public constructor(tableName: string, session: Session,
     filter: Expr, join1: Join<COLUMN, T1>, join2: Join<COLUMN, T2>, join3: Join<COLUMN, T3>,
     join4: Join<COLUMN, T4>,
-    columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; }) {
-    super(filter, tableName, session, columns);
+    columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; },
+    props: {limit?:number, offset?:number}) {
+    super(filter, tableName, session, columns, props);
     this._join1 = join1;
     this._join2 = join2;
     this._join3 = join3;
