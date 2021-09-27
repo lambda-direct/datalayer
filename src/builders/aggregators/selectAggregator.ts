@@ -45,10 +45,10 @@ export default class SelectAggregator extends Aggregator {
 
   public orderBy = (column?: Column<ColumnType, boolean, boolean>,
     order?: Order) : SelectAggregator => {
-    if (column && order) {
+    if (column !== null && column !== undefined) {
       this._orderBy.push('ORDER BY ');
       this._orderBy.push(`${column.columnName} `);
-      this._orderBy.push(Order[order]);
+      this._orderBy.push(Order[order!]);
     }
     return this;
   };
