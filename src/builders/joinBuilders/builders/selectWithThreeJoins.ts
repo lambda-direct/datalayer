@@ -50,6 +50,8 @@ ColumnType, T1, T2, T3, MODEL> extends AbstractJoined<MODEL> {
     const queryBuilder = Select
       .from(this._tableName, Object.values(this._columns))
       .joined([this._join1, this._join2, this._join3])
+      .limit(this._props.limit)
+      .offset(this._props.offset)
       .filteredBy(this._filter)
       .orderBy(this._orderBy, this._order);
 
