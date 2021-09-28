@@ -16,5 +16,5 @@ export { default as Select } from './lowLvlBuilders/selects/select';
 export { default as Update } from './lowLvlBuilders/updates/update';
 export { set, combine } from './requestBuilders/updates/static';
 export {
-  eq, inArray as in, and, or, like, greater, greaterEq, less, lessEq,
+  eq, notEq, inArray as in, and, or, like, greater, greaterEq, less, lessEq,
 } from './requestBuilders/where/static';
