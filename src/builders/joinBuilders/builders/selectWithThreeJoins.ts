@@ -1,4 +1,5 @@
-import { Column } from '../../../columns/column';
+/* eslint-disable max-len */
+import { AbstractColumn, Column } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import Session from '../../../db/session';
 import BuilderError, { BuilderType } from '../../../errors/builderError';
@@ -64,11 +65,11 @@ ColumnType, T1, T2, T3, MODEL> extends AbstractJoined<MODEL> {
     }
 
     const parent:
-    { [name in keyof ExtractModel<T1>]: Column<ColumnType>; } = this._join1.mappedServiceToDb;
+    { [name in keyof ExtractModel<T1>]: AbstractColumn<ColumnType>; } = this._join1.mappedServiceToDb;
     const parentTwo:
-    { [name in keyof ExtractModel<T2>]: Column<ColumnType>; } = this._join2.mappedServiceToDb;
+    { [name in keyof ExtractModel<T2>]: AbstractColumn<ColumnType>; } = this._join2.mappedServiceToDb;
     const parentThree:
-    { [name in keyof ExtractModel<T3>]: Column<ColumnType>; } = this._join3.mappedServiceToDb;
+    { [name in keyof ExtractModel<T3>]: AbstractColumn<ColumnType>; } = this._join3.mappedServiceToDb;
 
     const result = await this._session.execute(query);
     if (result.isLeft()) {

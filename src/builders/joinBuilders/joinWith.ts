@@ -1,4 +1,4 @@
-import { Column } from '../../columns/column';
+import { Column, IndexedColumn } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import { ExtractModel } from '../../tables/inferTypes';
 import Join from './join';
@@ -13,7 +13,8 @@ export default class JoinWith<T extends ColumnType, K> {
     this.mappedServiceToDb = mappedServiceToDb;
   }
 
-  public columns = (fromColumn:Column<T, boolean, boolean>,
-    toColumn:Column<T, boolean, boolean>): Join<T, K> => new Join(this.joinTableName,
+  public columns = (fromColumn: Column<T, boolean, boolean> | IndexedColumn<T, boolean, boolean>,
+    toColumn: Column<T, boolean, boolean> | IndexedColumn<T, boolean, boolean>)
+  : Join<T, K> => new Join(this.joinTableName,
     fromColumn, toColumn, this.mappedServiceToDb);
 }
