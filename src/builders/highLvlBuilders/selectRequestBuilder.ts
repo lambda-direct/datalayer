@@ -64,7 +64,7 @@ export default class SelectTRB<TTable>
   public join = <COLUMN extends ColumnType, T1>(join: Join<COLUMN, T1>):
   SelectTRBWithJoin<COLUMN, T1, TTable> => new SelectTRBWithJoin(this._tableName, this._session,
     this._filter, join, this._mappedServiceToDb, this.props, this.__orderBy, this.__order,
-    this._logger);
+    this._logger, this.__distinct);
 
   public execute = async () => {
     const res = await this._execute();
