@@ -25,8 +25,9 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
     props: {limit?:number, offset?:number},
     orderBy?: Column<ColumnType, boolean, boolean>,
     order?: Order,
-    logger?: BaseLogger) {
-    super(filter, tableName, session, columns, props, orderBy, order, logger);
+    logger?: BaseLogger,
+    distinct?: AbstractColumn<ColumnType, boolean, boolean>) {
+    super(filter, tableName, session, columns, props, orderBy, order, logger, distinct);
     this._join = join;
   }
 
@@ -42,6 +43,7 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
     this._orderBy,
     this._order,
     this._logger,
+    this._distinct,
   );
 
   public execute = async (): Promise<SelectResponseJoin<MODEL, T1>> => {
@@ -51,7 +53,8 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
       .limit(this._props.limit)
       .offset(this._props.offset)
       .filteredBy(this._filter)
-      .orderBy(this._orderBy, this._order);
+      .orderBy(this._orderBy, this._order)
+      .distinct(this._distinct);
 
     let query = '';
     try {

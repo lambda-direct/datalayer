@@ -28,8 +28,9 @@ ColumnType, T1, T2, T3, T4, MODEL> extends AbstractJoined<MODEL> {
     props: {limit?:number, offset?:number},
     orderBy?: Column<ColumnType, boolean, boolean>,
     order?: Order,
-    logger?: BaseLogger) {
-    super(filter, tableName, session, columns, props, orderBy, order, logger);
+    logger?: BaseLogger,
+    distinct?: AbstractColumn<ColumnType, boolean, boolean>) {
+    super(filter, tableName, session, columns, props, orderBy, order, logger, distinct);
     this._join1 = join1;
     this._join2 = join2;
     this._join3 = join3;
@@ -43,7 +44,8 @@ ColumnType, T1, T2, T3, T4, MODEL> extends AbstractJoined<MODEL> {
       .limit(this._props.limit)
       .offset(this._props.offset)
       .filteredBy(this._filter)
-      .orderBy(this._orderBy, this._order);
+      .orderBy(this._orderBy, this._order)
+      .distinct(this._distinct);
 
     let query = '';
     try {

@@ -1,4 +1,5 @@
 import { Column } from '../../../columns';
+import { AbstractColumn } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import SelectAggregator from '../../aggregators/selectAggregator';
 import Order from '../../highLvlBuilders/order';
@@ -23,6 +24,13 @@ export default class WhereSelect {
 
   public orderBy = (orderBy?: Column<ColumnType, boolean, boolean>, order?: Order): WhereSelect => {
     this._aggregator.orderBy(orderBy, order);
+    return this;
+  };
+
+  public distinct = (column?: AbstractColumn<ColumnType, boolean, boolean>): WhereSelect => {
+    if (column) {
+      this._aggregator.distinct(column);
+    }
     return this;
   };
 

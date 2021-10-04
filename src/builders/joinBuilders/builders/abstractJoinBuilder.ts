@@ -1,4 +1,4 @@
-import { Column } from '../../../columns/column';
+import { AbstractColumn, Column } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import Session from '../../../db/session';
 import BaseLogger from '../../../logger/abstractLogger';
@@ -15,6 +15,7 @@ export default abstract class AbstractJoined<K> {
   protected _order?: Order;
   protected _logger?: BaseLogger;
   protected _columns: { [name in keyof ExtractModel<K>]: Column<ColumnType>; };
+  protected _distinct?: AbstractColumn<ColumnType, boolean, boolean>;
 
   public constructor(filter: Expr,
     tableName: string,
@@ -23,7 +24,8 @@ export default abstract class AbstractJoined<K> {
     props: {limit?:number, offset?:number},
     orderBy?: Column<ColumnType, boolean, boolean>,
     order?: Order,
-    logger?: BaseLogger) {
+    logger?: BaseLogger,
+    distinct?: AbstractColumn<ColumnType, boolean, boolean>) {
     this._tableName = tableName;
     this._session = session;
     this._filter = filter;
@@ -32,5 +34,6 @@ export default abstract class AbstractJoined<K> {
     this._order = order;
     this._orderBy = orderBy;
     this._logger = logger;
+    this._distinct = distinct;
   }
 }

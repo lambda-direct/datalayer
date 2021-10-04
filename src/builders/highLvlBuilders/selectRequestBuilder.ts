@@ -1,5 +1,5 @@
 import { Select } from '..';
-import { Column } from '../../columns/column';
+import { AbstractColumn, Column } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
@@ -22,6 +22,7 @@ export default class SelectTRB<TTable>
   private __groupBy?: Column<ColumnType, boolean, boolean>;
   private __order?: Order;
   private __table: TTable;
+  private __distinct: AbstractColumn<ColumnType, boolean, boolean>;
 
   public constructor(
     tableName: string,
@@ -38,6 +39,12 @@ export default class SelectTRB<TTable>
 
   public where = (expr: Expr): SelectTRB<TTable> => {
     this._filter = expr;
+    return this;
+  };
+
+  public distinct = (column: AbstractColumn<ColumnType<any>, boolean, boolean>)
+  : SelectTRB<TTable> => {
+    this.__distinct = column;
     return this;
   };
 
@@ -71,7 +78,8 @@ export default class SelectTRB<TTable>
       .filteredBy(this._filter)
       .limit(this.props.limit)
       .offset(this.props.offset)
-      .orderBy(this.__orderBy, this.__order);
+      .orderBy(this.__orderBy, this.__order)
+      .distinct(this.__distinct);
 
     let query = '';
     try {
