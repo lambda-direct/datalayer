@@ -3,6 +3,7 @@ import ColumnType from '../../../columns/types/columnType';
 import Session from '../../../db/session';
 import BuilderError, { BuilderType } from '../../../errors/builderError';
 import { DatabaseSelectError } from '../../../errors/dbErrors';
+import BaseLogger from '../../../logger/abstractLogger';
 import QueryResponseMapper from '../../../mappers/responseMapper';
 import { ExtractModel } from '../../../tables/inferTypes';
 import Order from '../../highLvlBuilders/order';
@@ -23,8 +24,9 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
     columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; },
     props: {limit?:number, offset?:number},
     orderBy?: Column<ColumnType, boolean, boolean>,
-    order?: Order) {
-    super(filter, tableName, session, columns, props, orderBy, order);
+    order?: Order,
+    logger?: BaseLogger) {
+    super(filter, tableName, session, columns, props, orderBy, order, logger);
     this._join = join;
   }
 
@@ -39,6 +41,7 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
     this._props,
     this._orderBy,
     this._order,
+    this._logger,
   );
 
   public execute = async (): Promise<SelectResponseJoin<MODEL, T1>> => {
@@ -56,6 +59,10 @@ export default class SelectTRBWithJoin<COLUMN extends ColumnType, T1, MODEL>
     } catch (e) {
       throw new BuilderError(BuilderType.JOINED_SELECT,
         this._tableName, Object.values(this._columns), e, this._filter);
+    }
+
+    if (this._logger) {
+      this._logger.info(`Selecting from ${this._tableName} using query:\n ${query}`);
     }
 
     const parent:

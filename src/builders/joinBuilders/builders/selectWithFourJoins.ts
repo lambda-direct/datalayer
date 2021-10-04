@@ -4,6 +4,7 @@ import ColumnType from '../../../columns/types/columnType';
 import Session from '../../../db/session';
 import BuilderError, { BuilderType } from '../../../errors/builderError';
 import { DatabaseSelectError } from '../../../errors/dbErrors';
+import BaseLogger from '../../../logger/abstractLogger';
 import QueryResponseMapper from '../../../mappers/responseMapper';
 import { ExtractModel } from '../../../tables/inferTypes';
 import Order from '../../highLvlBuilders/order';
@@ -26,8 +27,9 @@ ColumnType, T1, T2, T3, T4, MODEL> extends AbstractJoined<MODEL> {
     columns: { [name in keyof ExtractModel<MODEL>]: Column<ColumnType>; },
     props: {limit?:number, offset?:number},
     orderBy?: Column<ColumnType, boolean, boolean>,
-    order?: Order) {
-    super(filter, tableName, session, columns, props, orderBy, order);
+    order?: Order,
+    logger?: BaseLogger) {
+    super(filter, tableName, session, columns, props, orderBy, order, logger);
     this._join1 = join1;
     this._join2 = join2;
     this._join3 = join3;
@@ -49,6 +51,10 @@ ColumnType, T1, T2, T3, T4, MODEL> extends AbstractJoined<MODEL> {
     } catch (e) {
       throw new BuilderError(BuilderType.TWO_JOINED_SELECT,
         this._tableName, Object.values(this._columns), e, this._filter);
+    }
+
+    if (this._logger) {
+      this._logger.info(`Selecting from ${this._tableName} using query:\n ${query}`);
     }
 
     const parent:
