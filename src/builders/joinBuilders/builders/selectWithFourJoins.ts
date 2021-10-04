@@ -13,6 +13,7 @@ import Expr from '../../requestBuilders/where/where';
 import Join from '../join';
 import SelectResponseFourJoins from '../responses/selectResponseFourJoins';
 import AbstractJoined from './abstractJoinBuilder';
+import SelectTRBWithFiveJoins from './selectWithFiveJoins';
 
 export default class SelectTRBWithFourJoins<COLUMN extends
 ColumnType, T1, T2, T3, T4, MODEL> extends AbstractJoined<MODEL> {
@@ -36,6 +37,24 @@ ColumnType, T1, T2, T3, T4, MODEL> extends AbstractJoined<MODEL> {
     this._join3 = join3;
     this._join4 = join4;
   }
+
+  public join = <T5>(join: Join<COLUMN, T5>):
+  SelectTRBWithFiveJoins<COLUMN, T1, T2, T3, T4, T5, MODEL> => new SelectTRBWithFiveJoins(
+    this._tableName,
+    this._session,
+    this._filter,
+    this._join1,
+    this._join2,
+    this._join3,
+    this._join4,
+    join,
+    this._columns,
+    this._props,
+    this._orderBy,
+    this._order,
+    this._logger,
+    this._distinct,
+  );
 
   public execute = async (): Promise<SelectResponseFourJoins<MODEL, T1, T2, T3, T4>> => {
     const queryBuilder = Select
