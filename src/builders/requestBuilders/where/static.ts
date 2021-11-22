@@ -4,6 +4,7 @@ import { ExtractCodeType } from '../../../tables/inferTypes';
 import And from './and';
 import Const from './const';
 import ConstArray from './constArray';
+import CustomWhere from './customWhere';
 import EqWhere from './eqWhere';
 import Greater from './greater';
 import GreaterEq from './greaterEq';
@@ -20,6 +21,8 @@ import Expr from './where';
 // eslint-disable-next-line max-len
 export const eq = <T extends AbstractColumn<ColumnType<any>, boolean, boolean>>(
   left: T, value: ExtractCodeType<T>): Expr => new EqWhere(new Var<T>(left), new Const(value));
+
+export const custom = (customQuery: string): Expr => new CustomWhere(customQuery);
 
 export const isNull = <T extends AbstractColumn<ColumnType<any>, boolean, boolean>>(
   left: T): Expr => new IsNull(new Var<T>(left));
