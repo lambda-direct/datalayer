@@ -23,10 +23,11 @@ export default class DbConnector {
         for (let i = 0; i < connections; i += 1) {
           promises.push(pool.connect());
         }
-        Promise.all(promises);
+        await Promise.all(promises);
+      } else {
+        await pool.connect();
       }
 
-      await pool.connect();
       console.log('Db connected!');
 
       // check if table structure is the same as in code
