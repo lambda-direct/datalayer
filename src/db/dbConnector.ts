@@ -1,4 +1,6 @@
-import { ClientConfig, Pool } from 'pg';
+import {
+  ClientConfig, Pool, PoolClient,
+} from 'pg';
 import DB from './db';
 import DBStringConnector from './dbStringConnector';
 
@@ -12,9 +14,17 @@ export default class DbConnector {
     return this;
   };
 
-  public connect = async (): Promise<DB> => {
+  public connect = async (connections?: number): Promise<DB> => {
     try {
       const pool = new Pool(this.__config);
+
+      if (connections) {
+        const promises: Promise<PoolClient>[] = [];
+        for (let i = 0; i < connections; i += 1) {
+          promises.push(pool.connect());
+        }
+        Promise.all(promises);
+      }
 
       await pool.connect();
       console.log('Db connected!');
