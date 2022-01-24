@@ -50,7 +50,7 @@ export default class SelectAggregator extends Aggregator {
     order?: Order) : SelectAggregator => {
     if (column !== null && column !== undefined) {
       this._orderBy.push('ORDER BY ');
-      this._orderBy.push(`${column.columnName} `);
+      this._orderBy.push(`${column.getParent()}.${ecranate(column.columnName)}`);
       this._orderBy.push(Order[order!]);
     }
     return this;
