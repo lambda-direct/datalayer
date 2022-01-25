@@ -21,8 +21,8 @@ export default class DBStringConnector {
 
       return new DB(pool);
     } catch (e) {
-      console.log(`Connection error: ${e.message}`);
-      throw new Error(`Connection error: ${e.message}`);
+      console.log(`Connection error: ${e}`);
+      throw new Error(`Connection error: ${e}`);
     }
   };
 
@@ -34,15 +34,10 @@ export default class DBStringConnector {
     try {
       const pool = new Pool(config);
 
-      // await pool.connect();
-      // console.log('Db connected!');
-
-      // check if table structure is the same as in code
-
       return new DB(pool);
     } catch (e) {
-      console.log(`Connection error: ${e.message}`);
-      throw new Error(`Connection error: ${e.message}`);
+      console.log(`Connection error: ${e}`);
+      throw new Error(`Connection error: ${e}`);
     }
   };
 }
