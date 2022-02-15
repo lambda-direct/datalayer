@@ -12,7 +12,10 @@ export default class PgInteger extends ColumnType<number> {
 
   public insertStrategy = (value: number): string => `${value}`;
 
-  public selectStrategy(value: number): number {
+  public selectStrategy(value: number): number | undefined {
+    if (typeof value === 'string') {
+      return value ? parseInt(value, 10) : undefined;
+    }
     return value;
   }
 }
