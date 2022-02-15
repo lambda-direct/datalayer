@@ -56,8 +56,6 @@ export default class UpdateTRB<TTable extends AbstractTable<TTable>> extends Tab
       throw new BuilderError(BuilderType.UPDATE, this._tableName, this._columns, e, this._filter);
     }
 
-    console.log(values);
-
     if (this._logger) {
       this._logger.info(`Updating ${this._tableName} using query:\n ${query}`);
     }

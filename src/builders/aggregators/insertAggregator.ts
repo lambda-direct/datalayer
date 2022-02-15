@@ -48,7 +48,6 @@ export default class InsertAggregator extends Aggregator {
   public appendValues = (values: {[name: string]: any}[]) => {
     // @TODO Check if values not empty
     const mapper = this._table.mapServiceToDb();
-    console.log(mapper);
 
     let position: number = 0;
     for (let i = 0; i < values.length; i += 1) {
@@ -58,8 +57,6 @@ export default class InsertAggregator extends Aggregator {
       const entries = Object.entries(mapper);
 
       entries.forEach(([key], index) => {
-        console.log('key: ', key);
-        console.log('value: ', value);
         const column = mapper[key];
         const valueToInsert = value[column.getColumnName()];
         const isKeyExistsInValue = column.getColumnName() in value;

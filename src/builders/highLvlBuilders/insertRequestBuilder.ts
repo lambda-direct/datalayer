@@ -62,8 +62,6 @@ export default class InsertTRB<TTable extends AbstractTable<TTable>> extends Tab
       .values(mappedRows)
       .onConflict(this._onConflict, this._onConflictField);
 
-    console.log(mappedRows);
-
     // @TODO refactor values() part!!
     let query = '';
     let values = [];
@@ -74,8 +72,6 @@ export default class InsertTRB<TTable extends AbstractTable<TTable>> extends Tab
     } catch (e: any) {
       throw new BuilderError(BuilderType.INSERT, this._tableName, this._columns, e);
     }
-
-    console.log(values);
 
     if (this._logger) {
       this._logger.info(`Inserting to ${this._tableName} using query:\n ${query}`);
