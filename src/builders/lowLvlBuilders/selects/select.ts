@@ -1,12 +1,13 @@
-import { Column } from '../../../columns/column';
-import ColumnType from '../../../columns/types/columnType';
+/* eslint-disable import/no-cycle */
+import AbstractTable from '../../../tables/abstractTable';
 import SelectAggregator from '../../aggregators/selectAggregator';
 import SelectFrom from './selectFrom';
 
 export default class Select {
-  public static from = (tableName: string, columns: Column<ColumnType>[]) => {
-    const aggregator = new SelectAggregator(tableName);
-    aggregator.appendFrom(tableName).appendFields(columns);
+  // eslint-disable-next-line max-len
+  public static from = <TTable extends AbstractTable<TTable>>(table: AbstractTable<TTable>) => {
+    const aggregator = new SelectAggregator(table);
+    aggregator.appendFrom(table.tableName());
     return new SelectFrom(aggregator);
   };
 }

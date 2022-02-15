@@ -1,3 +1,5 @@
+/* eslint-disable import/no-cycle */
+/* eslint-disable max-len */
 /* eslint-disable max-classes-per-file */
 import PgVarChar from '../columns/types/pgVarChar';
 import PgTimestamp from '../columns/types/pgTimestamp';
@@ -18,10 +20,10 @@ import BaseLogger from '../logger/abstractLogger';
 import PgEnum from '../columns/types/pgEnum';
 import { ExtractModel } from './inferTypes';
 import DB, { IDB } from '../db/db';
-import { Column } from '../columns/column';
+import { AbstractColumn, Column } from '../columns/column';
 import TableIndex from '../indexes/tableIndex';
 
-export default abstract class AbstractTable<TTable> {
+export default abstract class AbstractTable<TTable extends AbstractTable<TTable>> {
   private _session: Session;
   private _logger: BaseLogger | undefined;
 
@@ -47,15 +49,15 @@ export default abstract class AbstractTable<TTable> {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
 
-    return new SelectTRB(this.tableName(),
-      this._session, this.mapServiceToDb(), { limit, offset }, this, this._logger);
+    return new SelectTRB(this,
+      this._session, this.mapServiceToDb(), { limit, offset }, this._logger);
   };
 
   public update = (): UpdateTRB<TTable> => {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
-    return new UpdateTRB(this.tableName(), this._session, this.mapServiceToDb(), this._logger);
+    return new UpdateTRB(this, this._session, this.mapServiceToDb(), this._logger);
   };
 
   public insert = (value: ExtractModel<TTable>):
@@ -63,8 +65,8 @@ export default abstract class AbstractTable<TTable> {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
-    return new InsertTRB([value], this.tableName(), this._session,
-      this.mapServiceToDb(), this, this._logger);
+    return new InsertTRB([value], this, this._session,
+      this.mapServiceToDb(), this._logger);
   };
 
   public insertMany = (values: ExtractModel<TTable>[]):
@@ -72,23 +74,23 @@ export default abstract class AbstractTable<TTable> {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
-    return new InsertTRB(values, this.tableName(), this._session,
-      this.mapServiceToDb(), this, this._logger);
+    return new InsertTRB(values, this, this._session,
+      this.mapServiceToDb(), this._logger);
   };
 
   public delete = (): DeleteTRB<TTable> => {
     if (!this._session) {
       throw new Error(`Db was not provided in constructor, while ${this.constructor.name} class was creating. Please make sure, that you provided Db object to ${this.constructor.name} class. Should be -> new ${this.constructor.name}(db)`);
     }
-    return new DeleteTRB(this.tableName(), this._session,
+    return new DeleteTRB(this, this._session,
       this.mapServiceToDb(), this._logger);
   };
 
-  public mapServiceToDb(): {[name in keyof ExtractModel<TTable>]: Column<ColumnType>} {
+  public mapServiceToDb(): {[name in keyof ExtractModel<TTable>]: AbstractColumn<ColumnType>} {
     return Object.getOwnPropertyNames(this)
-      .reduce<{[name in keyof ExtractModel<TTable>]: Column<ColumnType>}>((res, fieldName) => {
+      .reduce<{[name in keyof ExtractModel<TTable>]: AbstractColumn<ColumnType>}>((res, fieldName) => {
       const field: unknown = (this as unknown as TTable)[fieldName as keyof TTable];
-      if (field instanceof Column) {
+      if (field instanceof AbstractColumn) {
         res[fieldName as keyof ExtractModel<TTable>] = field;
       }
       return res;

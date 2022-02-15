@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { ClientConfig } from 'pg';
 import Create from './builders/lowLvlBuilders/create';
 import { DB, DbConnector } from './db';
@@ -15,7 +16,7 @@ export const anotherMinor = {
     return dbConnector.connect();
   },
   builders: {
-    createTable<IService>(table: AbstractTable<IService>): Create<IService> {
+    createTable<IService extends AbstractTable<IService>>(table: AbstractTable<IService>): Create<IService> {
       return Create.table(table);
     },
   },
@@ -25,7 +26,7 @@ export const anotherMinor = {
 };
 
 export const minor = {
-  prepareCreateTable<IService>(table: AbstractTable<IService>): string {
+  prepareCreateTable<IService extends AbstractTable<IService>>(table: AbstractTable<IService>): string {
     return Create.table(table).build();
   },
   migrator(db:DB): Migrator {

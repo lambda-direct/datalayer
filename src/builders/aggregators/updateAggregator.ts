@@ -1,4 +1,6 @@
-import UpdateExpr from '../requestBuilders/updates/updates';
+/* eslint-disable import/no-cycle */
+import { AbstractTable } from '../../tables';
+import { UpdateExpr } from '../requestBuilders/updates/updates';
 import Expr from '../requestBuilders/where/where';
 import Aggregator from './abstractAggregator';
 
@@ -6,16 +8,22 @@ export default class UpdateAggregator extends Aggregator {
   private _updates: Array<string> = [];
   private _filters: Array<string> = [];
   private _from: Array<string> = [];
+  private _values: Array<any> = [];
   private _update: Array<string> = ['UPDATE'];
 
-  public constructor(tableName: string) {
-    super(tableName);
+  public constructor(table: AbstractTable<any>) {
+    super(table);
   }
 
   public where = (filters: Expr): UpdateAggregator => {
     if (filters) {
+      const currentPointerPosition = this._values.length > 0 ? this._values.length + 1 : undefined;
+      const filterQuery = filters.toQuery(currentPointerPosition);
+
       this._filters.push('WHERE ');
-      this._filters.push(filters.toQuery());
+      this._filters.push(filterQuery.query);
+
+      this._values.push(...filterQuery.values);
     }
     return this;
   };
@@ -27,7 +35,9 @@ export default class UpdateAggregator extends Aggregator {
   };
 
   public set = (updates: UpdateExpr): UpdateAggregator => {
-    this._updates.push(`\nSET ${updates.toQuery()}`);
+    const setQuery = updates.toQuery();
+    this._updates.push(`\nSET ${setQuery.query}`);
+    this._values.push(...setQuery.values);
     return this;
   };
 
@@ -42,6 +52,6 @@ export default class UpdateAggregator extends Aggregator {
     this._update.push('\n');
     this._update.push(this._fields.join(''));
 
-    return this._update.join('');
+    return { query: this._update.join(''), values: this._values };
   };
 }

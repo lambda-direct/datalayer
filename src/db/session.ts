@@ -7,10 +7,10 @@ export default class Session {
   public constructor(private pool: Pool) {
   }
 
-  public execute = async (query: string)
+  public execute = async (query: string, values?: Array<any>)
   : Promise<Either<Failure, QueryResult<any>>> => {
     try {
-      return right(await this.pool.query(query));
+      return right(await this.pool.query(query, values));
     } catch (e) {
       return left({
         type: PgSessionError.PgQueryExecutionError,

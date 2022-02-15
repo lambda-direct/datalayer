@@ -25,6 +25,6 @@ Reason: ${reason.message}
 Query builder: ${BuilderType[builderType]}
 Table name: ${tableName}
 Filter query: ${filter ? filter.toQuery() : 'undefined'}
-Column names: ${columns.map((column) => column.getColumnName()).join(', ')}\n-----\n`;
+\n-----\n`;
   }
 }

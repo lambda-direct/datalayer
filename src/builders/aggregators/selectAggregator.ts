@@ -1,6 +1,9 @@
+/* eslint-disable max-len */
+/* eslint-disable import/no-cycle */
 import { Column } from '../../columns';
 import { AbstractColumn } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
+import { AbstractTable } from '../../tables';
 import { ecranate } from '../../utils/ecranate';
 import Order from '../highLvlBuilders/order';
 import Join from '../joinBuilders/join';
@@ -17,15 +20,20 @@ export default class SelectAggregator extends Aggregator {
   private _distinct: Array<string> = [];
   // private _groupBy: Array<string> = [];
   private _orderBy: Array<string> = [];
+  private _values: Array<any> = [];
 
-  public constructor(tableName: string) {
-    super(tableName);
+  private _joinCache: {[tableName: string]: string} = {};
+
+  public constructor(table: AbstractTable<any>) {
+    super(table);
   }
 
   public filters = (filters?: Expr): SelectAggregator => {
     if (filters) {
+      const queryBuilder = filters.toQuery(1, this._joinCache);
       this._filters.push('WHERE ');
-      this._filters.push(filters.toQuery());
+      this._filters.push(queryBuilder.query);
+      this._values = queryBuilder.values;
     }
     return this;
   };
@@ -70,29 +78,45 @@ export default class SelectAggregator extends Aggregator {
   };
 
   // Add select generator for second table also
-  public join = <COLUMN extends ColumnType>(joins: Array<Join<COLUMN,
-  {}>>): SelectAggregator => {
-    joins.forEach((join: Join<COLUMN, {}>) => {
-      const tableFrom = join.fromColumn.getParent();
-      const tableTo = join.toColumn.getParent();
-      const { type } = join;
+  public join = (joins: Array<{
+    join: Join<any>,
+    id?: number
+  }>): SelectAggregator => {
+    // const cache: {[tableName: string]: string} = {};
+    joins.forEach((joinObject: {
+      join: Join<any>,
+      id?: number
+    }) => {
+      if (joinObject) {
+        const tableFrom = joinObject.join.fromColumn.getParent();
+        const tableTo = joinObject.join.toColumn.getParent();
+        const { type } = joinObject.join;
 
-      const selectString = this.generateSelectArray(tableTo, Object.values(join.mappedServiceToDb)).join('');
-      this._fields.push(', ');
-      this._fields.push(selectString);
-      this._join.push('\n');
-      this._join.push(type);
-      this._join.push(' ');
-      this._join.push(tableTo);
-      this._join.push('\n');
-      this._join.push('ON ');
-      this._join.push(tableFrom);
-      this._join.push('.');
-      this._join.push(join.fromColumn.columnName);
-      this._join.push(' = ');
-      this._join.push(tableTo);
-      this._join.push('.');
-      this._join.push(join.toColumn.columnName);
+        const selectString = this.generateSelectArray(`${tableTo}${joinObject.id ? `_${joinObject.id}` : ''}`, Object.values(joinObject.join.mappedServiceToDb), joinObject.id).join('');
+
+        this._fields.push(', ');
+        this._fields.push(selectString);
+        this._join.push('\n');
+        this._join.push(type);
+        this._join.push(' ');
+        this._join.push(tableTo);
+        this._join.push(' ');
+        this._join.push(`AS ${tableTo}${joinObject.id ? `_${joinObject.id}` : ''}`);
+        this._join.push('\n');
+        this._join.push('ON ');
+        if (this._joinCache[tableFrom]) {
+          this._join.push(this._joinCache[tableFrom]);
+        } else {
+          this._join.push(tableFrom);
+          this._joinCache[tableTo] = `${tableTo}${joinObject.id ? `_${joinObject.id}` : ''}`;
+        }
+        this._join.push('.');
+        this._join.push(joinObject.join.fromColumn.getColumnName());
+        this._join.push(' = ');
+        this._join.push(`${tableTo}${joinObject.id ? `_${joinObject.id}` : ''}`);
+        this._join.push('.');
+        this._join.push(joinObject.join.toColumn.getColumnName());
+      }
     });
 
     return this;
@@ -116,6 +140,6 @@ export default class SelectAggregator extends Aggregator {
     this._select.push('\n');
     this._select.push(this._offset.join(''));
 
-    return this._select.join('');
+    return { query: this._select.join(''), values: this._values };
   };
 }

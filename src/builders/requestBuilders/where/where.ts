@@ -1,3 +1,4 @@
 export default abstract class Expr {
-  abstract toQuery(): string;
+  abstract toQuery(position?: number, tableCache?: {[tableName: string]: string})
+  : { query: string, values: Array<any> };
 }

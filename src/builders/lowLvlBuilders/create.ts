@@ -3,7 +3,7 @@ import PgEnum from '../../columns/types/pgEnum';
 import AbstractTable from '../../tables/abstractTable';
 import { ecranate } from '../../utils/ecranate';
 
-export default class Create<SERVICE> {
+export default class Create<SERVICE extends AbstractTable<SERVICE>> {
   private tableBuilder: Array<string> = [];
   private enumBuilder: Array<string> = [];
   private columnsBuilder: Array<string> = [];
@@ -15,7 +15,7 @@ export default class Create<SERVICE> {
     this.tableClass = tableClass;
   }
 
-  public static table = <SSERVICE>(tableClass:
+  public static table = <SSERVICE extends AbstractTable<SSERVICE>>(tableClass:
   AbstractTable<SSERVICE>): Create<SSERVICE> => new Create(tableClass);
 
   public build = (): string => {

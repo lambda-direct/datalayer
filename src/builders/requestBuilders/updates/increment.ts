@@ -1,17 +1,24 @@
 import { AbstractColumn } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
-import UpdateExpr from './updates';
+import { UpdateCustomExpr } from './updates';
 
 export default class Increment<T extends AbstractColumn<ColumnType<any>, boolean, boolean>>
-  extends UpdateExpr {
+  extends UpdateCustomExpr<T> {
   private _column: T;
   private _value: number;
 
-  public constructor(column: T, value: number) {
+  public constructor(value: number) {
     super();
-    this._column = column;
     this._value = value;
   }
 
-  public toQuery = (): string => `${this._column.columnName} = ${this._column.columnName} + ${this._value}`;
+  public setColumn = (column: T): UpdateCustomExpr<T> => {
+    this._column = column;
+    return this;
+  };
+
+  public toQuery = (): { query: string, values: Array<any>} => {
+    const query = `${this._column.getColumnName()} = ${this._column.getColumnName()} + ${this._value}`;
+    return { query, values: [] };
+  };
 }

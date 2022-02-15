@@ -1,18 +1,21 @@
-import { Column, IndexedColumn } from '../../columns/column';
-import ColumnType from '../../columns/types/columnType';
+/* eslint-disable import/no-cycle */
+/* eslint-disable @typescript-eslint/no-loop-func */
+import { IndexedColumn } from '../../columns/column';
+import AbstractTable from '../../tables/abstractTable';
 import { Indexing } from '../../tables/inferTypes';
-import UpdateExpr from '../requestBuilders/updates/updates';
+import { UpdateExpr } from '../requestBuilders/updates/updates';
 import Aggregator from './abstractAggregator';
 
 export default class InsertAggregator extends Aggregator {
   private _onConflict: Array<string> = [];
   private _columns: Array<string> = [];
+  private _query: Array<string> = [];
   private _values: Array<string> = [];
   private _from: Array<string> = [];
   private _insert: Array<string> = ['INSERT INTO'];
 
-  public constructor(tableName: string) {
-    super(tableName);
+  public constructor(table: AbstractTable<any>) {
+    super(table);
   }
 
   public appendFrom = (tableName: string): InsertAggregator => {
@@ -23,15 +26,16 @@ export default class InsertAggregator extends Aggregator {
   };
 
   // @TODO refactor!!
-  public appendColumns = <T>(values: Array<T>) => {
+  public appendColumns = () => {
     // @TODO Check if values not empty
-    const columns = Object.keys(values[0]);
+    const mapper = this._table.mapServiceToDb();
+    const columns = Object.values(mapper);
 
     for (let i = 0; i < columns.length; i += 1) {
       const column = columns[i];
 
       this._columns.push('"');
-      this._columns.push(column);
+      this._columns.push(column.getColumnName());
       this._columns.push('"');
 
       if (i < columns.length - 1) {
@@ -41,49 +45,66 @@ export default class InsertAggregator extends Aggregator {
   };
 
   // @TODO refactor!!
-  public appendValues = <T>(mapper: {[name in keyof T]: Column<ColumnType>},
-    values: {[name: string]: any}[]) => {
+  public appendValues = (values: {[name: string]: any}[]) => {
     // @TODO Check if values not empty
+    const mapper = this._table.mapServiceToDb();
+    console.log(mapper);
+
+    let position: number = 0;
     for (let i = 0; i < values.length; i += 1) {
       const value = values[i];
-      const insertValues = Object.values(value);
-      const insertKeys = Object.keys(value);
 
-      this._values.push('(');
-      for (let j = 0; j < insertValues.length; j += 1) {
-        const insertValue = insertValues[j];
-        const insertKey = insertKeys[j];
+      this._query.push('(');
+      const entries = Object.entries(mapper);
 
-        const columnKey = Object.keys(mapper)
-          .find((it) => mapper[it as keyof T].columnName === insertKey)!;
-        const column = mapper[columnKey as keyof T];
-        if (insertValue !== undefined && insertValue !== null) {
-          this._values.push(column.columnType.insertStrategy(insertValue));
+      entries.forEach(([key], index) => {
+        console.log('key: ', key);
+        console.log('value: ', value);
+        const column = mapper[key];
+        const valueToInsert = value[column.getColumnName()];
+        const isKeyExistsInValue = column.getColumnName() in value;
+
+        if (isKeyExistsInValue) {
+          if (valueToInsert !== undefined && valueToInsert !== null) {
+            position += 1;
+            this._query.push(`$${position}`);
+            this._values.push(column.getColumnType().insertStrategy(valueToInsert));
+          } else {
+            this._query.push('null');
+          }
         } else {
-          this._values.push('null');
+          this._query.push('DEFAULT');
         }
 
-        if (j < insertValues.length - 1) {
-          this._values.push(', ');
+        if (index < entries.length - 1) {
+          this._query.push(', ');
         }
-      }
+      });
+
       if (i < values.length - 1) {
-        this._values.push('),\n');
+        this._query.push('),\n');
       } else {
-        this._values.push(')\n');
+        this._query.push(')\n');
       }
     }
   };
 
-  public appendOnConflict = (column?: Indexing,
+  public appendOnConflict = (column: Indexing,
     updates?: UpdateExpr) => {
     if (column) {
-      const indexName = column instanceof IndexedColumn ? column.columnName : column.indexName();
-
-      this._onConflict.push(`ON CONFLICT ON CONSTRAINT ${indexName}\n`);
+      const indexName = column instanceof IndexedColumn
+        ? column.getColumnName() : column.getColumns().map((it) => it.getColumnName()).join(',');
+      this._onConflict.push(`ON CONFLICT (${indexName})\n`);
       if (updates) {
+        const currentPointerPosition = this._values.length > 0
+          ? this._values.length + 1 : undefined;
+
+        const updatesQuery = updates.toQuery(currentPointerPosition);
+
         this._onConflict.push('DO UPDATE\n');
-        this._onConflict.push(`SET ${updates.toQuery()}`);
+        this._onConflict.push(`SET ${updatesQuery.query}`);
+
+        this._values.push(...updatesQuery.values);
       } else {
         this._onConflict.push('DO NOTHING\n');
       }
@@ -97,21 +118,14 @@ export default class InsertAggregator extends Aggregator {
     this._insert.push(this._columns.join(''));
     this._insert.push(') ');
     this._insert.push('VALUES\n');
-    this._insert.push(this._values.join(''));
+    this._insert.push(this._query.join(''));
     this._insert.push('\n');
+    this._insert.push(this._onConflict.join(''));
     this._insert.push('\n');
     this._insert.push('RETURNING');
     this._insert.push('\n');
     this._insert.push(this._fields.join(''));
-    this._insert.push('\n');
-    this._insert.push(this._onConflict.join(''));
-    // this._insert.push("ON CONFLICT ON CONSTRAINT \"");
-    // this._insert.push(this._table.tableName());
-    // this._insert.push("_");
-    // this._insert.push(this._table);
-    // this._insert.push("\n");
-    // this._insert.push(this._fields.join(''));
 
-    return this._insert.join('');
+    return { query: this._insert.join(''), values: this._values };
   };
 }

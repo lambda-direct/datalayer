@@ -1,4 +1,6 @@
-import { Column } from '../../columns/column';
+/* eslint-disable max-len */
+/* eslint-disable import/no-cycle */
+import { AbstractColumn } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
@@ -8,26 +10,23 @@ import QueryResponseMapper from '../../mappers/responseMapper';
 import { AbstractTable } from '../../tables';
 import { ExtractModel, Indexing } from '../../tables/inferTypes';
 import Insert from '../lowLvlBuilders/inserts/insert';
-import UpdateExpr from '../requestBuilders/updates/updates';
+import { UpdateExpr } from '../requestBuilders/updates/updates';
 import TableRequestBuilder from './abstractRequestBuilder';
 
-export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
+export default class InsertTRB<TTable extends AbstractTable<TTable>> extends TableRequestBuilder<TTable> {
   private _values: ExtractModel<TTable>[];
   private _onConflict: UpdateExpr;
   private _onConflictField: Indexing;
-  private _table: TTable;
 
   public constructor(
     values: ExtractModel<TTable>[],
-    tableName: string,
-    session: Session,
-    mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
     table: AbstractTable<TTable>,
+    session: Session,
+    mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: AbstractColumn<ColumnType>; },
     logger?: BaseLogger,
   ) {
-    super(tableName, session, mappedServiceToDb, logger);
+    super(table, session, mappedServiceToDb, logger);
     this._values = values;
-    this._table = table as unknown as TTable;
   }
 
   public execute = async () => {
@@ -59,23 +58,30 @@ export default class InsertTRB<TTable> extends TableRequestBuilder<TTable> {
     });
 
     const queryBuilder = Insert
-      .into(this._tableName, this._columns)
-      .values(mappedRows, mapper)
+      .into(this._table, this._columns)
+      .values(mappedRows)
       .onConflict(this._onConflict, this._onConflictField);
+
+    console.log(mappedRows);
 
     // @TODO refactor values() part!!
     let query = '';
+    let values = [];
     try {
-      query = queryBuilder.build();
-    } catch (e) {
+      const builderResult = queryBuilder.build();
+      query = builderResult.query;
+      values = builderResult.values;
+    } catch (e: any) {
       throw new BuilderError(BuilderType.INSERT, this._tableName, this._columns, e);
     }
+
+    console.log(values);
 
     if (this._logger) {
       this._logger.info(`Inserting to ${this._tableName} using query:\n ${query}`);
     }
 
-    const result = await this._session.execute(query);
+    const result = await this._session.execute(query, values);
     if (result.isLeft()) {
       const { reason } = result.value;
       throw new DatabaseInsertError(this._tableName, reason, query);

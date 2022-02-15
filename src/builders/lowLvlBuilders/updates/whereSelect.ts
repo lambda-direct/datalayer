@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import UpdateAggregator from '../../aggregators/updateAggregator';
 import Expr from '../../requestBuilders/where/where';
 

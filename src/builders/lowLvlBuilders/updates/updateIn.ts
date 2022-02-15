@@ -1,7 +1,8 @@
+/* eslint-disable import/no-cycle */
 import { Column } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
 import UpdateAggregator from '../../aggregators/updateAggregator';
-import UpdateExpr from '../../requestBuilders/updates/updates';
+import { UpdateExpr } from '../../requestBuilders/updates/updates';
 import WhereSet from './whereSet';
 
 export default class UpdateIn {

@@ -1,6 +1,6 @@
 import { AbstractColumn } from '../../../columns/column';
 import ColumnType from '../../../columns/types/columnType';
-import UpdateExpr from './updates';
+import { UpdateExpr } from './updates';
 
 export default class SetObject<T extends AbstractColumn<ColumnType<any>, boolean, boolean>>
   extends UpdateExpr {
@@ -13,10 +13,15 @@ export default class SetObject<T extends AbstractColumn<ColumnType<any>, boolean
     this._value = value;
   }
 
-  public toQuery = (): string => {
-    if (typeof this._value !== 'boolean') {
-      return `"${this._column.columnName}"=${this._value === null || this._value === undefined ? 'null' : this._column.columnType.insertStrategy(this._value)}`;
-    }
-    return `"${this._column.columnName}"=${this._column.columnType.insertStrategy(this._value)}`;
+  public toQuery = (position?: number): { query: string, values: Array<any>} => {
+    const nextPosition = position || 1;
+
+    const query = `"${this._column.getColumnName()}"=${this._value === null || this._value === undefined ? 'null' : `$${nextPosition}`}`;
+
+    const values = this._value === null || this._value === undefined
+      ? []
+      : [this._column.getColumnType().insertStrategy(this._value)];
+
+    return { query, values };
   };
 }

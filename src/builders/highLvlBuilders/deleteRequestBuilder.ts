@@ -1,25 +1,28 @@
-import { Column } from '../../columns/column';
+/* eslint-disable max-len */
+/* eslint-disable import/no-cycle */
+import { AbstractColumn } from '../../columns/column';
 import ColumnType from '../../columns/types/columnType';
 import Session from '../../db/session';
 import BuilderError, { BuilderType } from '../../errors/builderError';
 import { DatabaseDeleteError } from '../../errors/dbErrors';
 import BaseLogger from '../../logger/abstractLogger';
 import QueryResponseMapper from '../../mappers/responseMapper';
+import AbstractTable from '../../tables/abstractTable';
 import { ExtractModel } from '../../tables/inferTypes';
 import Delete from '../lowLvlBuilders/delets/delete';
 import Expr from '../requestBuilders/where/where';
 import TableRequestBuilder from './abstractRequestBuilder';
 
-export default class DeleteTRB<TTable> extends TableRequestBuilder<TTable> {
+export default class DeleteTRB<TTable extends AbstractTable<TTable>> extends TableRequestBuilder<TTable> {
   private _filter: Expr;
 
   public constructor(
-    tableName: string,
+    table: AbstractTable<TTable>,
     session: Session,
-    mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: Column<ColumnType>; },
+    mappedServiceToDb: { [name in keyof ExtractModel<TTable>]: AbstractColumn<ColumnType>; },
     logger?: BaseLogger,
   ) {
-    super(tableName, session, mappedServiceToDb, logger);
+    super(table, session, mappedServiceToDb, logger);
   }
 
   public where = (expr: Expr): DeleteTRB<TTable> => {
@@ -33,21 +36,25 @@ export default class DeleteTRB<TTable> extends TableRequestBuilder<TTable> {
 
   protected _execute = async (): Promise<ExtractModel<TTable>[]> => {
     const queryBuilder = Delete
-      .from(this._tableName, this._columns)
+      .from(this._table, this._columns)
       .filteredBy(this._filter);
 
     let query = '';
+    let values = [];
     try {
-      query = queryBuilder.build();
-    } catch (e) {
-      throw new BuilderError(BuilderType.DELETE, this._tableName, this._columns, e, this._filter);
+      const builderResult = queryBuilder.build();
+      query = builderResult.query;
+      values = builderResult.values;
+    } catch (e: any) {
+      throw new BuilderError(BuilderType.DELETE, this._tableName,
+        this._columns, e, this._filter);
     }
 
     if (this._logger) {
       this._logger.info(`Deleting from ${this._tableName} using query:\n ${query}`);
     }
 
-    const result = await this._session.execute(query);
+    const result = await this._session.execute(query, values);
     if (result.isLeft()) {
       const { reason } = result.value;
       throw new DatabaseDeleteError(this._tableName, reason, query);

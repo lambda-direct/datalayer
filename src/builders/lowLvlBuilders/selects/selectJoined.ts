@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { Column } from '../../../columns';
 import ColumnType from '../../../columns/types/columnType';
 import SelectAggregator from '../../aggregators/selectAggregator';
@@ -13,8 +14,10 @@ export default class SelectJoined {
     this._aggregator = aggregator;
   }
 
-  public apply = <COLUMN extends ColumnType>(joins: Array<Join<COLUMN,
-  {}>>): SelectJoined => {
+  public apply = (joins: Array<{
+    join: Join<any>,
+    id?: number
+  }>): SelectJoined => {
     this._aggregator.join(joins);
     return this;
   };
