@@ -75,6 +75,7 @@ export default class SelectAggregator extends Aggregator {
   public appendFrom = (tableName: string): SelectAggregator => {
     this._from.push('FROM ');
     this._from.push(tableName);
+    this._joinCache[tableName] = `${tableName}`;
     return this;
   };
 
@@ -105,15 +106,25 @@ export default class SelectAggregator extends Aggregator {
         this._join.push(`AS ${tableTo}${joinObject.id ? `_${joinObject.id}` : ''}`);
         this._join.push('\n');
         this._join.push('ON ');
-        if (this._joinCache[tableFrom]) {
-          this._join.push(this._joinCache[tableFrom]);
-        } else {
-          this._join.push(tableFrom);
-          this._joinCache[tableTo] = `${tableTo}${joinObject.id ? `_${joinObject.id}` : ''}`;
+        if (!this._joinCache[tableFrom]) {
+          this._joinCache[tableFrom] = `${tableFrom}${joinObject.id ? `_${joinObject.id}` : ''}`;
         }
+        this._join.push(this._joinCache[tableFrom]);
+        // if (this._joinCache[tableFrom]) {
+        //   this._join.push(this._joinCache[tableFrom]);
+        // } else {
+        //   this._join.push(tableFrom);
+        //   this._joinCache[tableFrom] = `${tableTo}${joinObject.id ? `_${joinObject.id}` : ''}`;
+        // }
         this._join.push('.');
         this._join.push(joinObject.join.fromColumn.getColumnName());
         this._join.push(' = ');
+
+        // if (!this._joinCache[tableTo]) {
+        //   this._joinCache[tableTo] = `${tableTo}${joinObject.id ? `_${joinObject.id}` : ''}`;
+        // }
+        // this._join.push(this._joinCache[tableTo]);
+        this._joinCache[tableTo] = `${tableTo}${joinObject.id ? `_${joinObject.id}` : ''}`;
         this._join.push(`${tableTo}${joinObject.id ? `_${joinObject.id}` : ''}`);
         this._join.push('.');
         this._join.push(joinObject.join.toColumn.getColumnName());
